@@ -1,362 +1,297 @@
-# 🎨 Hi Food - Frontend
+# 🍕 Hi Food - Telegram Mini App
 
-React приложение для Telegram Mini App с картами лояльности.
+Полнофункциональное приложение для доставки еды с системой лояльности в Telegram.
 
-## ✨ Что уже готово
+## 🎯 Особенности
 
-✅ Структура проекта (React 18 + TypeScript + Vite)
-✅ Конфигурация (Tailwind CSS)
-✅ TypeScript типы (синхронизированы с backend)
-✅ **Header с отображением карты лояльности** 🎴
-✅ Интеграция Telegram Web App SDK
-✅ Базовое приложение с тестовым пользователем
-
----
+✅ **Карта лояльности** - уникальные 4-значные номера (1000-9999)
+✅ **Система бонусов** - накопление и использование бонусов
+✅ **Telegram Integration** - полная интеграция с Telegram Web App SDK
+✅ **Многоязычность** - готовность к поддержке нескольких языков
+✅ **Гибкая архитектура** - легкое переключение между Google Sheets и Supabase
 
 ## 🚀 Быстрый старт
 
-### 1. Установите зависимости
+### Локальная разработка
 
+**Frontend:**
 ```bash
-cd frontend
 npm install
-```
-
-### 2. Запустите dev сервер
-
-```bash
 npm run dev
+# Откройте http://localhost:5173
 ```
 
-Откройте http://localhost:5173
-
----
-
-## 🎴 Карта лояльности - как это выглядит
-
-### Header (всегда виден):
-
-```
-🍕 Hi Food                    Иван @testuser
-                              Card: #1234 🎴
-                              150 бонусов
+**Backend:**
+```bash
+cd backend
+npm install
+npm run dev
+# API: http://localhost:3000
 ```
 
-### Детальная карточка:
+## 📁 Структура проекта
 
 ```
+hifoodv1/
+├── src/                      # Frontend (React + TypeScript)
+│   ├── components/          # UI компоненты
+│   │   └── Layout/         # Header, Footer
+│   ├── pages/              # Страницы приложения
+│   ├── services/           # API интеграция
+│   ├── store/              # State management
+│   ├── config/             # Конфигурация (API URL)
+│   └── types/              # TypeScript типы
+│
+├── backend/                 # Backend API (Express + TypeScript)
+│   ├── src/
+│   │   ├── services/       # Бизнес-логика
+│   │   │   └── dataProvider/  # Абстрактный слой данных
+│   │   ├── utils/          # Утилиты (генератор карт)
+│   │   └── types/          # Типы (синхронизированы с frontend)
+│   └── scripts/            # Миграции и утилиты
+│
+└── database/               # SQL схемы для Supabase
+    └── supabase_schema.sql
+```
+
+## 🛠️ Технологический стек
+
+### Frontend
+- **React 18** + TypeScript + Vite
+- **Tailwind CSS** с кастомной темой (#01fff7)
+- **Telegram Web App SDK**
+- **React Router** для навигации
+
+### Backend
+- **Express** + TypeScript
+- **Абстрактный Data Provider** (Google Sheets / Supabase)
+- **Supabase** для PostgreSQL
+- **RESTful API**
+
+### Деплой (100% бесплатно)
+- **Frontend**: GitHub Pages
+- **Backend**: Render.com (Free tier)
+- **Database**: Supabase (Free tier)
+- **Telegram Bot**: Telegram Bot API
+
+```
+💰 Стоимость: $0/месяц
+```
+
+## 📋 Деплой - Пошаговая инструкция
+
+### 1️⃣ GitHub Pages (Frontend)
+
+Frontend уже настроен и готов к деплою!
+
+**Активация GitHub Pages:**
+1. Откройте https://github.com/RAZ-AR/hifoodv1/settings/pages
+2. **Source** → выберите **GitHub Actions**
+3. Сохраните
+
+Готово! Frontend будет доступен по адресу:
+```
+https://raz-ar.github.io/hifoodv1/
+```
+
+GitHub Actions автоматически задеплоит при каждом push в `main`.
+
+📖 Подробнее: [SETUP_GITHUB_PAGES.md](./SETUP_GITHUB_PAGES.md)
+
+### 2️⃣ Supabase (Database)
+
+**Создание проекта:**
+1. https://supabase.com → Sign up/Login
+2. **New Project**:
+   - Name: `hi-food-db`
+   - Database Password: (сохраните!)
+   - Region: `Central EU`
+
+**Создание таблиц:**
+1. Откройте **SQL Editor**
+2. Скопируйте содержимое `database/supabase_schema.sql`
+3. Выполните SQL
+
+**Получите credentials:**
+- Settings → API
+- Скопируйте: **Project URL** и **anon key**
+
+### 3️⃣ Render.com (Backend)
+
+**Деплой backend:**
+1. https://render.com → Sign up/Login
+2. **New** → **Web Service**
+3. Connect GitHub repo: `RAZ-AR/hifoodv1`
+4. Настройки:
+```
+Name: hi-food-backend
+Region: Frankfurt (EU Central)
+Root Directory: backend
+Build Command: npm install && npm run build
+Start Command: npm start
+```
+
+**Environment Variables:**
+```
+NODE_ENV=production
+PORT=3000
+DATA_PROVIDER=supabase
+SUPABASE_URL=https://xxxxx.supabase.co
+SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+5. **Create Web Service**
+
+⏳ Деплой займёт 5-10 минут. Backend будет доступен:
+```
+https://hi-food-backend.onrender.com
+```
+
+⚠️ Free tier: Первый запрос может занять 30-50 секунд (cold start).
+
+### 4️⃣ Telegram Bot
+
+**Создание бота:**
+1. Откройте [@BotFather](https://t.me/BotFather) в Telegram
+2. Отправьте `/newbot`
+3. Name: `Hi Food`
+4. Username: `@HiFoodDeliveryBot`
+
+**Настройка Web App:**
+```
+/setmenubutton
+@HiFoodDeliveryBot
+Открыть меню 🍕
+https://raz-ar.github.io/hifoodv1/
+```
+
+**Команды:**
+```
+/setcommands
+@HiFoodDeliveryBot
+
+start - Открыть приложение
+menu - Показать меню
+orders - Мои заказы
+profile - Мой профиль
+```
+
+🎉 Готово! Откройте бота в Telegram и нажмите кнопку меню!
+
+📖 Полная инструкция: [BACKEND_DEPLOYMENT.md](./BACKEND_DEPLOYMENT.md)
+
+## 🎨 Ключевые функции
+
+### Карта лояльности
+
+Каждый пользователь получает уникальную карту при первой регистрации:
+
+- **Формат**: 4-значный номер (1000-9999)
+- **Генерация**: Автоматическая при создании профиля
+- **Уникальность**: Проверяется в базе данных
+- **Отображение**: В header приложения с бирюзовым бейджем
+
+```typescript
+// Пример генерации карты
+const loyaltyCard = await LoyaltyCardGenerator.generateUniqueCard();
+// → "5678"
+```
+
+### Абстрактный Data Provider
+
+Легко переключайтесь между Google Sheets (разработка) и Supabase (продакшн):
+
+```typescript
+// .env
+DATA_PROVIDER=supabase  // или google_sheets
+
+// Код остаётся одинаковым
+const user = await dataProvider.getUser(telegramId);
+```
+
+### API интеграция
+
+Frontend автоматически определяет окружение:
+
+```typescript
+// Development: http://localhost:3000/api
+// Production: https://hi-food-backend.onrender.com/api
+
+import { api } from '@/services/api';
+
+const user = await api.getUser(telegramId);
+const menu = await api.getMenu({ available: true });
+```
+
+## 🎨 Цветовая схема
+
+- **Primary**: `#01fff7` (бирюзовый)
+- **Background**: Белый / Черный
+- **Text**: Адаптивный контраст
+
+## ✅ Checklist деплоя
+
+- [x] Frontend загружен в GitHub
+- [x] GitHub Actions настроен для автодеплоя
+- [x] Backend готов к деплою на Render
+- [x] SQL схема для Supabase подготовлена
+- [x] API сервис создан во frontend
+- [x] Документация по деплою готова
+- [ ] GitHub Pages активирован
+- [ ] Supabase проект создан
+- [ ] Backend задеплоен на Render
+- [ ] Telegram Bot создан и настроен
+- [ ] Приложение протестировано в Telegram
+
+## 📚 Документация
+
+- [SETUP_GITHUB_PAGES.md](./SETUP_GITHUB_PAGES.md) - Активация GitHub Pages
+- [BACKEND_DEPLOYMENT.md](./BACKEND_DEPLOYMENT.md) - Полный гайд по деплою
+- [database/supabase_schema.sql](./database/supabase_schema.sql) - SQL схема
+
+## 🔧 Архитектура
+
+```
+┌─────────────────┐
+│  Telegram Bot   │  @HiFoodDeliveryBot
+└────────┬────────┘
+         │ Web App URL
+         ▼
 ┌─────────────────────────────┐
-│ Hi Food Card          🎴    │
-│ #1234                       │
-│                             │
-│ Владелец: Иван Иванов       │
-│ Бонусов: 150                │
-│ Заказов: 12                 │
-│                             │
-│ Выдана: 22.10.2025          │
+│   Frontend (GitHub Pages)   │  React + TypeScript
+│   https://raz-ar.github.io  │  + Telegram Web App SDK
+└────────┬────────────────────┘
+         │ API Calls
+         ▼
+┌─────────────────────────────┐
+│   Backend (Render.com)      │  Express + TypeScript
+│   hi-food-backend.onrender  │  + Abstract Data Layer
+└────────┬────────────────────┘
+         │ SQL Queries
+         ▼
+┌─────────────────────────────┐
+│   Database (Supabase)       │  PostgreSQL
+│   users, menu, orders, etc  │
 └─────────────────────────────┘
 ```
 
----
+## 🚀 Следующие шаги разработки
 
-## 📂 Структура
+1. **Страница меню** (Home) - каталог блюд с фильтрами
+2. **Профиль** (Profile) - информация о пользователе и бонусах
+3. **Корзина** (Cart) - добавление товаров и оформление заказа
+4. **История заказов** (OrderHistory) - список прошлых заказов
+5. **Избранное** (Favorites) - сохранённые блюда
+6. **Многоязычность** - переключение языков
 
-```
-frontend/
-├── src/
-│   ├── components/
-│   │   └── Layout/
-│   │       └── Header.tsx        # ✅ Header с картой
-│   ├── types/
-│   │   └── index.ts              # ✅ Все типы
-│   ├── App.tsx                   # ✅ Главное приложение
-│   ├── main.tsx                  # Entry point
-│   └── index.css                 # Стили
-├── index.html                    # ✅ С Telegram SDK
-├── vite.config.ts                # ✅ Настроен
-├── tsconfig.json                 # ✅ Настроен
-├── tailwind.config.js            # ✅ Настроен
-└── package.json                  # ✅ Все зависимости
-```
+## 📱 URL проекта
+
+- **Frontend**: https://raz-ar.github.io/hifoodv1/
+- **Backend**: https://hi-food-backend.onrender.com (после деплоя)
+- **GitHub**: https://github.com/RAZ-AR/hifoodv1
 
 ---
 
-## 🔧 Что нужно доделать
+**Создано с помощью Claude Code** 🤖
 
-### 1. Страницы (создать в `src/pages/`):
-
-- [ ] **Home.tsx** - главная страница с меню
-- [ ] **Profile.tsx** - профиль пользователя
-- [ ] **Cart.tsx** - корзина
-- [ ] **History.tsx** - история заказов
-- [ ] **Favorites.tsx** - избранное
-
-### 2. Компоненты (создать в `src/components/`):
-
-- [ ] **BottomNavbar.tsx** - нижняя навигация (5 вкладок)
-- [ ] **AdCarousel.tsx** - карусель рекламы
-- [ ] **CategoryFilter.tsx** - фильтр категорий
-- [ ] **DishGrid.tsx** - сетка блюд
-- [ ] **ProductCard.tsx** - карточка блюда
-- [ ] **CartSummary.tsx** - итоги корзины
-
-### 3. State Management:
-
-```bash
-# Создать store/
-├── store.ts                 # Redux store
-├── slices/
-│   ├── userSlice.ts         # Пользователь
-│   ├── cartSlice.ts         # Корзина
-│   ├── menuSlice.ts         # Меню
-│   └── ordersSlice.ts       # Заказы
-```
-
-### 4. Routing:
-
-```typescript
-// App.tsx с роутингом
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
-<BrowserRouter>
-  <Routes>
-    <Route path="/" element={<Home />} />
-    <Route path="/profile" element={<Profile />} />
-    <Route path="/cart" element={<Cart />} />
-    <Route path="/history" element={<History />} />
-    <Route path="/favorites" element={<Favorites />} />
-  </Routes>
-</BrowserRouter>
-```
-
-### 5. API Services:
-
-```typescript
-// src/services/api.ts
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-export const api = {
-  // Пользователи
-  getUser: (telegramId: number) =>
-    axios.get(`${API_URL}/users/${telegramId}`),
-
-  createUser: (userData) =>
-    axios.post(`${API_URL}/users`, userData),
-
-  // Меню
-  getMenu: () =>
-    axios.get(`${API_URL}/menu`),
-
-  // Заказы
-  createOrder: (orderData) =>
-    axios.post(`${API_URL}/orders`, orderData),
-
-  getUserOrders: (userId: string) =>
-    axios.get(`${API_URL}/orders/user/${userId}`),
-
-  // Бонусы
-  addBonus: (userId: string, amount: number) =>
-    axios.post(`${API_URL}/bonuses/add`, { userId, amount }),
-};
-```
-
-### 6. Многоязычность (i18next):
-
-```typescript
-// src/i18n/config.ts
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-
-import en from './locales/en.json';
-import ru from './locales/ru.json';
-import srLat from './locales/sr-lat.json';
-
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: { translation: en },
-      ru: { translation: ru },
-      'sr-lat': { translation: srLat },
-    },
-    lng: 'ru',
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false,
-    },
-  });
-```
-
----
-
-## 🎯 Пример компонента BottomNavbar
-
-```typescript
-// src/components/Layout/BottomNavbar.tsx
-import { NavLink } from 'react-router-dom';
-
-const BottomNavbar = () => {
-  const navItems = [
-    { path: '/', icon: '🏠', label: 'Home' },
-    { path: '/favorites', icon: '❤️', label: 'Favorites' },
-    { path: '/history', icon: '📋', label: 'History' },
-    { path: '/cart', icon: '🛒', label: 'Cart' },
-    { path: '/profile', icon: '👤', label: 'Profile' },
-  ];
-
-  return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t">
-      <div className="flex justify-around items-center h-16">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) =>
-              `flex flex-col items-center gap-1 px-3 py-2 ${
-                isActive ? 'text-primary-500' : 'text-gray-500'
-              }`
-            }
-          >
-            <span className="text-2xl">{item.icon}</span>
-            <span className="text-xs">{item.label}</span>
-          </NavLink>
-        ))}
-      </div>
-    </nav>
-  );
-};
-```
-
----
-
-## 📦 Доступные скрипты
-
-```bash
-# Разработка
-npm run dev
-
-# Сборка
-npm run build
-
-# Предпросмотр production
-npm run preview
-
-# Линтинг
-npm run lint
-
-# Форматирование
-npm run format
-```
-
----
-
-## 🔌 Интеграция с Backend
-
-### 1. Создайте `.env`:
-
-```env
-VITE_API_URL=http://localhost:3000
-```
-
-### 2. Используйте API:
-
-```typescript
-import { api } from '@/services/api';
-
-// В компоненте
-useEffect(() => {
-  const fetchUser = async () => {
-    const response = await api.getUser(telegramId);
-    setUser(response.data);
-  };
-
-  fetchUser();
-}, [telegramId]);
-```
-
----
-
-## 🎨 Дизайн-система
-
-### Цвета:
-
-- **Primary**: `bg-primary-500` (красный)
-- **Telegram bg**: `tg-theme-bg`
-- **Telegram text**: `tg-theme-text`
-
-### Компоненты Tailwind:
-
-```jsx
-// Кнопка
-<button className="bg-primary-500 text-white px-4 py-2 rounded-lg">
-  Click me
-</button>
-
-// Карточка
-<div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
-  Content
-</div>
-
-// Badge карты лояльности
-<div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-full px-3 py-1">
-  <span className="text-white font-bold">#1234</span>
-</div>
-```
-
----
-
-## 📱 Тестирование в Telegram
-
-### 1. Соберите проект:
-
-```bash
-npm run build
-```
-
-### 2. Разверните на хостинге:
-
-- Vercel
-- Netlify
-- GitHub Pages
-
-### 3. Настройте Telegram Bot:
-
-```
-/newbot
-/setmenubutton
-# Укажите URL вашего приложения
-```
-
----
-
-## 🔗 Полезные ссылки
-
-- [Figma Design](https://www.figma.com/design/E09w100tYLeRLoZYfuz3Ow/HyperMart-App--Community-)
-- [Telegram Web App Docs](https://core.telegram.org/bots/webapps)
-- [Tailwind CSS Docs](https://tailwindcss.com/docs)
-- [React Router Docs](https://reactrouter.com/)
-- [Redux Toolkit Docs](https://redux-toolkit.js.org/)
-
----
-
-## ✅ Чеклист
-
-- [x] Структура проекта
-- [x] TypeScript типы
-- [x] Header с картой лояльности
-- [x] Telegram SDK интеграция
-- [x] Базовое приложение
-- [ ] Все страницы
-- [ ] Bottom Navigation
-- [ ] Redux store
-- [ ] API интеграция
-- [ ] i18next многоязычность
-- [ ] Полная функциональность
-
----
-
-**Frontend готов к разработке!** 🚀
-
-Начните с создания страниц и компонентов из чеклиста выше.
+Telegram Mini App для доставки еды готов к деплою! 🍕✨
