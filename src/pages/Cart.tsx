@@ -25,9 +25,12 @@ const Cart: React.FC = () => {
     setIsOrdering(true);
 
     try {
+      // Генерируем ID заказа
+      const orderId = `#${Date.now().toString().slice(-8)}`;
+
       // Формируем сообщение для отправки в Telegram
       const orderMessage = `
-🛒 *НОВЫЙ ЗАКАЗ*
+🛒 *НОВЫЙ ЗАКАЗ ${orderId}*
 
 👤 *Имя:* ${checkoutData.name}
 
@@ -44,8 +47,8 @@ ${cartItems.map((item) => `• ${item.item.name} × ${item.quantity} = ${item.it
 ${checkoutData.code ? `Код: ${checkoutData.code}` : ''}
 ${checkoutData.deliveryNote ? `Отметка для курьера: ${checkoutData.deliveryNote}` : ''}
 
-📞 *Телефон:*
-${checkoutData.phone}
+📞 *Контакт:*
+${checkoutData.contactMethod === 'telegram' ? 'Telegram' : `Телефон: ${checkoutData.phone}`}
 
 💳 *Способ оплаты:*
 ${checkoutData.paymentMethod === 'cash' ? 'Наличные' : 'Банковская карта'}
@@ -59,6 +62,7 @@ ${checkoutData.comment ? `💬 *Комментарий:*\n${checkoutData.comment
         window.Telegram.WebApp.sendData(JSON.stringify({
           type: 'order',
           data: {
+            orderId: orderId,
             items: cartItems.map(item => ({
               id: item.item.id,
               name: item.item.name,
@@ -66,15 +70,22 @@ ${checkoutData.comment ? `💬 *Комментарий:*\n${checkoutData.comment
               quantity: item.quantity,
             })),
             total: getTotalPrice(),
+            cutleryCount: cutleryCount,
             ...checkoutData,
           }
         }));
+
+        // Сохраняем orderId в localStorage
+        localStorage.setItem('currentOrderId', orderId);
+        localStorage.setItem('currentOrderStatus', 'accepted');
 
         // Показываем успешное сообщение
         window.Telegram.WebApp.showAlert('Заказ успешно оформлен! 🎉\n\nВы получите уведомление в боте с деталями заказа.');
         window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
       } else {
         // Для разработки вне Telegram
+        localStorage.setItem('currentOrderId', orderId);
+        localStorage.setItem('currentOrderStatus', 'accepted');
         console.log('Order message:', orderMessage);
         alert('Заказ оформлен!\n\n' + orderMessage);
       }

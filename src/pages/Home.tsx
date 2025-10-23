@@ -6,6 +6,7 @@ import CategoryFilter from '@/components/CategoryFilter';
 import AdBannerSlider from '@/components/AdBannerSlider';
 import SkeletonCard from '@/components/SkeletonCard';
 import SearchBar from '@/components/SearchBar';
+import OrderStatusTracker, { OrderStatus } from '@/components/OrderStatusTracker';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 
@@ -27,12 +28,45 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Статус заказа
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
+  const [currentOrderStatus, setCurrentOrderStatus] = useState<OrderStatus | null>(null);
+
   // Получить список категорий из меню
   const categories = ['Все', ...Array.from(new Set(menuItems.map(item => item.category)))];
 
   // Загрузить меню при монтировании компонента
   useEffect(() => {
     loadMenu();
+
+    // Проверяем наличие активного заказа
+    const orderId = localStorage.getItem('currentOrderId');
+    const orderStatus = localStorage.getItem('currentOrderStatus') as OrderStatus | null;
+    if (orderId && orderStatus) {
+      setCurrentOrderId(orderId);
+      setCurrentOrderStatus(orderStatus);
+
+      // Периодически обновляем статус заказа
+      const interval = setInterval(async () => {
+        const status = await api.getOrderStatus(orderId);
+        if (status?.status) {
+          setCurrentOrderStatus(status.status as OrderStatus);
+          localStorage.setItem('currentOrderStatus', status.status);
+
+          // Если заказ доставлен, очищаем через некоторое время
+          if (status.status === 'delivered') {
+            setTimeout(() => {
+              setCurrentOrderId(null);
+              setCurrentOrderStatus(null);
+              localStorage.removeItem('currentOrderId');
+              localStorage.removeItem('currentOrderStatus');
+            }, 30000); // 30 секунд
+          }
+        }
+      }, 10000); // Проверяем каждые 10 секунд
+
+      return () => clearInterval(interval);
+    }
   }, []);
 
   // Фильтровать меню при изменении категории или поиска
@@ -169,6 +203,20 @@ const Home: React.FC = () => {
             placeholder="Поиск блюд..."
           />
         </div>
+
+        {/* Трекер статуса заказа */}
+        {currentOrderId && currentOrderStatus && (
+          <OrderStatusTracker
+            orderId={currentOrderId}
+            status={currentOrderStatus}
+            onClose={() => {
+              setCurrentOrderId(null);
+              setCurrentOrderStatus(null);
+              localStorage.removeItem('currentOrderId');
+              localStorage.removeItem('currentOrderStatus');
+            }}
+          />
+        )}
 
         {/* Слайдер с баннерами */}
         <div className="mb-6">

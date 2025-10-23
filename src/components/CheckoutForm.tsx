@@ -13,7 +13,8 @@ export interface CheckoutData {
   apartment: string;
   code?: string;
   deliveryNote?: string;
-  phone: string;
+  contactMethod: 'telegram' | 'phone';
+  phone?: string;
   paymentMethod: 'cash' | 'card';
   comment?: string;
 }
@@ -35,6 +36,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
     apartment: '',
     code: '',
     deliveryNote: '',
+    contactMethod: 'telegram',
     phone: '',
     paymentMethod: 'cash',
     comment: '',
@@ -61,10 +63,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
       newErrors.apartment = 'Укажите квартиру';
     }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Укажите номер телефона';
-    } else if (!/^\+?[0-9]{10,15}$/.test(formData.phone.replace(/[\s-()]/g, ''))) {
-      newErrors.phone = 'Неверный формат телефона';
+    if (formData.contactMethod === 'phone') {
+      if (!formData.phone?.trim()) {
+        newErrors.phone = 'Укажите номер телефона';
+      } else if (!/^\+?[0-9]{10,15}$/.test(formData.phone.replace(/[\s-()]/g, ''))) {
+        newErrors.phone = 'Неверный формат телефона';
+      }
     }
 
     setErrors(newErrors);
@@ -216,26 +220,64 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
             />
           </div>
 
-          {/* Телефон */}
+          {/* Способ связи */}
           <div>
             <label className="block text-sm font-medium tg-theme-text mb-2">
-              Телефон <span className="text-red-500">*</span>
+              Как с вами связаться? <span className="text-red-500">*</span>
             </label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => handleChange('phone', e.target.value)}
-              placeholder="+381 XX XXX XXXX"
-              className={`w-full px-4 py-3 rounded-lg border ${
-                errors.phone
-                  ? 'border-red-500'
-                  : 'border-gray-300 dark:border-gray-600'
-              } bg-white dark:bg-gray-700 tg-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500`}
-            />
-            {errors.phone && (
-              <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-            )}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => handleChange('contactMethod', 'telegram')}
+                className={`py-3 px-4 rounded-lg border-2 font-medium transition-all ${
+                  formData.contactMethod === 'telegram'
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-600'
+                    : 'border-gray-300 dark:border-gray-600 tg-theme-text hover:border-primary-300'
+                }`}
+              >
+                📱 Telegram
+              </button>
+              <button
+                type="button"
+                onClick={() => handleChange('contactMethod', 'phone')}
+                className={`py-3 px-4 rounded-lg border-2 font-medium transition-all ${
+                  formData.contactMethod === 'phone'
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-600'
+                    : 'border-gray-300 dark:border-gray-600 tg-theme-text hover:border-primary-300'
+                }`}
+              >
+                📞 Телефон
+              </button>
+            </div>
+            <p className="text-xs tg-theme-hint mt-2">
+              {formData.contactMethod === 'telegram'
+                ? 'Курьер свяжется с вами через Telegram'
+                : 'Курьер позвонит вам по телефону'}
+            </p>
           </div>
+
+          {/* Телефон (только если выбран способ связи "телефон") */}
+          {formData.contactMethod === 'phone' && (
+            <div>
+              <label className="block text-sm font-medium tg-theme-text mb-2">
+                Номер телефона <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                value={formData.phone || ''}
+                onChange={(e) => handleChange('phone', e.target.value)}
+                placeholder="+381 XX XXX XXXX"
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  errors.phone
+                    ? 'border-red-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                } bg-white dark:bg-gray-700 tg-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500`}
+              />
+              {errors.phone && (
+                <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+              )}
+            </div>
+          )}
 
           {/* Способ оплаты */}
           <div>
@@ -289,7 +331,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
           <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
             <div className="flex justify-between items-center mb-2">
               <span className="tg-theme-hint">Сумма заказа:</span>
-              <span className="font-semibold tg-theme-text">{totalPrice} ₽</span>
+              <span className="font-semibold tg-theme-text">{totalPrice} RSD</span>
             </div>
             <div className="flex justify-between items-center mb-2">
               <span className="tg-theme-hint">Доставка:</span>
@@ -298,13 +340,13 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
             <div className="border-t border-gray-300 dark:border-gray-600 pt-2 mt-2">
               <div className="flex justify-between items-center">
                 <span className="text-lg font-bold tg-theme-text">Итого:</span>
-                <span className="text-2xl font-bold text-primary-600">{totalPrice} ₽</span>
+                <span className="text-2xl font-bold text-primary-600">{totalPrice} RSD</span>
               </div>
             </div>
           </div>
 
           {/* Кнопки */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-4 pb-8">
             <button
               type="button"
               onClick={onCancel}
