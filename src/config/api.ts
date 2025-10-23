@@ -6,7 +6,7 @@
  */
 
 const API_BASE_URL = import.meta.env.PROD
-  ? 'https://hi-food-backend.onrender.com/api'
+  ? 'https://hifoodv1.onrender.com/api'
   : 'http://localhost:3000/api';
 
 export { API_BASE_URL };
