@@ -4,7 +4,6 @@ import {
   Order,
   AdBanner,
   BonusTransaction,
-  Language,
 } from '../../types';
 
 /**

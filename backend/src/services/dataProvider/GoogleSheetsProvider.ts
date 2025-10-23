@@ -292,7 +292,12 @@ export class GoogleSheetsProvider implements IDataProvider {
       throw new Error(`Пользователь с ID ${userId} не найден`);
     }
 
-    const user = this.rowToUser(rows[rowIndex]);
+    const row = rows[rowIndex];
+    if (!row) {
+      throw new Error(`Строка данных для пользователя ${userId} пуста`);
+    }
+
+    const user = this.rowToUser(row);
     const updatedUser = { ...user, ...data };
 
     await this.updateSheet(`user!A${rowIndex + 2}:T${rowIndex + 2}`, [
@@ -302,7 +307,7 @@ export class GoogleSheetsProvider implements IDataProvider {
     return updatedUser;
   }
 
-  async deleteUser(userId: string): Promise<boolean> {
+  async deleteUser(_userId: string): Promise<boolean> {
     // Для Google Sheets удаление - это сложная операция
     // Можно пометить пользователя как удаленного или использовать Sheets API для удаления строки
     console.warn('Удаление пользователей в Google Sheets не реализовано');
@@ -331,15 +336,15 @@ export class GoogleSheetsProvider implements IDataProvider {
       .map((row) => this.rowToMenuItem(row));
   }
 
-  async updateMenuItem(id: string, data: Partial<MenuItem>): Promise<MenuItem> {
+  async updateMenuItem(_id: string, _data: Partial<MenuItem>): Promise<MenuItem> {
     throw new Error('Обновление блюд в Google Sheets требует реализации');
   }
 
-  async createMenuItem(item: Omit<MenuItem, 'id'>): Promise<MenuItem> {
+  async createMenuItem(_item: Omit<MenuItem, 'id'>): Promise<MenuItem> {
     throw new Error('Создание блюд в Google Sheets требует реализации');
   }
 
-  async deleteMenuItem(id: string): Promise<boolean> {
+  async deleteMenuItem(_id: string): Promise<boolean> {
     throw new Error('Удаление блюд в Google Sheets требует реализации');
   }
 
@@ -386,7 +391,12 @@ export class GoogleSheetsProvider implements IDataProvider {
       throw new Error(`Заказ с ID ${orderId} не найден`);
     }
 
-    const order = this.rowToOrder(rows[rowIndex]);
+    const row = rows[rowIndex];
+    if (!row) {
+      throw new Error(`Строка данных для заказа ${orderId} пуста`);
+    }
+
+    const order = this.rowToOrder(row);
     const updatedOrder = { ...order, ...data, updated_at: new Date().toISOString() };
 
     await this.updateSheet(`order!A${rowIndex + 2}:Q${rowIndex + 2}`, [
@@ -425,15 +435,15 @@ export class GoogleSheetsProvider implements IDataProvider {
     return rows.map((row) => this.rowToAdBanner(row));
   }
 
-  async createAd(ad: Omit<AdBanner, 'ad_id'>): Promise<AdBanner> {
+  async createAd(_ad: Omit<AdBanner, 'ad_id'>): Promise<AdBanner> {
     throw new Error('Создание рекламы в Google Sheets требует реализации');
   }
 
-  async updateAd(adId: string, data: Partial<AdBanner>): Promise<AdBanner> {
+  async updateAd(_adId: string, _data: Partial<AdBanner>): Promise<AdBanner> {
     throw new Error('Обновление рекламы в Google Sheets требует реализации');
   }
 
-  async deleteAd(adId: string): Promise<boolean> {
+  async deleteAd(_adId: string): Promise<boolean> {
     throw new Error('Удаление рекламы в Google Sheets требует реализации');
   }
 
@@ -498,7 +508,7 @@ export class GoogleSheetsProvider implements IDataProvider {
     return transaction;
   }
 
-  async getBonusHistory(userId: string): Promise<BonusTransaction[]> {
+  async getBonusHistory(_userId: string): Promise<BonusTransaction[]> {
     // Требует отдельной таблицы bonus_transactions
     throw new Error('История бонусов требует реализации таблицы bonus_transactions');
   }
@@ -518,7 +528,10 @@ export class GoogleSheetsProvider implements IDataProvider {
 
     if (rowIndex === -1) throw new Error('Пользователь не найден');
 
-    const user = this.rowToUser(rows[rowIndex]);
+    const row = rows[rowIndex];
+    if (!row) throw new Error('Строка данных пользователя пуста');
+
+    const user = this.rowToUser(row);
     if (!user.favorite_dishes.includes(dishId)) {
       user.favorite_dishes.push(dishId);
       await this.updateUser(userId, { favorite_dishes: user.favorite_dishes });
@@ -531,7 +544,10 @@ export class GoogleSheetsProvider implements IDataProvider {
 
     if (rowIndex === -1) throw new Error('Пользователь не найден');
 
-    const user = this.rowToUser(rows[rowIndex]);
+    const row = rows[rowIndex];
+    if (!row) throw new Error('Строка данных пользователя пуста');
+
+    const user = this.rowToUser(row);
     user.favorite_dishes = user.favorite_dishes.filter((id) => id !== dishId);
     await this.updateUser(userId, { favorite_dishes: user.favorite_dishes });
   }
@@ -586,7 +602,7 @@ export class GoogleSheetsProvider implements IDataProvider {
 
     if (addressIndex === -1) throw new Error('Адрес не найден');
 
-    user.addresses[addressIndex] = { ...user.addresses[addressIndex], ...data };
+    user.addresses[addressIndex] = { ...user.addresses[addressIndex], ...data } as Address;
     return this.updateUser(userId, { addresses: user.addresses });
   }
 
