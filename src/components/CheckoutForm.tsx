@@ -8,7 +8,11 @@ interface CheckoutFormProps {
 
 export interface CheckoutData {
   name: string;
-  address: string;
+  street: string;
+  building: string;
+  apartment: string;
+  code?: string;
+  deliveryNote?: string;
   phone: string;
   paymentMethod: 'cash' | 'card';
   comment?: string;
@@ -26,7 +30,11 @@ export interface CheckoutData {
 const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPrice }) => {
   const [formData, setFormData] = useState<CheckoutData>({
     name: '',
-    address: '',
+    street: '',
+    building: '',
+    apartment: '',
+    code: '',
+    deliveryNote: '',
     phone: '',
     paymentMethod: 'cash',
     comment: '',
@@ -41,8 +49,16 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
       newErrors.name = 'Укажите ваше имя';
     }
 
-    if (!formData.address.trim()) {
-      newErrors.address = 'Укажите адрес доставки';
+    if (!formData.street.trim()) {
+      newErrors.street = 'Укажите улицу';
+    }
+
+    if (!formData.building.trim()) {
+      newErrors.building = 'Укажите дом';
+    }
+
+    if (!formData.apartment.trim()) {
+      newErrors.apartment = 'Укажите квартиру';
     }
 
     if (!formData.phone.trim()) {
@@ -106,25 +122,98 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
             )}
           </div>
 
-          {/* Адрес доставки */}
+          {/* Улица */}
           <div>
             <label className="block text-sm font-medium tg-theme-text mb-2">
-              Адрес доставки <span className="text-red-500">*</span>
+              Улица <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              value={formData.address}
-              onChange={(e) => handleChange('address', e.target.value)}
-              placeholder="Улица, дом, квартира"
+              value={formData.street}
+              onChange={(e) => handleChange('street', e.target.value)}
+              placeholder="Название улицы"
               className={`w-full px-4 py-3 rounded-lg border ${
-                errors.address
+                errors.street
                   ? 'border-red-500'
                   : 'border-gray-300 dark:border-gray-600'
               } bg-white dark:bg-gray-700 tg-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500`}
             />
-            {errors.address && (
-              <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+            {errors.street && (
+              <p className="text-red-500 text-sm mt-1">{errors.street}</p>
             )}
+          </div>
+
+          {/* Дом и Квартира */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Дом */}
+            <div>
+              <label className="block text-sm font-medium tg-theme-text mb-2">
+                Дом <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.building}
+                onChange={(e) => handleChange('building', e.target.value)}
+                placeholder="№"
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  errors.building
+                    ? 'border-red-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                } bg-white dark:bg-gray-700 tg-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500`}
+              />
+              {errors.building && (
+                <p className="text-red-500 text-sm mt-1">{errors.building}</p>
+              )}
+            </div>
+
+            {/* Квартира */}
+            <div>
+              <label className="block text-sm font-medium tg-theme-text mb-2">
+                Квартира <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.apartment}
+                onChange={(e) => handleChange('apartment', e.target.value)}
+                placeholder="№"
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  errors.apartment
+                    ? 'border-red-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                } bg-white dark:bg-gray-700 tg-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500`}
+              />
+              {errors.apartment && (
+                <p className="text-red-500 text-sm mt-1">{errors.apartment}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Код */}
+          <div>
+            <label className="block text-sm font-medium tg-theme-text mb-2">
+              Код домофона
+            </label>
+            <input
+              type="text"
+              value={formData.code}
+              onChange={(e) => handleChange('code', e.target.value)}
+              placeholder="Код (необязательно)"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 tg-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+
+          {/* Отметка для курьера */}
+          <div>
+            <label className="block text-sm font-medium tg-theme-text mb-2">
+              Отметка для курьера
+            </label>
+            <textarea
+              value={formData.deliveryNote}
+              onChange={(e) => handleChange('deliveryNote', e.target.value)}
+              placeholder="Например: позвоните за 5 минут"
+              rows={2}
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 tg-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
           </div>
 
           {/* Телефон */}

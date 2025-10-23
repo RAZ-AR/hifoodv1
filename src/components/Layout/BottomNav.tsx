@@ -59,7 +59,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
                 `}
               >
                 <div className="relative">
-                  <div className={`${isActive ? 'scale-110' : 'scale-100'} transition-transform`}>
+                  <div className={`${isActive ? 'scale-110 animate-bounce-once' : 'scale-100'} transition-all duration-300`}>
                     {getIcon(tab.id, isActive)}
                   </div>
 

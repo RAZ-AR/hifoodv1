@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import Header from './components/Layout/Header';
 import BottomNav, { TabType } from './components/Layout/BottomNav';
-import CartFab from './components/CartFab';
 import Home from './pages/Home';
 import Favorites from './pages/Favorites';
 import Cart from './pages/Cart';
@@ -175,11 +174,6 @@ function App() {
           <main>
             {renderPage()}
           </main>
-
-          {/* FAB показывается только не на странице корзины */}
-          {activeTab !== 'cart' && (
-            <CartFab onClick={() => setActiveTab('cart')} />
-          )}
 
           <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
         </div>

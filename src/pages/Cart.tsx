@@ -15,6 +15,7 @@ const Cart: React.FC = () => {
   const { cartItems, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCart();
   const [showCheckoutForm, setShowCheckoutForm] = useState(false);
   const [isOrdering, setIsOrdering] = useState(false);
+  const [cutleryCount, setCutleryCount] = useState(0);
 
   const handleCheckoutClick = () => {
     setShowCheckoutForm(true);
@@ -33,10 +34,15 @@ const Cart: React.FC = () => {
 📦 *Товары:*
 ${cartItems.map((item) => `• ${item.item.name} × ${item.quantity} = ${item.item.price * item.quantity} RSD`).join('\n')}
 
+🍴 *Приборы:* ${cutleryCount} шт.
+
 💰 *Итого:* ${getTotalPrice()} RSD
 
 📍 *Адрес доставки:*
-${checkoutData.address}
+Улица: ${checkoutData.street}
+Дом: ${checkoutData.building}, Квартира: ${checkoutData.apartment}
+${checkoutData.code ? `Код: ${checkoutData.code}` : ''}
+${checkoutData.deliveryNote ? `Отметка для курьера: ${checkoutData.deliveryNote}` : ''}
 
 📞 *Телефон:*
 ${checkoutData.phone}
@@ -189,6 +195,29 @@ ${checkoutData.comment ? `💬 *Комментарий:*\n${checkoutData.comment
       {/* Фиксированный футер с итогом */}
       <div className="fixed bottom-16 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 safe-area-bottom">
         <div className="max-w-7xl mx-auto">
+          {/* Количество приборов */}
+          <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🍴</span>
+              <span className="text-sm font-medium tg-theme-text">Приборы</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setCutleryCount(Math.max(0, cutleryCount - 1))}
+                className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-95 transition-all"
+              >
+                <span className="text-lg font-bold text-gray-600 dark:text-gray-300">−</span>
+              </button>
+              <span className="w-8 text-center font-bold tg-theme-text">{cutleryCount}</span>
+              <button
+                onClick={() => setCutleryCount(cutleryCount + 1)}
+                className="w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center hover:bg-primary-600 active:scale-95 transition-all"
+              >
+                <span className="text-lg font-bold">+</span>
+              </button>
+            </div>
+          </div>
+
           {/* Итоговая сумма */}
           <div className="flex justify-between items-center mb-4">
             <span className="text-lg font-semibold tg-theme-text">Итого:</span>
