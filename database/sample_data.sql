@@ -53,7 +53,7 @@ INSERT INTO menu (name, description, category, price, image_url, available, prep
 -- РЕКЛАМНЫЕ БАННЕРЫ
 -- ==========================================
 
-INSERT INTO ads (title, description, image_url, link_url, start_date, end_date, order_priority) VALUES
+INSERT INTO ads (title, description, image_url, link, start_date, end_date, "order") VALUES
 ('Скидка 20% на первый заказ!', 'Используйте промокод FIRST20 при оформлении заказа', 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800', NULL, NOW(), NOW() + INTERVAL '30 days', 1),
 ('Бесплатная доставка от 1500 DIN', 'Закажите на сумму от 1500 DIN и получите бесплатную доставку', 'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=800', NULL, NOW(), NOW() + INTERVAL '60 days', 2),
 ('Новинка: Пицца 4 сыра', 'Попробуйте нашу новую пиццу с четырьмя видами сыра!', 'https://images.unsplash.com/photo-1571407970349-bc81e7e96e47?w=800', NULL, NOW(), NOW() + INTERVAL '14 days', 3);
