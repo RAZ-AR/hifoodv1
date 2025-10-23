@@ -3,9 +3,10 @@ import { MenuItem } from '@/types';
 
 interface ProductCardProps {
   item: MenuItem;
-  onAddToCart?: (item: MenuItem) => void;
+  onAddToCart?: (item: MenuItem, quantity: number) => void;
   onFavoriteToggle?: (item: MenuItem) => void;
   isFavorite?: boolean;
+  currentQuantity?: number;
 }
 
 /**
@@ -24,19 +25,57 @@ const ProductCard: React.FC<ProductCardProps> = ({
   item,
   onAddToCart,
   onFavoriteToggle,
-  isFavorite = false
+  isFavorite = false,
+  currentQuantity = 0
 }) => {
+  const [quantity, setQuantity] = useState(currentQuantity);
   const [isAdding, setIsAdding] = useState(false);
+
+  const handleIncrease = () => {
+    const newQuantity = quantity + 1;
+    setQuantity(newQuantity);
+
+    if (onAddToCart && item.available) {
+      onAddToCart(item, 1);
+
+      // Haptic feedback
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+      }
+    }
+  };
+
+  const handleDecrease = () => {
+    if (quantity > 0) {
+      const newQuantity = quantity - 1;
+      setQuantity(newQuantity);
+
+      if (onAddToCart && item.available) {
+        onAddToCart(item, -1);
+
+        // Haptic feedback
+        if (window.Telegram?.WebApp) {
+          window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+        }
+      }
+    }
+  };
 
   const handleAddToCart = () => {
     if (onAddToCart && item.available) {
       setIsAdding(true);
-      onAddToCart(item);
+      setQuantity(quantity + 1);
+      onAddToCart(item, 1);
 
       // Убираем анимацию через 300ms
       setTimeout(() => {
         setIsAdding(false);
       }, 300);
+
+      // Haptic feedback
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+      }
     }
   };
 
@@ -100,7 +139,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
 
-        {/* Цена и кнопка */}
+        {/* Цена и кнопки */}
         <div className="flex items-center justify-between">
           {/* Цена */}
           <div className="flex items-baseline gap-1">
@@ -110,20 +149,44 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <span className="text-sm tg-theme-hint">₽</span>
           </div>
 
-          {/* Кнопка "Добавить в корзину" */}
-          <button
-            onClick={handleAddToCart}
-            disabled={!item.available}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-              isAdding ? 'animate-add-to-cart' : ''
-            } ${
-              item.available
-                ? 'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-          >
-            {item.available ? (isAdding ? '✓ Добавлено' : '+ Добавить') : 'Недоступно'}
-          </button>
+          {/* Кнопки добавления */}
+          {quantity === 0 ? (
+            /* Кнопка "Добавить в корзину" */
+            <button
+              onClick={handleAddToCart}
+              disabled={!item.available}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                isAdding ? 'animate-add-to-cart' : ''
+              } ${
+                item.available
+                  ? 'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {item.available ? (isAdding ? '✓ Добавлено' : '+ Добавить') : 'Недоступно'}
+            </button>
+          ) : (
+            /* Счетчик количества */
+            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+              <button
+                onClick={handleDecrease}
+                className="w-8 h-8 bg-white dark:bg-gray-600 rounded-md flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-500 active:scale-95 transition-all"
+              >
+                <span className="text-lg font-bold text-primary-600">−</span>
+              </button>
+
+              <span className="w-8 text-center font-bold tg-theme-text">
+                {quantity}
+              </span>
+
+              <button
+                onClick={handleIncrease}
+                className="w-8 h-8 bg-primary-500 text-white rounded-md flex items-center justify-center hover:bg-primary-600 active:scale-95 transition-all"
+              >
+                <span className="text-lg font-bold">+</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

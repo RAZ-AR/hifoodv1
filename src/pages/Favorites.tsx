@@ -17,7 +17,7 @@ interface FavoritesProps {
  * - Возможность удалить из избранного
  */
 const Favorites: React.FC<FavoritesProps> = ({ userId = 'user_test_123' }) => {
-  const { addToCart } = useCart();
+  const { addToCart, getItemQuantity } = useCart();
   const [favorites, setFavorites] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,12 +41,8 @@ const Favorites: React.FC<FavoritesProps> = ({ userId = 'user_test_123' }) => {
     }
   };
 
-  const handleAddToCart = (item: MenuItem) => {
-    addToCart(item);
-
-    if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-    }
+  const handleAddToCart = (item: MenuItem, quantityChange: number) => {
+    addToCart(item, quantityChange);
   };
 
   const handleFavoriteToggle = async (item: MenuItem) => {
@@ -129,6 +125,7 @@ const Favorites: React.FC<FavoritesProps> = ({ userId = 'user_test_123' }) => {
               onAddToCart={handleAddToCart}
               onFavoriteToggle={handleFavoriteToggle}
               isFavorite={true}
+              currentQuantity={getItemQuantity(item.id)}
             />
           ))}
         </div>

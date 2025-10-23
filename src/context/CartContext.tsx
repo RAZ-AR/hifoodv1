@@ -8,9 +8,10 @@ interface CartItem {
 
 interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (item: MenuItem) => void;
+  addToCart: (item: MenuItem, quantityChange?: number) => void;
   removeFromCart: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
+  getItemQuantity: (itemId: string) => number;
   clearCart: () => void;
   getTotalPrice: () => number;
   getTotalItems: () => number;
@@ -21,22 +22,37 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const addToCart = (item: MenuItem) => {
+  const addToCart = (item: MenuItem, quantityChange: number = 1) => {
     setCartItems((prevItems) => {
       const existingItem = prevItems.find((cartItem) => cartItem.item.id === item.id);
 
       if (existingItem) {
-        // Увеличиваем количество
+        // Изменяем количество (может быть как +1, так и -1)
+        const newQuantity = existingItem.quantity + quantityChange;
+
+        if (newQuantity <= 0) {
+          // Удаляем если количество стало 0 или меньше
+          return prevItems.filter((cartItem) => cartItem.item.id !== item.id);
+        }
+
         return prevItems.map((cartItem) =>
           cartItem.item.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            ? { ...cartItem, quantity: newQuantity }
             : cartItem
         );
       } else {
-        // Добавляем новый товар
-        return [...prevItems, { item, quantity: 1 }];
+        // Добавляем новый товар только если quantityChange положительное
+        if (quantityChange > 0) {
+          return [...prevItems, { item, quantity: quantityChange }];
+        }
+        return prevItems;
       }
     });
+  };
+
+  const getItemQuantity = (itemId: string): number => {
+    const cartItem = cartItems.find((item) => item.item.id === itemId);
+    return cartItem ? cartItem.quantity : 0;
   };
 
   const removeFromCart = (itemId: string) => {
@@ -77,6 +93,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         addToCart,
         removeFromCart,
         updateQuantity,
+        getItemQuantity,
         clearCart,
         getTotalPrice,
         getTotalItems,

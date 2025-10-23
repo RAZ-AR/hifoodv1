@@ -16,7 +16,7 @@ import { useCart } from '@/context/CartContext';
  * - Загрузку и ошибки
  */
 const Home: React.FC = () => {
-  const { addToCart } = useCart();
+  const { addToCart, getItemQuantity } = useCart();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Все');
@@ -61,13 +61,8 @@ const Home: React.FC = () => {
     setSelectedCategory(category);
   };
 
-  const handleAddToCart = (item: MenuItem) => {
-    addToCart(item);
-
-    // Используем Telegram Web App API для haptic feedback
-    if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-    }
+  const handleAddToCart = (item: MenuItem, quantityChange: number) => {
+    addToCart(item, quantityChange);
   };
 
   const handleFavoriteToggle = (item: MenuItem) => {
@@ -180,6 +175,7 @@ const Home: React.FC = () => {
                 onAddToCart={handleAddToCart}
                 onFavoriteToggle={handleFavoriteToggle}
                 isFavorite={false} // TODO: Получить из стейта избранного
+                currentQuantity={getItemQuantity(item.id)}
               />
             ))}
           </div>
