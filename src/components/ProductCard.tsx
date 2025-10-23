@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MenuItem } from '@/types';
 
 interface ProductCardProps {
@@ -26,9 +26,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onFavoriteToggle,
   isFavorite = false
 }) => {
+  const [isAdding, setIsAdding] = useState(false);
+
   const handleAddToCart = () => {
     if (onAddToCart && item.available) {
+      setIsAdding(true);
       onAddToCart(item);
+
+      // Убираем анимацию через 300ms
+      setTimeout(() => {
+        setIsAdding(false);
+      }, 300);
     }
   };
 
@@ -39,7 +47,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover-lift">
       {/* Изображение */}
       <div className="relative h-48 overflow-hidden">
         <img
@@ -107,12 +115,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
             onClick={handleAddToCart}
             disabled={!item.available}
             className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+              isAdding ? 'animate-add-to-cart' : ''
+            } ${
               item.available
                 ? 'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >
-            {item.available ? '+ Добавить' : 'Недоступно'}
+            {item.available ? (isAdding ? '✓ Добавлено' : '+ Добавить') : 'Недоступно'}
           </button>
         </div>
       </div>

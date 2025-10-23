@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Header from './components/Layout/Header';
 import BottomNav, { TabType } from './components/Layout/BottomNav';
+import CartFab from './components/CartFab';
 import Home from './pages/Home';
 import Favorites from './pages/Favorites';
 import Cart from './pages/Cart';
@@ -139,19 +140,21 @@ function App() {
     setActiveTab('home');
   };
 
-  // Рендер активной страницы
+  // Рендер активной страницы с анимацией
   const renderPage = () => {
+    const pageClassName = "animate-fade-in";
+
     switch (activeTab) {
       case 'home':
-        return <Home />;
+        return <div className={pageClassName}><Home /></div>;
       case 'favorites':
-        return <Favorites userId={user?.user_id} />;
+        return <div className={pageClassName}><Favorites userId={user?.user_id} /></div>;
       case 'cart':
-        return <Cart />;
+        return <div className={pageClassName}><Cart /></div>;
       case 'profile':
-        return <Profile user={user} />;
+        return <div className={pageClassName}><Profile user={user} /></div>;
       default:
-        return <Home />;
+        return <div className={pageClassName}><Home /></div>;
     }
   };
 
@@ -163,6 +166,11 @@ function App() {
         <main>
           {renderPage()}
         </main>
+
+        {/* FAB показывается только не на странице корзины */}
+        {activeTab !== 'cart' && (
+          <CartFab onClick={() => setActiveTab('cart')} />
+        )}
 
         <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       </div>

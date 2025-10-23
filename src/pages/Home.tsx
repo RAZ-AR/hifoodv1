@@ -4,6 +4,7 @@ import { api } from '@/services/api';
 import ProductCard from '@/components/ProductCard';
 import CategoryFilter from '@/components/CategoryFilter';
 import AdBannerSlider from '@/components/AdBannerSlider';
+import SkeletonCard from '@/components/SkeletonCard';
 import { useCart } from '@/context/CartContext';
 
 /**
@@ -79,13 +80,34 @@ const Home: React.FC = () => {
     }
   };
 
-  // Состояние загрузки
+  // Состояние загрузки с скелетонами
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
-          <p className="tg-theme-hint">Загружаем меню...</p>
+      <div className="pb-20">
+        <CategoryFilter
+          categories={['Все']}
+          selectedCategory="Все"
+          onCategoryChange={() => {}}
+        />
+
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          {/* Скелетон слайдера */}
+          <div className="mb-6">
+            <div className="w-full h-48 skeleton rounded-lg"></div>
+          </div>
+
+          {/* Скелетон заголовка */}
+          <div className="mb-4">
+            <div className="h-8 skeleton rounded w-40 mb-2"></div>
+            <div className="h-4 skeleton rounded w-24"></div>
+          </div>
+
+          {/* Скелетон карточек */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, index) => (
+              <SkeletonCard key={index} />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -150,7 +172,7 @@ const Home: React.FC = () => {
 
         {/* Сетка карточек */}
         {filteredItems.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-stagger">
             {filteredItems.map((item) => (
               <ProductCard
                 key={item.id}
