@@ -5,6 +5,7 @@ import ProductCard from '@/components/ProductCard';
 import CategoryFilter from '@/components/CategoryFilter';
 import AdBannerSlider from '@/components/AdBannerSlider';
 import SkeletonCard from '@/components/SkeletonCard';
+import SearchBar from '@/components/SearchBar';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 
@@ -22,6 +23,7 @@ const Home: React.FC = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Все');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,14 +35,26 @@ const Home: React.FC = () => {
     loadMenu();
   }, []);
 
-  // Фильтровать меню при изменении категории
+  // Фильтровать меню при изменении категории или поиска
   useEffect(() => {
-    if (selectedCategory === 'Все') {
-      setFilteredItems(menuItems);
-    } else {
-      setFilteredItems(menuItems.filter(item => item.category === selectedCategory));
+    let items = menuItems;
+
+    // Фильтр по категории
+    if (selectedCategory !== 'Все') {
+      items = items.filter(item => item.category === selectedCategory);
     }
-  }, [selectedCategory, menuItems]);
+
+    // Фильтр по поиску
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      items = items.filter(item =>
+        item.name.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query)
+      );
+    }
+
+    setFilteredItems(items);
+  }, [selectedCategory, searchQuery, menuItems]);
 
   const loadMenu = async () => {
     try {
@@ -147,6 +161,15 @@ const Home: React.FC = () => {
 
       {/* Список блюд */}
       <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Поисковая строка */}
+        <div className="mb-6">
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Поиск блюд..."
+          />
+        </div>
+
         {/* Слайдер с баннерами */}
         <div className="mb-6">
           <AdBannerSlider />

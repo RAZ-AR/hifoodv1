@@ -30,7 +30,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
   };
 
   return (
-    <div className="sticky top-[73px] z-40 tg-theme-bg border-b border-gray-200 dark:border-gray-800 py-3">
+    <div className="sticky top-[105px] z-40 tg-theme-bg border-b border-gray-200 dark:border-gray-800 py-3">
       <div className="max-w-7xl mx-auto px-4">
         {/* Горизонтальный скролл категорий */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar">

@@ -68,10 +68,11 @@ export interface MenuItem {
   price: number;
   image_url: string;
   ingredients: string[];
-  rating: number;
+  rating?: number;
   available: boolean;
   preparation_time: number;
   allergens?: string[];
+  discount?: number;  // Процент скидки (0-100)
 }
 
 export interface OrderItem {
