@@ -3,6 +3,7 @@ import { MenuItem } from '@/types';
 import { api } from '@/services/api';
 import ProductCard from '@/components/ProductCard';
 import CategoryFilter from '@/components/CategoryFilter';
+import { useCart } from '@/context/CartContext';
 
 /**
  * ГЛАВНАЯ СТРАНИЦА (МЕНЮ)
@@ -13,6 +14,7 @@ import CategoryFilter from '@/components/CategoryFilter';
  * - Загрузку и ошибки
  */
 const Home: React.FC = () => {
+  const { addToCart } = useCart();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Все');
@@ -58,8 +60,7 @@ const Home: React.FC = () => {
   };
 
   const handleAddToCart = (item: MenuItem) => {
-    // TODO: Реализовать добавление в корзину
-    console.log('Добавить в корзину:', item);
+    addToCart(item);
 
     // Используем Telegram Web App API для haptic feedback
     if (window.Telegram?.WebApp) {
