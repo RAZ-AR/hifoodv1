@@ -5,7 +5,7 @@
  */
 
 import { API_BASE_URL } from '@/config/api';
-import type { User, MenuItem, Order } from '@/types';
+import type { User, MenuItem, Order, AdBanner } from '@/types';
 
 class ApiService {
   /**
@@ -124,9 +124,23 @@ class ApiService {
   }
 
   /**
+   * Ads
+   */
+  async getAds(): Promise<AdBanner[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/ads`);
+      if (!response.ok) throw new Error('Failed to fetch ads');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching ads:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Favorites
    */
-  async getFavorites(userId: string): Promise<string[]> {
+  async getFavorites(userId: string): Promise<MenuItem[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/favorites/${userId}`);
       if (!response.ok) throw new Error('Failed to fetch favorites');

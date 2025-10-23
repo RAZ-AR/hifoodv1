@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCart } from '@/context/CartContext';
 
-export type TabType = 'home' | 'cart' | 'orders' | 'profile';
+export type TabType = 'home' | 'favorites' | 'cart' | 'profile';
 
 interface BottomNavProps {
   activeTab: TabType;
@@ -23,9 +23,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
 
   const tabs = [
     { id: 'home' as TabType, icon: '🏠', label: 'Меню' },
+    { id: 'favorites' as TabType, icon: '❤️', label: 'Избранное' },
     { id: 'cart' as TabType, icon: '🛒', label: 'Корзина', badge: cartItemsCount },
-    { id: 'orders' as TabType, icon: '📦', label: 'Заказы' },
-    { id: 'profile' as TabType, icon: '👤', label: 'Профиль' },
+    { id: 'profile' as TabType, icon: '👤', label: 'Личный кабинет' },
   ];
 
   return (

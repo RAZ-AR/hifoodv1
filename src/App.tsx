@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import Header from './components/Layout/Header';
 import BottomNav, { TabType } from './components/Layout/BottomNav';
 import Home from './pages/Home';
+import Favorites from './pages/Favorites';
 import Cart from './pages/Cart';
-import OrderHistory from './pages/OrderHistory';
 import Profile from './pages/Profile';
 import { CartProvider } from './context/CartContext';
 import { User } from './types';
@@ -134,15 +134,20 @@ function App() {
     );
   }
 
+  // Обработчик клика на логотип
+  const handleLogoClick = () => {
+    setActiveTab('home');
+  };
+
   // Рендер активной страницы
   const renderPage = () => {
     switch (activeTab) {
       case 'home':
         return <Home />;
+      case 'favorites':
+        return <Favorites userId={user?.user_id} />;
       case 'cart':
         return <Cart />;
-      case 'orders':
-        return <OrderHistory userId={user?.user_id} />;
       case 'profile':
         return <Profile user={user} />;
       default:
@@ -153,7 +158,7 @@ function App() {
   return (
     <CartProvider>
       <div className="min-h-screen tg-theme-bg">
-        <Header user={user} />
+        <Header user={user} onLogoClick={handleLogoClick} />
 
         <main>
           {renderPage()}

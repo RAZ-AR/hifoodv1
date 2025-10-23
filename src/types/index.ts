@@ -217,6 +217,8 @@ export interface TelegramWebApp {
   showAlert(message: string): void;
   showConfirm(message: string): Promise<boolean>;
   showPopup(params: { title?: string; message: string; buttons?: Array<{ id?: string; type?: string; text: string }> }): Promise<string>;
+  openLink(url: string): void;
+  openTelegramLink(url: string): void;
 }
 
 declare global {

@@ -3,6 +3,7 @@ import { MenuItem } from '@/types';
 import { api } from '@/services/api';
 import ProductCard from '@/components/ProductCard';
 import CategoryFilter from '@/components/CategoryFilter';
+import AdBannerSlider from '@/components/AdBannerSlider';
 import { useCart } from '@/context/CartContext';
 
 /**
@@ -133,6 +134,10 @@ const Home: React.FC = () => {
 
       {/* Список блюд */}
       <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Слайдер с баннерами */}
+        <div className="mb-6">
+          <AdBannerSlider />
+        </div>
         {/* Заголовок категории */}
         <div className="mb-4">
           <h2 className="text-2xl font-bold tg-theme-text">
