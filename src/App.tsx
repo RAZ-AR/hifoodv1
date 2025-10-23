@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Header from './components/Layout/Header';
+import Home from './pages/Home';
 import { User } from './types';
 
 function App() {
@@ -131,86 +132,8 @@ function App() {
     <div className="min-h-screen tg-theme-bg">
       <Header user={user} />
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <div className="text-center py-12">
-          <div className="mb-8">
-            <div className="text-6xl mb-4">🍕</div>
-            <h1 className="text-3xl font-bold tg-theme-text mb-2">
-              Добро пожаловать в Hi Food!
-            </h1>
-            <p className="tg-theme-hint text-lg">
-              Доставка вкусной еды прямо к вам
-            </p>
-          </div>
-
-          {user && (
-            <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 animate-slide-in-up">
-              <h2 className="text-xl font-bold mb-4 tg-theme-text">
-                Ваша карта лояльности
-              </h2>
-
-              <div className="relative overflow-hidden bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl p-6 text-white loyalty-card-shimmer">
-                <div className="relative z-10">
-                  <div className="flex justify-between items-start mb-8">
-                    <div>
-                      <p className="text-sm opacity-90">Hi Food Card</p>
-                      <p className="text-2xl font-bold mt-1">
-                        #{user.loyalty_card_number}
-                      </p>
-                    </div>
-                    <div className="text-3xl">🎴</div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm opacity-90">Владелец</span>
-                      <span className="font-medium">{user.first_name} {user.last_name}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm opacity-90">Бонусов</span>
-                      <span className="font-bold text-lg">{user.bonus_balance}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm opacity-90">Заказов</span>
-                      <span className="font-medium">{user.total_orders}</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t border-white/20">
-                    <p className="text-xs opacity-75">
-                      Выдана: {new Date(user.loyalty_card_issued_date).toLocaleDateString('ru-RU')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 text-left space-y-3">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <span className="text-2xl">💰</span>
-                  <div>
-                    <p className="text-sm font-medium tg-theme-text">Накоплено бонусов</p>
-                    <p className="text-xs tg-theme-hint">Всего заработано: {user.total_bonus_earned}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <span className="text-2xl">📦</span>
-                  <div>
-                    <p className="text-sm font-medium tg-theme-text">Заказов выполнено</p>
-                    <p className="text-xs tg-theme-hint">Общая сумма: {user.total_spent} DIN</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="mt-12 text-center tg-theme-hint">
-            <p className="text-sm">Frontend готов! 🎉</p>
-            <p className="text-xs mt-1">
-              Смотрите README.md для продолжения разработки
-            </p>
-          </div>
-        </div>
+      <main>
+        <Home />
       </main>
     </div>
   );
