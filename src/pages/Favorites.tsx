@@ -3,6 +3,7 @@ import { MenuItem } from '@/types';
 import { api } from '@/services/api';
 import ProductCard from '@/components/ProductCard';
 import { useCart } from '@/context/CartContext';
+import { useFavorites } from '@/context/FavoritesContext';
 
 interface FavoritesProps {
   userId?: string;
@@ -16,49 +17,41 @@ interface FavoritesProps {
  * - Возможность добавить в корзину
  * - Возможность удалить из избранного
  */
-const Favorites: React.FC<FavoritesProps> = ({ userId = 'user_test_123' }) => {
+const Favorites: React.FC<FavoritesProps> = () => {
   const { addToCart, getItemQuantity } = useCart();
-  const [favorites, setFavorites] = useState<MenuItem[]>([]);
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadFavorites();
-  }, [userId]);
+    loadMenu();
+  }, []);
 
-  const loadFavorites = async () => {
+  const loadMenu = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const items = await api.getFavorites(userId);
-      setFavorites(items);
+      const items = await api.getMenu();
+      setMenuItems(items);
     } catch (err) {
-      console.error('Ошибка загрузки избранного:', err);
-      setError('Не удалось загрузить избранное');
+      console.error('Ошибка загрузки меню:', err);
+      setError('Не удалось загрузить меню');
     } finally {
       setLoading(false);
     }
   };
 
+  // Фильтруем только избранные блюда
+  const favoriteItems = menuItems.filter(item => isFavorite(item.id));
+
   const handleAddToCart = (item: MenuItem, quantityChange: number) => {
     addToCart(item, quantityChange);
   };
 
-  const handleFavoriteToggle = async (item: MenuItem) => {
-    try {
-      // Удаляем из избранного
-      await api.removeFavorite(userId, item.id);
-
-      // Обновляем локальный список
-      setFavorites(favorites.filter(fav => fav.id !== item.id));
-
-      if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-      }
-    } catch (err) {
-      console.error('Ошибка удаления из избранного:', err);
-    }
+  const handleFavoriteToggle = (item: MenuItem) => {
+    toggleFavorite(item.id);
   };
 
   // Состояние загрузки
@@ -82,7 +75,7 @@ const Favorites: React.FC<FavoritesProps> = ({ userId = 'user_test_123' }) => {
           <h2 className="text-xl font-bold tg-theme-text mb-2">Ошибка загрузки</h2>
           <p className="tg-theme-hint mb-4">{error}</p>
           <button
-            onClick={loadFavorites}
+            onClick={loadMenu}
             className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
           >
             Попробовать снова
@@ -93,7 +86,7 @@ const Favorites: React.FC<FavoritesProps> = ({ userId = 'user_test_123' }) => {
   }
 
   // Пустое избранное
-  if (favorites.length === 0) {
+  if (favoriteItems.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 pb-20">
         <div className="text-center">
@@ -112,13 +105,13 @@ const Favorites: React.FC<FavoritesProps> = ({ userId = 'user_test_123' }) => {
         <div className="mb-6">
           <h1 className="text-2xl font-bold tg-theme-text">Избранное</h1>
           <p className="text-sm tg-theme-hint mt-1">
-            {favorites.length} {favorites.length === 1 ? 'блюдо' : 'блюд'}
+            {favoriteItems.length} {favoriteItems.length === 1 ? 'блюдо' : 'блюд'}
           </p>
         </div>
 
         {/* Сетка карточек */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {favorites.map((item) => (
+        <div className="grid grid-cols-2 gap-4">
+          {favoriteItems.map((item) => (
             <ProductCard
               key={item.id}
               item={item}

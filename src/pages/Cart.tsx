@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '@/context/CartContext';
+import CheckoutForm, { CheckoutData } from '@/components/CheckoutForm';
 
 /**
  * СТРАНИЦА КОРЗИНЫ
@@ -12,23 +13,75 @@ import { useCart } from '@/context/CartContext';
  */
 const Cart: React.FC = () => {
   const { cartItems, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCart();
+  const [showCheckoutForm, setShowCheckoutForm] = useState(false);
   const [isOrdering, setIsOrdering] = useState(false);
 
-  const handleCheckout = async () => {
+  const handleCheckoutClick = () => {
+    setShowCheckoutForm(true);
+  };
+
+  const handleCheckoutSubmit = async (checkoutData: CheckoutData) => {
     setIsOrdering(true);
 
-    // TODO: Интеграция с API для создания заказа
-    // await api.createOrder({ ... })
+    try {
+      // Формируем сообщение для отправки в Telegram
+      const orderMessage = `
+🛒 *НОВЫЙ ЗАКАЗ*
 
-    // Имитация отправки заказа
-    setTimeout(() => {
+📦 *Товары:*
+${cartItems.map((item) => `• ${item.item.name} × ${item.quantity} = ${item.item.price * item.quantity} ₽`).join('\n')}
+
+💰 *Итого:* ${getTotalPrice()} ₽
+
+📍 *Адрес доставки:*
+${checkoutData.address}
+
+📞 *Телефон:*
+${checkoutData.phone}
+
+💳 *Способ оплаты:*
+${checkoutData.paymentMethod === 'cash' ? 'Наличные' : 'Банковская карта'}
+
+${checkoutData.comment ? `💬 *Комментарий:*\n${checkoutData.comment}` : ''}
+      `.trim();
+
+      // Отправляем данные в Telegram
       if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.showAlert('Заказ успешно оформлен! 🎉');
+        // Отправляем данные через sendData (они попадут в бота)
+        window.Telegram.WebApp.sendData(JSON.stringify({
+          type: 'order',
+          data: {
+            items: cartItems.map(item => ({
+              id: item.item.id,
+              name: item.item.name,
+              price: item.item.price,
+              quantity: item.quantity,
+            })),
+            total: getTotalPrice(),
+            ...checkoutData,
+          }
+        }));
+
+        // Показываем успешное сообщение
+        window.Telegram.WebApp.showAlert('Заказ успешно оформлен! 🎉\n\nВы получите уведомление в боте с деталями заказа.');
         window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+      } else {
+        // Для разработки вне Telegram
+        console.log('Order message:', orderMessage);
+        alert('Заказ оформлен!\n\n' + orderMessage);
       }
+
+      // Очищаем корзину
       clearCart();
+      setShowCheckoutForm(false);
+    } catch (error) {
+      console.error('Ошибка оформления заказа:', error);
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.showAlert('Ошибка оформления заказа. Попробуйте снова.');
+      }
+    } finally {
       setIsOrdering(false);
-    }, 1500);
+    }
   };
 
   // Пустая корзина
@@ -147,7 +200,7 @@ const Cart: React.FC = () => {
 
           {/* Кнопка оформления */}
           <button
-            onClick={handleCheckout}
+            onClick={handleCheckoutClick}
             disabled={isOrdering}
             className={`
               w-full py-3 rounded-lg font-semibold text-white transition-all
@@ -168,6 +221,15 @@ const Cart: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Форма оформления заказа */}
+      {showCheckoutForm && (
+        <CheckoutForm
+          onSubmit={handleCheckoutSubmit}
+          onCancel={() => setShowCheckoutForm(false)}
+          totalPrice={getTotalPrice()}
+        />
+      )}
     </div>
   );
 };

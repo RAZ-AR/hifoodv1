@@ -6,6 +6,7 @@ import CategoryFilter from '@/components/CategoryFilter';
 import AdBannerSlider from '@/components/AdBannerSlider';
 import SkeletonCard from '@/components/SkeletonCard';
 import { useCart } from '@/context/CartContext';
+import { useFavorites } from '@/context/FavoritesContext';
 
 /**
  * ГЛАВНАЯ СТРАНИЦА (МЕНЮ)
@@ -17,6 +18,7 @@ import { useCart } from '@/context/CartContext';
  */
 const Home: React.FC = () => {
   const { addToCart, getItemQuantity } = useCart();
+  const { toggleFavorite, isFavorite } = useFavorites();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Все');
@@ -66,13 +68,7 @@ const Home: React.FC = () => {
   };
 
   const handleFavoriteToggle = (item: MenuItem) => {
-    // TODO: Реализовать добавление/удаление из избранного
-    console.log('Переключить избранное:', item);
-
-    // Используем Telegram Web App API для haptic feedback
-    if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-    }
+    toggleFavorite(item.id);
   };
 
   // Состояние загрузки с скелетонами
@@ -98,7 +94,7 @@ const Home: React.FC = () => {
           </div>
 
           {/* Скелетон карточек */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {[...Array(8)].map((_, index) => (
               <SkeletonCard key={index} />
             ))}
@@ -167,14 +163,14 @@ const Home: React.FC = () => {
 
         {/* Сетка карточек */}
         {filteredItems.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-stagger">
+          <div className="grid grid-cols-2 gap-4 animate-stagger">
             {filteredItems.map((item) => (
               <ProductCard
                 key={item.id}
                 item={item}
                 onAddToCart={handleAddToCart}
                 onFavoriteToggle={handleFavoriteToggle}
-                isFavorite={false} // TODO: Получить из стейта избранного
+                isFavorite={isFavorite(item.id)}
                 currentQuantity={getItemQuantity(item.id)}
               />
             ))}

@@ -7,6 +7,7 @@ import Favorites from './pages/Favorites';
 import Cart from './pages/Cart';
 import Profile from './pages/Profile';
 import { CartProvider } from './context/CartContext';
+import { FavoritesProvider } from './context/FavoritesContext';
 import { User } from './types';
 
 function App() {
@@ -140,6 +141,11 @@ function App() {
     setActiveTab('home');
   };
 
+  // Обработчик клика на профиль
+  const handleProfileClick = () => {
+    setActiveTab('profile');
+  };
+
   // Рендер активной страницы с анимацией
   const renderPage = () => {
     const pageClassName = "animate-fade-in";
@@ -159,22 +165,24 @@ function App() {
   };
 
   return (
-    <CartProvider>
-      <div className="min-h-screen tg-theme-bg">
-        <Header user={user} onLogoClick={handleLogoClick} />
+    <FavoritesProvider>
+      <CartProvider>
+        <div className="min-h-screen tg-theme-bg">
+          <Header user={user} onLogoClick={handleLogoClick} onProfileClick={handleProfileClick} />
 
-        <main>
-          {renderPage()}
-        </main>
+          <main>
+            {renderPage()}
+          </main>
 
-        {/* FAB показывается только не на странице корзины */}
-        {activeTab !== 'cart' && (
-          <CartFab onClick={() => setActiveTab('cart')} />
-        )}
+          {/* FAB показывается только не на странице корзины */}
+          {activeTab !== 'cart' && (
+            <CartFab onClick={() => setActiveTab('cart')} />
+          )}
 
-        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-      </div>
-    </CartProvider>
+          <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+        </div>
+      </CartProvider>
+    </FavoritesProvider>
   );
 }
 

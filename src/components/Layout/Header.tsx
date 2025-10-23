@@ -5,6 +5,7 @@ import logo from '@/assets/logo.svg';
 interface HeaderProps {
   user: User | null;
   onLogoClick?: () => void;
+  onProfileClick?: () => void;
 }
 
 /**
@@ -16,7 +17,7 @@ interface HeaderProps {
  * - Номер карты лояльности (#1234)
  * - Аватар пользователя
  */
-const Header: React.FC<HeaderProps> = ({ user, onLogoClick }) => {
+const Header: React.FC<HeaderProps> = ({ user, onLogoClick, onProfileClick }) => {
   return (
     <header className="sticky top-0 z-50 tg-theme-bg border-b border-gray-200 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 py-3">
@@ -37,48 +38,25 @@ const Header: React.FC<HeaderProps> = ({ user, onLogoClick }) => {
 
           {/* Информация о пользователе */}
           {user && (
-            <div className="flex items-center gap-3">
+            <button
+              onClick={onProfileClick}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
               <div className="text-right">
-                {/* Приветствие */}
+                {/* Имя (кликабельное) */}
                 <p className="text-sm font-medium tg-theme-text">
                   {user.first_name}
-                  {user.telegram_username && (
-                    <span className="tg-theme-hint text-xs ml-1">
-                      @{user.telegram_username}
-                    </span>
-                  )}
                 </p>
 
-                {/* КАРТА ЛОЯЛЬНОСТИ */}
-                <div className="flex items-center justify-end gap-1 mt-0.5">
-                  <span className="text-xs tg-theme-hint">Card:</span>
-                  <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full">
-                    <span className="text-white text-xs font-bold">
-                      #{user.loyalty_card_number}
-                    </span>
-                    <span className="text-xs">🎴</span>
-                  </div>
-                </div>
-
                 {/* Бонусы */}
-                {user.bonus_balance > 0 && (
-                  <p className="text-xs tg-theme-hint mt-0.5">
-                    {user.bonus_balance} бонусов
-                  </p>
-                )}
-              </div>
-
-              {/* Аватар */}
-              <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center overflow-hidden">
-                {user.telegram_username ? (
-                  <span className="text-lg font-bold">
-                    {user.first_name.charAt(0).toUpperCase()}
+                <div className="flex items-center justify-end gap-1 mt-0.5">
+                  <span className="text-xs">💰</span>
+                  <span className="text-xs font-semibold text-primary-600">
+                    {user.bonus_balance}
                   </span>
-                ) : (
-                  <span className="text-2xl">👤</span>
-                )}
+                </div>
               </div>
-            </div>
+            </button>
           )}
 
           {/* Для неавторизованных пользователей */}
