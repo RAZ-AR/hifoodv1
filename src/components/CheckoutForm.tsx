@@ -7,6 +7,7 @@ interface CheckoutFormProps {
 }
 
 export interface CheckoutData {
+  name: string;
   address: string;
   phone: string;
   paymentMethod: 'cash' | 'card';
@@ -24,6 +25,7 @@ export interface CheckoutData {
  */
 const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPrice }) => {
   const [formData, setFormData] = useState<CheckoutData>({
+    name: '',
     address: '',
     phone: '',
     paymentMethod: 'cash',
@@ -34,6 +36,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
 
   const validate = (): boolean => {
     const newErrors: Partial<CheckoutData> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Укажите ваше имя';
+    }
 
     if (!formData.address.trim()) {
       newErrors.address = 'Укажите адрес доставки';
@@ -79,6 +85,27 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Имя */}
+          <div>
+            <label className="block text-sm font-medium tg-theme-text mb-2">
+              Ваше имя <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+              placeholder="Например: Иван"
+              className={`w-full px-4 py-3 rounded-lg border ${
+                errors.name
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-600'
+              } bg-white dark:bg-gray-700 tg-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500`}
+            />
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+            )}
+          </div>
+
           {/* Адрес доставки */}
           <div>
             <label className="block text-sm font-medium tg-theme-text mb-2">

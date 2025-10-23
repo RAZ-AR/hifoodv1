@@ -43,7 +43,7 @@ const CartFab: React.FC<CartFabProps> = ({ onClick }) => {
         <div className="flex flex-col items-start">
           <span className="text-xs opacity-90">Корзина</span>
           <span className="text-lg font-bold">
-            ₽ {totalPrice.toFixed(0)}
+            {totalPrice.toFixed(0)} RSD
           </span>
         </div>
       </div>

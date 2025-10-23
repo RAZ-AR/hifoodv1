@@ -28,10 +28,12 @@ const Cart: React.FC = () => {
       const orderMessage = `
 🛒 *НОВЫЙ ЗАКАЗ*
 
-📦 *Товары:*
-${cartItems.map((item) => `• ${item.item.name} × ${item.quantity} = ${item.item.price * item.quantity} ₽`).join('\n')}
+👤 *Имя:* ${checkoutData.name}
 
-💰 *Итого:* ${getTotalPrice()} ₽
+📦 *Товары:*
+${cartItems.map((item) => `• ${item.item.name} × ${item.quantity} = ${item.item.price * item.quantity} RSD`).join('\n')}
+
+💰 *Итого:* ${getTotalPrice()} RSD
 
 📍 *Адрес доставки:*
 ${checkoutData.address}
@@ -136,7 +138,7 @@ ${checkoutData.comment ? `💬 *Комментарий:*\n${checkoutData.comment
                       <span className="text-lg font-bold text-primary-600">
                         {item.price * quantity}
                       </span>
-                      <span className="text-xs tg-theme-hint">₽</span>
+                      <span className="text-xs tg-theme-hint">RSD</span>
                     </div>
 
                     {/* Количество */}
@@ -192,9 +194,9 @@ ${checkoutData.comment ? `💬 *Комментарий:*\n${checkoutData.comment
             <span className="text-lg font-semibold tg-theme-text">Итого:</span>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-bold text-primary-600">
-                {getTotalPrice().toFixed(2)}
+                {getTotalPrice().toFixed(0)}
               </span>
-              <span className="text-sm tg-theme-hint">₽</span>
+              <span className="text-sm tg-theme-hint">RSD</span>
             </div>
           </div>
 

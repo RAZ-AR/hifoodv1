@@ -8,6 +8,7 @@ import Cart from './pages/Cart';
 import Profile from './pages/Profile';
 import { CartProvider } from './context/CartContext';
 import { FavoritesProvider } from './context/FavoritesContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { User } from './types';
 
 function App() {
@@ -165,10 +166,11 @@ function App() {
   };
 
   return (
-    <FavoritesProvider>
-      <CartProvider>
-        <div className="min-h-screen tg-theme-bg">
-          <Header user={user} onLogoClick={handleLogoClick} onProfileClick={handleProfileClick} />
+    <LanguageProvider>
+      <FavoritesProvider>
+        <CartProvider>
+          <div className="min-h-screen tg-theme-bg">
+            <Header user={user} onLogoClick={handleLogoClick} onProfileClick={handleProfileClick} />
 
           <main>
             {renderPage()}
@@ -183,6 +185,7 @@ function App() {
         </div>
       </CartProvider>
     </FavoritesProvider>
+    </LanguageProvider>
   );
 }
 

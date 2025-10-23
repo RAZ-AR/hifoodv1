@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MenuItem } from '@/types';
 
 interface ProductCardProps {
@@ -30,6 +30,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const [quantity, setQuantity] = useState(currentQuantity);
   const [isAdding, setIsAdding] = useState(false);
+
+  // Обновлять quantity при изменении currentQuantity
+  useEffect(() => {
+    setQuantity(currentQuantity);
+  }, [currentQuantity]);
 
   const handleIncrease = () => {
     const newQuantity = quantity + 1;
@@ -140,7 +145,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-baseline gap-1">
             <span className="text-base font-bold tg-theme-text">
-              ₽ {item.price}
+              {item.price} RSD
             </span>
           </div>
 
