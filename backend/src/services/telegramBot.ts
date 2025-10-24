@@ -9,9 +9,6 @@
 
 import TelegramBot from 'node-telegram-bot-api';
 
-// ID группы для кухни (получите через команду /chatid в вашей группе)
-const KITCHEN_GROUP_ID = process.env.KITCHEN_GROUP_ID || '-3233318512';
-
 interface OrderData {
   orderId: string;
   items: Array<{
@@ -297,29 +294,37 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
       throw new Error('Telegram Bot не инициализирован');
     }
 
+    // ID группы для кухни (получите через команду /chatid в вашей группе)
+    const kitchenGroupId = process.env.KITCHEN_GROUP_ID || '-3233318512';
+
     const message = this.formatOrderMessage(orderData);
 
     try {
       // 1. Отправляем в группу кухни с кнопками управления
-      await this.bot.sendMessage(KITCHEN_GROUP_ID, message, {
+      await this.bot.sendMessage(kitchenGroupId, message, {
         parse_mode: 'Markdown',
         reply_markup: {
           inline_keyboard: this.getStatusButtons(orderData.orderId, 'accepted'),
         },
       });
 
-      console.log(`✅ Заказ ${orderData.orderId} отправлен в группу кухни`);
+      console.log(`✅ Заказ ${orderData.orderId} отправлен в группу кухни (${kitchenGroupId})`);
 
       // 2. Дублируем клиенту (если есть его Telegram ID)
       if (customerTelegramId) {
-        await this.bot.sendMessage(customerTelegramId, message, {
-          parse_mode: 'Markdown',
-        });
-        console.log(`✅ Заказ ${orderData.orderId} отправлен клиенту`);
+        try {
+          await this.bot.sendMessage(customerTelegramId, message, {
+            parse_mode: 'Markdown',
+          });
+          console.log(`✅ Заказ ${orderData.orderId} отправлен клиенту`);
+        } catch (customerError: any) {
+          console.warn(`⚠️  Не удалось отправить заказ клиенту ${customerTelegramId}:`, customerError.message);
+          console.warn('   (Клиент, возможно, не запустил бота или заблокировал его)');
+        }
       }
 
     } catch (error) {
-      console.error('❌ Ошибка отправки заказа в Telegram:', error);
+      console.error('❌ Ошибка отправки заказа в группу кухни:', error);
       throw error;
     }
   }
