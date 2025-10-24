@@ -7,7 +7,7 @@
  * - Управление статусами заказов
  */
 
-import TelegramBot from 'node-telegram-bot-api';
+import TelegramBot, { Message, CallbackQuery } from 'node-telegram-bot-api';
 
 interface OrderData {
   orderId: string;
@@ -73,7 +73,7 @@ class TelegramBotService {
     if (!this.bot) return;
 
     // Команда /start
-    this.bot.onText(/\/start/, (msg) => {
+    this.bot.onText(/\/start/, (msg: Message) => {
       const chatId = msg.chat.id;
       this.bot?.sendMessage(
         chatId,
@@ -83,7 +83,7 @@ class TelegramBotService {
     });
 
     // Команда /help
-    this.bot.onText(/\/help/, (msg) => {
+    this.bot.onText(/\/help/, (msg: Message) => {
       const chatId = msg.chat.id;
       this.bot?.sendMessage(
         chatId,
@@ -98,7 +98,7 @@ class TelegramBotService {
     });
 
     // Команда /status
-    this.bot.onText(/\/status (.+)/, (msg, match) => {
+    this.bot.onText(/\/status (.+)/, (msg: Message, match: RegExpExecArray | null) => {
       const chatId = msg.chat.id;
       const orderId = match?.[1];
 
@@ -112,7 +112,7 @@ class TelegramBotService {
     });
 
     // Команда /chatid - получить ID чата
-    this.bot.onText(/\/chatid/, (msg) => {
+    this.bot.onText(/\/chatid/, (msg: Message) => {
       const chatId = msg.chat.id;
       const chatType = msg.chat.type;
       const chatTitle = msg.chat.title || 'Личный чат';
@@ -135,7 +135,7 @@ class TelegramBotService {
   private setupCallbackHandlers() {
     if (!this.bot) return;
 
-    this.bot.on('callback_query', async (callbackQuery) => {
+    this.bot.on('callback_query', async (callbackQuery: CallbackQuery) => {
       const message = callbackQuery.message;
       const data = callbackQuery.data;
 

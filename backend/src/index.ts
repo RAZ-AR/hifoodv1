@@ -6,7 +6,7 @@
 
 import dotenv from 'dotenv';
 import path from 'path';
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 
 // Загружаем переменные окружения
@@ -78,9 +78,9 @@ async function main() {
     // ==========================================
 
     // Get user by Telegram ID
-    app.get('/api/users/telegram/:telegramId', async (req, res) => {
+    app.get('/api/users/telegram/:telegramId', async (req: Request, res: Response) => {
       try {
-        const telegramId = parseInt(req.params.telegramId);
+        const telegramId = parseInt(req.params.telegramId!);
         const user = await db.getUserByTelegramId(telegramId);
 
         if (!user) {
@@ -94,9 +94,9 @@ async function main() {
     });
 
     // Get user by loyalty card
-    app.get('/api/users/card/:cardNumber', async (req, res) => {
+    app.get('/api/users/card/:cardNumber', async (req: Request, res: Response) => {
       try {
-        const user = await db.getUserByLoyaltyCard(req.params.cardNumber);
+        const user = await db.getUserByLoyaltyCard(req.params.cardNumber!);
 
         if (!user) {
           return res.status(404).json({ error: 'User not found' });
@@ -109,7 +109,7 @@ async function main() {
     });
 
     // Create user
-    app.post('/api/users', async (req, res) => {
+    app.post('/api/users', async (req: Request, res: Response) => {
       try {
         const user = await db.createUser(req.body);
         res.status(201).json(user);
@@ -119,9 +119,9 @@ async function main() {
     });
 
     // Update user
-    app.put('/api/users/:userId', async (req, res) => {
+    app.put('/api/users/:userId', async (req: Request, res: Response) => {
       try {
-        const user = await db.updateUser(req.params.userId, req.body);
+        const user = await db.updateUser(req.params.userId!, req.body);
         res.json(user);
       } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -133,7 +133,7 @@ async function main() {
     // ==========================================
 
     // Get menu
-    app.get('/api/menu', async (_req, res) => {
+    app.get('/api/menu', async (_req: Request, res: Response) => {
       try {
         const menu = await db.getMenu();
         res.json(menu);
@@ -143,9 +143,9 @@ async function main() {
     });
 
     // Get menu item by ID
-    app.get('/api/menu/:itemId', async (req, res) => {
+    app.get('/api/menu/:itemId', async (req: Request, res: Response) => {
       try {
-        const item = await db.getMenuItemById(req.params.itemId);
+        const item = await db.getMenuItemById(req.params.itemId!);
 
         if (!item) {
           return res.status(404).json({ error: 'Menu item not found' });
@@ -158,9 +158,9 @@ async function main() {
     });
 
     // Get menu by category
-    app.get('/api/menu/category/:category', async (req, res) => {
+    app.get('/api/menu/category/:category', async (req: Request, res: Response) => {
       try {
-        const items = await db.getMenuByCategory(req.params.category);
+        const items = await db.getMenuByCategory(req.params.category!);
         res.json(items);
       } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -172,7 +172,7 @@ async function main() {
     // ==========================================
 
     // Create order
-    app.post('/api/orders', async (req, res) => {
+    app.post('/api/orders', async (req: Request, res: Response) => {
       try {
         const order = await db.createOrder(req.body);
         res.status(201).json(order);
@@ -182,7 +182,7 @@ async function main() {
     });
 
     // Webhook для получения заказов из Telegram Web App
-    app.post('/api/orders/telegram-webhook', async (req, res) => {
+    app.post('/api/orders/telegram-webhook', async (req: Request, res: Response) => {
       try {
         const { orderData, customerTelegramId } = req.body;
 
@@ -242,9 +242,9 @@ async function main() {
     });
 
     // Get order by ID
-    app.get('/api/orders/:orderId', async (req, res) => {
+    app.get('/api/orders/:orderId', async (req: Request, res: Response) => {
       try {
-        const order = await db.getOrderById(req.params.orderId);
+        const order = await db.getOrderById(req.params.orderId!);
 
         if (!order) {
           return res.status(404).json({ error: 'Order not found' });
@@ -257,9 +257,9 @@ async function main() {
     });
 
     // Get user orders
-    app.get('/api/orders/user/:userId', async (req, res) => {
+    app.get('/api/orders/user/:userId', async (req: Request, res: Response) => {
       try {
-        const orders = await db.getUserOrders(req.params.userId);
+        const orders = await db.getUserOrders(req.params.userId!);
         res.json(orders);
       } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -267,9 +267,9 @@ async function main() {
     });
 
     // Update order status
-    app.patch('/api/orders/:orderId/status', async (req, res) => {
+    app.patch('/api/orders/:orderId/status', async (req: Request, res: Response) => {
       try {
-        const order = await db.updateOrderStatus(req.params.orderId, req.body.status);
+        const order = await db.updateOrderStatus(req.params.orderId!, req.body.status);
         res.json(order);
       } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -281,7 +281,7 @@ async function main() {
     // ==========================================
 
     // Get active ads
-    app.get('/api/ads', async (_req, res) => {
+    app.get('/api/ads', async (_req: Request, res: Response) => {
       try {
         const ads = await db.getActiveAds();
         res.json(ads);
@@ -295,9 +295,9 @@ async function main() {
     // ==========================================
 
     // Get favorites
-    app.get('/api/favorites/:userId', async (req, res) => {
+    app.get('/api/favorites/:userId', async (req: Request, res: Response) => {
       try {
-        const favorites = await db.getFavorites(req.params.userId);
+        const favorites = await db.getFavorites(req.params.userId!);
         res.json(favorites);
       } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -305,7 +305,7 @@ async function main() {
     });
 
     // Add to favorites
-    app.post('/api/favorites', async (req, res) => {
+    app.post('/api/favorites', async (req: Request, res: Response) => {
       try {
         const { userId, dishId } = req.body;
         await db.addToFavorites(userId, dishId);
@@ -316,9 +316,9 @@ async function main() {
     });
 
     // Remove from favorites
-    app.delete('/api/favorites/:userId/:dishId', async (req, res) => {
+    app.delete('/api/favorites/:userId/:dishId', async (req: Request, res: Response) => {
       try {
-        await db.removeFromFavorites(req.params.userId, req.params.dishId);
+        await db.removeFromFavorites(req.params.userId!, req.params.dishId!);
         res.json({ success: true });
       } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -330,9 +330,9 @@ async function main() {
     // ==========================================
 
     // Get bonus history
-    app.get('/api/bonuses/:userId', async (req, res) => {
+    app.get('/api/bonuses/:userId', async (req: Request, res: Response) => {
       try {
-        const history = await db.getBonusHistory(req.params.userId);
+        const history = await db.getBonusHistory(req.params.userId!);
         res.json(history);
       } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -340,7 +340,7 @@ async function main() {
     });
 
     // Add bonus
-    app.post('/api/bonuses/add', async (req, res) => {
+    app.post('/api/bonuses/add', async (req: Request, res: Response) => {
       try {
         const { userId, amount, reason, orderId } = req.body;
         const transaction = await db.addBonus(userId, amount, reason, orderId);
@@ -351,7 +351,7 @@ async function main() {
     });
 
     // Spend bonus
-    app.post('/api/bonuses/spend', async (req, res) => {
+    app.post('/api/bonuses/spend', async (req: Request, res: Response) => {
       try {
         const { userId, amount, orderId } = req.body;
         const transaction = await db.spendBonus(userId, amount, orderId);
@@ -366,7 +366,7 @@ async function main() {
     // ==========================================
 
     // Get stats
-    app.get('/api/stats', async (_req, res) => {
+    app.get('/api/stats', async (_req: Request, res: Response) => {
       try {
         const stats = await db.getStats();
         res.json(stats);
