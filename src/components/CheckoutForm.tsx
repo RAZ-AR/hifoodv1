@@ -18,6 +18,7 @@ export interface CheckoutData {
   paymentMethod: 'cash' | 'card';
   changeFrom?: number; // Сумма, с которой нужна сдача (только для наличных)
   comment?: string;
+  loyaltyCardNumber?: string; // Номер карты лояльности (необязательно)
 }
 
 /**
@@ -42,6 +43,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
     paymentMethod: 'cash',
     changeFrom: undefined,
     comment: '',
+    loyaltyCardNumber: '',
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutData, string>>>({});
@@ -347,6 +349,23 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
               </p>
             </div>
           )}
+
+          {/* Номер карты лояльности */}
+          <div>
+            <label className="block text-sm font-medium tg-theme-text mb-2">
+              Номер карты лояльности
+            </label>
+            <input
+              type="text"
+              value={formData.loyaltyCardNumber || ''}
+              onChange={(e) => handleChange('loyaltyCardNumber', e.target.value)}
+              placeholder="Если у вас есть карта лояльности"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 tg-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <p className="text-xs tg-theme-hint mt-2">
+              Если у вас нет карты, оставьте поле пустым
+            </p>
+          </div>
 
           {/* Комментарий */}
           <div>

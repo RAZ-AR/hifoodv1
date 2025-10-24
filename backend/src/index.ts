@@ -194,7 +194,7 @@ async function main() {
           user_id: customerTelegramId ? String(customerTelegramId) : 'unknown',
           user_name: orderData.name,
           user_phone: orderData.phone || '',
-          loyalty_card_number: '',
+          loyalty_card_number: orderData.loyaltyCardNumber || '',
           items: orderData.items.map((item: any) => ({
             dish_id: item.id,
             name: item.name,

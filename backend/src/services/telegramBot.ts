@@ -9,8 +9,8 @@
 
 import TelegramBot from 'node-telegram-bot-api';
 
-// ID группы для кухни (замените на ваш ID)
-const KITCHEN_GROUP_ID = '-3233318512';
+// ID группы для кухни (получите через команду /chatid в вашей группе)
+const KITCHEN_GROUP_ID = process.env.KITCHEN_GROUP_ID || '-3233318512';
 
 interface OrderData {
   orderId: string;
@@ -33,6 +33,7 @@ interface OrderData {
   paymentMethod: 'cash' | 'card';
   changeFrom?: number;
   comment?: string;
+  loyaltyCardNumber?: string;
 }
 
 class TelegramBotService {
@@ -111,6 +112,23 @@ class TelegramBotService {
           `Проверяю статус заказа ${orderId}...`
         );
       }
+    });
+
+    // Команда /chatid - получить ID чата
+    this.bot.onText(/\/chatid/, (msg) => {
+      const chatId = msg.chat.id;
+      const chatType = msg.chat.type;
+      const chatTitle = msg.chat.title || 'Личный чат';
+
+      this.bot?.sendMessage(
+        chatId,
+        `📊 *Информация о чате:*\n\n` +
+        `ID: \`${chatId}\`\n` +
+        `Тип: ${chatType}\n` +
+        `Название: ${chatTitle}\n\n` +
+        `Используйте этот ID для настройки KITCHEN_GROUP_ID`,
+        { parse_mode: 'Markdown' }
+      );
     });
   }
 
@@ -204,6 +222,7 @@ class TelegramBotService {
 🛒 *НОВЫЙ ЗАКАЗ ${orderData.orderId}*
 
 👤 *Имя:* ${orderData.name}
+${orderData.loyaltyCardNumber ? `🎫 *Карта лояльности:* ${orderData.loyaltyCardNumber}` : ''}
 
 📦 *Товары:*
 ${itemsList}
