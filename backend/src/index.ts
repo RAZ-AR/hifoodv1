@@ -379,7 +379,7 @@ async function main() {
     // START SERVER
     // ==========================================
 
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`✨ Backend готов к работе!`);
       console.log(`🌐 Server running on port ${PORT}\n`);
       console.log(`📍 Health check: http://localhost:${PORT}/health`);
