@@ -129,7 +129,7 @@ class TelegramBotService {
       // Парсим данные: status:orderId:newStatus
       const [action, orderId, newStatus] = data.split(':');
 
-      if (action === 'status') {
+      if (action === 'status' && orderId && newStatus) {
         try {
           // Обновляем статус заказа в БД
           await this.updateOrderStatus(orderId, newStatus);
@@ -140,7 +140,7 @@ class TelegramBotService {
           });
 
           // Обновляем сообщение
-          const statusEmoji = this.getStatusEmoji(newStatus);
+          this.getStatusEmoji(newStatus);
           await this.bot?.editMessageReplyMarkup(
             { inline_keyboard: this.getStatusButtons(orderId, newStatus) },
             {

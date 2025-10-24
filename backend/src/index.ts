@@ -189,12 +189,12 @@ async function main() {
         // Отправляем заказ в Telegram группу и клиенту
         await telegramBot.sendOrder(orderData, customerTelegramId);
 
-        // Сохраняем заказ в БД
-        const order = await db.createOrder({
-          order_id: orderData.orderId,
+        // Сохраняем заказ в БД (MockProvider принимает order_id)
+        const orderToCreate = {
           user_id: customerTelegramId ? String(customerTelegramId) : 'unknown',
           user_name: orderData.name,
           user_phone: orderData.phone || '',
+          loyalty_card_number: '',
           items: orderData.items.map((item: any) => ({
             dish_id: item.id,
             name: item.name,
@@ -222,11 +222,14 @@ async function main() {
             type: orderData.paymentMethod,
             is_default: true,
           },
-          status: 'accepted',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          status: 'confirmed' as any,
           notes: orderData.comment,
-        });
+        } as any;
+
+        // Добавляем order_id для MockProvider
+        orderToCreate.order_id = orderData.orderId;
+
+        await db.createOrder(orderToCreate);
 
         res.status(201).json({
           success: true,

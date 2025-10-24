@@ -11,8 +11,14 @@ import type {
   Order,
   AdBanner,
   BonusTransaction,
-  Stats,
 } from '../../types';
+
+interface Stats {
+  totalUsers: number;
+  totalOrders: number;
+  totalRevenue: number;
+  activeUsers: number;
+}
 
 export class MockProvider implements IDataProvider {
   private mockMenu: MenuItem[] = [
@@ -28,7 +34,6 @@ export class MockProvider implements IDataProvider {
       available: true,
       preparation_time: 20,
       allergens: ['Глютен', 'Молочные продукты'],
-      discount: 0,
     },
     {
       id: '2',
@@ -42,7 +47,6 @@ export class MockProvider implements IDataProvider {
       available: true,
       preparation_time: 20,
       allergens: ['Глютен', 'Молочные продукты'],
-      discount: 10,
     },
     {
       id: '3',
@@ -56,7 +60,6 @@ export class MockProvider implements IDataProvider {
       available: true,
       preparation_time: 15,
       allergens: ['Глютен', 'Молочные продукты'],
-      discount: 0,
     },
     {
       id: '4',
@@ -70,7 +73,6 @@ export class MockProvider implements IDataProvider {
       available: true,
       preparation_time: 1,
       allergens: [],
-      discount: 0,
     },
     {
       id: '5',
@@ -84,7 +86,6 @@ export class MockProvider implements IDataProvider {
       available: true,
       preparation_time: 10,
       allergens: ['Глютен', 'Молочные продукты', 'Яйца'],
-      discount: 0,
     },
   ];
 
@@ -133,11 +134,11 @@ export class MockProvider implements IDataProvider {
     return this.mockMenu.filter(item => item.category === category);
   }
 
-  async getUserByTelegramId(telegramId: number): Promise<User | null> {
+  async getUserByTelegramId(_telegramId: number): Promise<User | null> {
     return null;
   }
 
-  async getUserByLoyaltyCard(cardNumber: string): Promise<User | null> {
+  async getUserByLoyaltyCard(_cardNumber: string): Promise<User | null> {
     return null;
   }
 
@@ -172,7 +173,7 @@ export class MockProvider implements IDataProvider {
     return userData as User;
   }
 
-  async getUserOrders(userId: string): Promise<Order[]> {
+  async getUserOrders(_userId: string): Promise<Order[]> {
     return [];
   }
 
@@ -187,7 +188,7 @@ export class MockProvider implements IDataProvider {
     return order;
   }
 
-  async getOrderById(orderId: string): Promise<Order | null> {
+  async getOrderById(_orderId: string): Promise<Order | null> {
     return null;
   }
 
@@ -204,7 +205,7 @@ export class MockProvider implements IDataProvider {
     return this.mockAds;
   }
 
-  async getFavorites(userId: string): Promise<MenuItem[]> {
+  async getFavorites(_userId: string): Promise<MenuItem[]> {
     return [];
   }
 
@@ -216,7 +217,7 @@ export class MockProvider implements IDataProvider {
     console.log('✅ Mock Provider: Removed from favorites', userId, dishId);
   }
 
-  async getBonusHistory(userId: string): Promise<BonusTransaction[]> {
+  async getBonusHistory(_userId: string): Promise<BonusTransaction[]> {
     return [];
   }
 
@@ -229,10 +230,13 @@ export class MockProvider implements IDataProvider {
     const transaction: BonusTransaction = {
       transaction_id: Date.now().toString(),
       user_id: userId,
+      loyalty_card_number: '',
       amount,
-      type: 'earn',
+      type: 'earned',
       reason,
       order_id: orderId,
+      balance_before: 0,
+      balance_after: amount,
       created_at: new Date().toISOString(),
     };
     console.log('✅ Mock Provider: Added bonus', transaction);
@@ -247,10 +251,13 @@ export class MockProvider implements IDataProvider {
     const transaction: BonusTransaction = {
       transaction_id: Date.now().toString(),
       user_id: userId,
+      loyalty_card_number: '',
       amount: -amount,
-      type: 'spend',
+      type: 'spent',
       reason: 'Order payment',
       order_id: orderId,
+      balance_before: amount,
+      balance_after: 0,
       created_at: new Date().toISOString(),
     };
     console.log('✅ Mock Provider: Spent bonus', transaction);
@@ -264,5 +271,90 @@ export class MockProvider implements IDataProvider {
       totalRevenue: 125000,
       activeUsers: 89,
     };
+  }
+
+  // ==========================================
+  // MISSING METHODS FROM INTERFACE
+  // ==========================================
+
+  async deleteUser(userId: string): Promise<boolean> {
+    console.log('✅ Mock Provider: Deleted user', userId);
+    return true;
+  }
+
+  async updateMenuItem(id: string, data: Partial<MenuItem>): Promise<MenuItem> {
+    console.log('✅ Mock Provider: Updated menu item', id);
+    return { ...this.mockMenu[0], ...data, id } as MenuItem;
+  }
+
+  async createMenuItem(item: Omit<MenuItem, 'id'>): Promise<MenuItem> {
+    const newItem = { ...item, id: Date.now().toString() };
+    console.log('✅ Mock Provider: Created menu item', newItem.id);
+    return newItem;
+  }
+
+  async deleteMenuItem(id: string): Promise<boolean> {
+    console.log('✅ Mock Provider: Deleted menu item', id);
+    return true;
+  }
+
+  async updateOrder(orderId: string, data: Partial<Order>): Promise<Order> {
+    console.log('✅ Mock Provider: Updated order', orderId);
+    return { ...data, order_id: orderId } as Order;
+  }
+
+  async getAllOrders(): Promise<Order[]> {
+    console.log('✅ Mock Provider: Get all orders');
+    return [];
+  }
+
+  async getAllAds(): Promise<AdBanner[]> {
+    return this.mockAds;
+  }
+
+  async createAd(ad: Omit<AdBanner, 'ad_id'>): Promise<AdBanner> {
+    const newAd = { ...ad, ad_id: Date.now().toString() };
+    console.log('✅ Mock Provider: Created ad', newAd.ad_id);
+    return newAd;
+  }
+
+  async updateAd(adId: string, data: Partial<AdBanner>): Promise<AdBanner> {
+    console.log('✅ Mock Provider: Updated ad', adId);
+    return { ...this.mockAds[0], ...data, ad_id: adId } as AdBanner;
+  }
+
+  async deleteAd(adId: string): Promise<boolean> {
+    console.log('✅ Mock Provider: Deleted ad', adId);
+    return true;
+  }
+
+  async isLoyaltyCardUnique(cardNumber: string): Promise<boolean> {
+    console.log('✅ Mock Provider: Check loyalty card unique', cardNumber);
+    return true;
+  }
+
+  async addAddress(userId: string, _address: Omit<User['addresses'][0], 'id'>): Promise<User> {
+    console.log('✅ Mock Provider: Added address', userId);
+    return {} as User;
+  }
+
+  async updateAddress(userId: string, addressId: string, _data: Partial<User['addresses'][0]>): Promise<User> {
+    console.log('✅ Mock Provider: Updated address', userId, addressId);
+    return {} as User;
+  }
+
+  async deleteAddress(userId: string, addressId: string): Promise<User> {
+    console.log('✅ Mock Provider: Deleted address', userId, addressId);
+    return {} as User;
+  }
+
+  async addPaymentMethod(userId: string, _paymentMethod: Omit<User['payment_methods'][0], 'id'>): Promise<User> {
+    console.log('✅ Mock Provider: Added payment method', userId);
+    return {} as User;
+  }
+
+  async deletePaymentMethod(userId: string, paymentMethodId: string): Promise<User> {
+    console.log('✅ Mock Provider: Deleted payment method', userId, paymentMethodId);
+    return {} as User;
   }
 }
