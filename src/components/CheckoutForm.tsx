@@ -16,6 +16,7 @@ export interface CheckoutData {
   contactMethod: 'telegram' | 'phone';
   phone?: string;
   paymentMethod: 'cash' | 'card';
+  changeFrom?: number; // Сумма, с которой нужна сдача (только для наличных)
   comment?: string;
 }
 
@@ -39,13 +40,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
     contactMethod: 'telegram',
     phone: '',
     paymentMethod: 'cash',
+    changeFrom: undefined,
     comment: '',
   });
 
-  const [errors, setErrors] = useState<Partial<CheckoutData>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof CheckoutData, string>>>({});
 
   const validate = (): boolean => {
-    const newErrors: Partial<CheckoutData> = {};
+    const newErrors: Partial<Record<keyof CheckoutData, string>> = {};
 
     if (!formData.name.trim()) {
       newErrors.name = 'Укажите ваше имя';
@@ -71,6 +73,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
       }
     }
 
+    if (formData.paymentMethod === 'cash' && formData.changeFrom) {
+      if (formData.changeFrom < totalPrice) {
+        newErrors.changeFrom = `Сумма должна быть не меньше ${totalPrice} RSD`;
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -83,7 +91,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
     }
   };
 
-  const handleChange = (field: keyof CheckoutData, value: string) => {
+  const handleChange = <K extends keyof CheckoutData>(field: K, value: CheckoutData[K]) => {
     setFormData({ ...formData, [field]: value });
     // Очищаем ошибку при изменении поля
     if (errors[field]) {
@@ -312,6 +320,33 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
               </button>
             </div>
           </div>
+
+          {/* Сдача (только для наличных) */}
+          {formData.paymentMethod === 'cash' && (
+            <div>
+              <label className="block text-sm font-medium tg-theme-text mb-2">
+                С какой суммы нужна сдача?
+              </label>
+              <input
+                type="number"
+                value={formData.changeFrom || ''}
+                onChange={(e) => handleChange('changeFrom', e.target.value ? Number(e.target.value) : undefined)}
+                placeholder={`Например: ${Math.ceil(totalPrice / 100) * 100}`}
+                min={totalPrice}
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  errors.changeFrom
+                    ? 'border-red-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                } bg-white dark:bg-gray-700 tg-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500`}
+              />
+              {errors.changeFrom && (
+                <p className="text-red-500 text-sm mt-1">{errors.changeFrom}</p>
+              )}
+              <p className="text-xs tg-theme-hint mt-2">
+                Если оставить пустым, курьер подготовит сдачу с ближайшей крупной купюры
+              </p>
+            </div>
+          )}
 
           {/* Комментарий */}
           <div>

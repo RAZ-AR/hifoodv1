@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import CheckoutForm, { CheckoutData } from '@/components/CheckoutForm';
+import { generateOrderId, saveOrder } from '@/hooks/useOrderTracking';
+import { formatOrderData } from '@/utils/orderMessage';
+import { showTelegramAlert, triggerHaptic, getTelegramUser } from '@/utils/telegram';
+import { formatItemCount } from '@/utils/formatters';
+import { ORDER_CONFIG } from '@/constants';
+import { api } from '@/services/api';
 
 /**
  * СТРАНИЦА КОРЗИНЫ
@@ -15,7 +21,7 @@ const Cart: React.FC = () => {
   const { cartItems, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCart();
   const [showCheckoutForm, setShowCheckoutForm] = useState(false);
   const [isOrdering, setIsOrdering] = useState(false);
-  const [cutleryCount, setCutleryCount] = useState(0);
+  const [cutleryCount, setCutleryCount] = useState<number>(ORDER_CONFIG.DEFAULT_CUTLERY_COUNT);
 
   const handleCheckoutClick = () => {
     setShowCheckoutForm(true);
@@ -26,78 +32,39 @@ const Cart: React.FC = () => {
 
     try {
       // Генерируем ID заказа
-      const orderId = `#${Date.now().toString().slice(-8)}`;
+      const orderId = generateOrderId();
+      const totalPrice = getTotalPrice();
 
-      // Формируем сообщение для отправки в Telegram
-      const orderMessage = `
-🛒 *НОВЫЙ ЗАКАЗ ${orderId}*
+      // Получаем Telegram ID пользователя
+      const telegramUser = getTelegramUser();
+      const customerTelegramId = telegramUser?.id;
 
-👤 *Имя:* ${checkoutData.name}
+      // Формируем данные для отправки в бота
+      const orderData = formatOrderData({
+        orderId,
+        checkoutData,
+        cartItems,
+        cutleryCount,
+        totalPrice,
+      });
 
-📦 *Товары:*
-${cartItems.map((item) => `• ${item.item.name} × ${item.quantity} = ${item.item.price * item.quantity} RSD`).join('\n')}
+      // Отправляем заказ через бэкенд (в группу кухни + клиенту)
+      await api.sendOrderToTelegram(orderData.data, customerTelegramId);
 
-🍴 *Приборы:* ${cutleryCount} шт.
+      // Сохраняем orderId в localStorage
+      saveOrder(orderId, 'accepted');
 
-💰 *Итого:* ${getTotalPrice()} RSD
-
-📍 *Адрес доставки:*
-Улица: ${checkoutData.street}
-Дом: ${checkoutData.building}, Квартира: ${checkoutData.apartment}
-${checkoutData.code ? `Код: ${checkoutData.code}` : ''}
-${checkoutData.deliveryNote ? `Отметка для курьера: ${checkoutData.deliveryNote}` : ''}
-
-📞 *Контакт:*
-${checkoutData.contactMethod === 'telegram' ? 'Telegram' : `Телефон: ${checkoutData.phone}`}
-
-💳 *Способ оплаты:*
-${checkoutData.paymentMethod === 'cash' ? 'Наличные' : 'Банковская карта'}
-
-${checkoutData.comment ? `💬 *Комментарий:*\n${checkoutData.comment}` : ''}
-      `.trim();
-
-      // Отправляем данные в Telegram
-      if (window.Telegram?.WebApp) {
-        // Отправляем данные через sendData (они попадут в бота)
-        window.Telegram.WebApp.sendData(JSON.stringify({
-          type: 'order',
-          data: {
-            orderId: orderId,
-            items: cartItems.map(item => ({
-              id: item.item.id,
-              name: item.item.name,
-              price: item.item.price,
-              quantity: item.quantity,
-            })),
-            total: getTotalPrice(),
-            cutleryCount: cutleryCount,
-            ...checkoutData,
-          }
-        }));
-
-        // Сохраняем orderId в localStorage
-        localStorage.setItem('currentOrderId', orderId);
-        localStorage.setItem('currentOrderStatus', 'accepted');
-
-        // Показываем успешное сообщение
-        window.Telegram.WebApp.showAlert('Заказ успешно оформлен! 🎉\n\nВы получите уведомление в боте с деталями заказа.');
-        window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-      } else {
-        // Для разработки вне Telegram
-        localStorage.setItem('currentOrderId', orderId);
-        localStorage.setItem('currentOrderStatus', 'accepted');
-        console.log('Order message:', orderMessage);
-        alert('Заказ оформлен!\n\n' + orderMessage);
-      }
+      // Показываем успешное сообщение
+      showTelegramAlert('Заказ успешно оформлен! 🎉\n\nВы получите уведомление в боте с деталями заказа.');
+      triggerHaptic('success');
 
       // Очищаем корзину
       clearCart();
       setShowCheckoutForm(false);
     } catch (error) {
       console.error('Ошибка оформления заказа:', error);
-      if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.showAlert('Ошибка оформления заказа. Попробуйте снова.');
-      }
+      showTelegramAlert('Ошибка оформления заказа. Попробуйте снова.');
+      triggerHaptic('error');
     } finally {
       setIsOrdering(false);
     }
@@ -123,7 +90,7 @@ ${checkoutData.comment ? `💬 *Комментарий:*\n${checkoutData.comment
         <div className="mb-6">
           <h1 className="text-2xl font-bold tg-theme-text">Корзина</h1>
           <p className="text-sm tg-theme-hint mt-1">
-            {cartItems.length} {cartItems.length === 1 ? 'товар' : 'товаров'}
+            {formatItemCount(cartItems.length)}
           </p>
         </div>
 

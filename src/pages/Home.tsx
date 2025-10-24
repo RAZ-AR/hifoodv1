@@ -6,9 +6,11 @@ import CategoryFilter from '@/components/CategoryFilter';
 import AdBannerSlider from '@/components/AdBannerSlider';
 import SkeletonCard from '@/components/SkeletonCard';
 import SearchBar from '@/components/SearchBar';
-import OrderStatusTracker, { OrderStatus } from '@/components/OrderStatusTracker';
+import OrderStatusTracker from '@/components/OrderStatusTracker';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
+import { useOrderTracking } from '@/hooks/useOrderTracking';
+import { formatDishCount } from '@/utils/formatters';
 
 /**
  * ГЛАВНАЯ СТРАНИЦА (МЕНЮ)
@@ -21,6 +23,8 @@ import { useFavorites } from '@/context/FavoritesContext';
 const Home: React.FC = () => {
   const { addToCart, getItemQuantity } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
+  const { orderId, orderStatus, clearOrder } = useOrderTracking();
+
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Все');
@@ -28,45 +32,12 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Статус заказа
-  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
-  const [currentOrderStatus, setCurrentOrderStatus] = useState<OrderStatus | null>(null);
-
   // Получить список категорий из меню
   const categories = ['Все', ...Array.from(new Set(menuItems.map(item => item.category)))];
 
   // Загрузить меню при монтировании компонента
   useEffect(() => {
     loadMenu();
-
-    // Проверяем наличие активного заказа
-    const orderId = localStorage.getItem('currentOrderId');
-    const orderStatus = localStorage.getItem('currentOrderStatus') as OrderStatus | null;
-    if (orderId && orderStatus) {
-      setCurrentOrderId(orderId);
-      setCurrentOrderStatus(orderStatus);
-
-      // Периодически обновляем статус заказа
-      const interval = setInterval(async () => {
-        const status = await api.getOrderStatus(orderId);
-        if (status?.status) {
-          setCurrentOrderStatus(status.status as OrderStatus);
-          localStorage.setItem('currentOrderStatus', status.status);
-
-          // Если заказ доставлен, очищаем через некоторое время
-          if (status.status === 'delivered') {
-            setTimeout(() => {
-              setCurrentOrderId(null);
-              setCurrentOrderStatus(null);
-              localStorage.removeItem('currentOrderId');
-              localStorage.removeItem('currentOrderStatus');
-            }, 30000); // 30 секунд
-          }
-        }
-      }, 10000); // Проверяем каждые 10 секунд
-
-      return () => clearInterval(interval);
-    }
   }, []);
 
   // Фильтровать меню при изменении категории или поиска
@@ -205,16 +176,11 @@ const Home: React.FC = () => {
         </div>
 
         {/* Трекер статуса заказа */}
-        {currentOrderId && currentOrderStatus && (
+        {orderId && orderStatus && (
           <OrderStatusTracker
-            orderId={currentOrderId}
-            status={currentOrderStatus}
-            onClose={() => {
-              setCurrentOrderId(null);
-              setCurrentOrderStatus(null);
-              localStorage.removeItem('currentOrderId');
-              localStorage.removeItem('currentOrderStatus');
-            }}
+            orderId={orderId}
+            status={orderStatus}
+            onClose={clearOrder}
           />
         )}
 
@@ -228,7 +194,7 @@ const Home: React.FC = () => {
             {selectedCategory}
           </h2>
           <p className="text-sm tg-theme-hint mt-1">
-            {filteredItems.length} {filteredItems.length === 1 ? 'блюдо' : 'блюд'}
+            {formatDishCount(filteredItems.length)}
           </p>
         </div>
 

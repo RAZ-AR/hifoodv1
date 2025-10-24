@@ -112,6 +112,27 @@ class ApiService {
     }
   }
 
+  /**
+   * Send order to Telegram (kitchen group + customer)
+   */
+  async sendOrderToTelegram(orderData: any, customerTelegramId?: number): Promise<{ success: boolean; orderId: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/telegram-webhook`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderData,
+          customerTelegramId,
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to send order to Telegram');
+      return await response.json();
+    } catch (error) {
+      console.error('Error sending order to Telegram:', error);
+      throw error;
+    }
+  }
+
   async getOrder(orderId: string): Promise<Order> {
     try {
       const response = await fetch(`${API_BASE_URL}/orders/${orderId}`);

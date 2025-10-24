@@ -13,6 +13,7 @@ import cors from 'cors';
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 import { getDataProviderInstance } from './services/dataProvider';
+import { telegramBot } from './services/telegramBot';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -176,6 +177,63 @@ async function main() {
         const order = await db.createOrder(req.body);
         res.status(201).json(order);
       } catch (error: any) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Webhook для получения заказов из Telegram Web App
+    app.post('/api/orders/telegram-webhook', async (req, res) => {
+      try {
+        const { orderData, customerTelegramId } = req.body;
+
+        // Отправляем заказ в Telegram группу и клиенту
+        await telegramBot.sendOrder(orderData, customerTelegramId);
+
+        // Сохраняем заказ в БД
+        const order = await db.createOrder({
+          order_id: orderData.orderId,
+          user_id: customerTelegramId ? String(customerTelegramId) : 'unknown',
+          user_name: orderData.name,
+          user_phone: orderData.phone || '',
+          items: orderData.items.map((item: any) => ({
+            dish_id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            subtotal: item.price * item.quantity,
+          })),
+          total_amount: orderData.total,
+          subtotal: orderData.total,
+          delivery_fee: 0,
+          bonus_applied: 0,
+          delivery_address: {
+            id: '',
+            label: 'Адрес доставки',
+            street: orderData.street,
+            building: orderData.building,
+            apartment: orderData.apartment,
+            entrance: orderData.code,
+            comment: orderData.deliveryNote,
+            is_default: false,
+          },
+          delivery_time: 'now',
+          payment_method: {
+            id: '',
+            type: orderData.paymentMethod,
+            is_default: true,
+          },
+          status: 'accepted',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          notes: orderData.comment,
+        });
+
+        res.status(201).json({
+          success: true,
+          orderId: orderData.orderId,
+        });
+      } catch (error: any) {
+        console.error('Ошибка webhook:', error);
         res.status(500).json({ error: error.message });
       }
     });
