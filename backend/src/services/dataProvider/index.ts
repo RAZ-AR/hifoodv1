@@ -1,6 +1,7 @@
 import { IDataProvider } from './IDataProvider';
 import { GoogleSheetsProvider } from './GoogleSheetsProvider';
 import { SupabaseProvider } from './SupabaseProvider';
+import { MockProvider } from './MockProvider';
 
 /**
  * ФАБРИКА ДЛЯ СОЗДАНИЯ DATA PROVIDER
@@ -17,7 +18,7 @@ import { SupabaseProvider } from './SupabaseProvider';
  * ```
  */
 
-export type DataProviderType = 'google_sheets' | 'supabase';
+export type DataProviderType = 'google_sheets' | 'supabase' | 'mock';
 
 /**
  * Конфигурация для Google Sheets
@@ -70,23 +71,25 @@ export function createDataProvider(config: DataProviderConfig): IDataProvider {
  * - SUPABASE_KEY: Anon/Service key
  */
 export function getDataProvider(): IDataProvider {
-  const providerType = (process.env.DATA_PROVIDER || 'google_sheets') as DataProviderType;
+  const providerType = (process.env.DATA_PROVIDER || 'mock') as DataProviderType;
 
   console.log(`📦 Инициализация Data Provider: ${providerType}`);
 
   switch (providerType) {
+    case 'mock': {
+      console.log(`✅ Mock Provider подключен (тестовые данные)`);
+      return new MockProvider();
+    }
+
     case 'google_sheets': {
       const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
 
       if (!spreadsheetId) {
-        throw new Error(
-          'GOOGLE_SPREADSHEET_ID не указан в переменных окружения.\n' +
-            'Укажите ID вашей Google Sheets таблицы.'
-        );
+        console.warn('⚠️  GOOGLE_SPREADSHEET_ID не указан, используется Mock Provider');
+        return new MockProvider();
       }
 
       console.log(`✅ Google Sheets Provider подключен (ID: ${spreadsheetId})`);
-
       return new GoogleSheetsProvider(spreadsheetId);
     }
 
@@ -95,22 +98,17 @@ export function getDataProvider(): IDataProvider {
       const supabaseKey = process.env.SUPABASE_KEY;
 
       if (!supabaseUrl || !supabaseKey) {
-        throw new Error(
-          'SUPABASE_URL и SUPABASE_KEY должны быть указаны в переменных окружения.\n' +
-            'Получите их в настройках проекта Supabase: https://app.supabase.com'
-        );
+        console.warn('⚠️  SUPABASE_URL или SUPABASE_KEY не указаны, используется Mock Provider');
+        return new MockProvider();
       }
 
       console.log(`✅ Supabase Provider подключен (URL: ${supabaseUrl})`);
-
       return new SupabaseProvider(supabaseUrl, supabaseKey);
     }
 
     default:
-      throw new Error(
-        `Неизвестный тип провайдера: ${providerType}\n` +
-          'Поддерживаемые типы: google_sheets, supabase'
-      );
+      console.warn(`⚠️  Неизвестный провайдер ${providerType}, используется Mock Provider`);
+      return new MockProvider();
   }
 }
 
