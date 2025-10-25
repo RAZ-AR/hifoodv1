@@ -9,6 +9,7 @@
     "start": "node dist/index.js",
     "test": "jest",
     "migrate": "ts-node ../scripts/migrate-sheets-to-supabase.ts",
+    "populate-sheets": "ts-node ../scripts/populate-google-sheets.ts",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\""
   },
