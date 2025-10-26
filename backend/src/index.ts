@@ -223,9 +223,12 @@ async function main() {
           payment_method: orderData.paymentMethod,
           payment_status: orderData.paymentMethod === 'cash' ? 'pending' : 'paid',
           customer_comment: orderData.comment || null,
+          // user_id не включаем - оно nullable и будет NULL
         } as any;
 
+        console.log('💾 Сохранение заказа в БД:', orderToCreate.order_number);
         await db.createOrder(orderToCreate);
+        console.log('✅ Заказ успешно сохранён в БД');
 
         res.status(201).json({
           success: true,
