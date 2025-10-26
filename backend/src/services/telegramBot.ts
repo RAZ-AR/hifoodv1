@@ -40,6 +40,10 @@ class TelegramBotService {
   constructor() {
     this.botToken = process.env.TELEGRAM_BOT_TOKEN || '';
 
+    console.log('🤖 TelegramBotService constructor вызван');
+    console.log(`   Bot token: ${this.botToken ? 'SET (' + this.botToken.substring(0, 10) + '...)' : 'NOT SET'}`);
+    console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'not set'}`);
+
     if (!this.botToken) {
       console.error('⚠️  TELEGRAM_BOT_TOKEN не установлен в .env');
       return;
@@ -326,13 +330,18 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
     console.log(`🔵 sendOrder вызван: OrderID=${orderData.orderId}, Timestamp=${new Date().toISOString()}`);
 
     if (!this.bot) {
+      console.error('❌ КРИТИЧЕСКАЯ ОШИБКА: this.bot is null!');
+      console.error('   Bot token:', this.botToken ? 'SET' : 'NOT SET');
       throw new Error('Telegram Bot не инициализирован');
     }
 
     // ID группы для кухни (получите через команду /chatid в вашей группе)
     const kitchenGroupId = process.env.KITCHEN_GROUP_ID || '-3233318512';
+    console.log(`📍 Kitchen Group ID: ${kitchenGroupId}`);
+    console.log(`📍 Customer Telegram ID: ${customerTelegramId || 'not provided'}`);
 
     const message = this.formatOrderMessage(orderData);
+    console.log(`📝 Сформировано сообщение (длина: ${message.length} символов)`);
 
     try {
       // 1. Отправляем в группу кухни с кнопками управления
