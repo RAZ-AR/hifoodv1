@@ -15,7 +15,7 @@ DROP TABLE IF EXISTS orders CASCADE;
 CREATE TABLE orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_number TEXT UNIQUE NOT NULL,
-  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  user_id UUID,
   telegram_id BIGINT NOT NULL,
   customer_name TEXT NOT NULL,
   customer_phone TEXT NOT NULL,
