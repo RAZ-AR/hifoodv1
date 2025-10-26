@@ -62,9 +62,13 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
 
         if (user) {
           // Автоматически заполняем поля формы
+          const fullName = user.last_name
+            ? `${user.first_name} ${user.last_name}`
+            : user.first_name;
+
           setFormData(prev => ({
             ...prev,
-            name: user.name || telegramUser.first_name || '',
+            name: fullName || telegramUser.first_name || '',
             phone: user.phone || '',
             loyaltyCardNumber: user.loyalty_card_number || '',
           }));
