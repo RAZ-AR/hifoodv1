@@ -670,11 +670,20 @@ export class SupabaseProvider implements IDataProvider {
   async healthCheck(): Promise<boolean> {
     try {
       // Просто проверяем доступность таблицы menu (которая точно есть)
-      const { error } = await this.supabase.from('menu').select('*', { count: 'exact', head: true });
+      const { error, count, status } = await this.supabase.from('menu').select('*', { count: 'exact', head: true });
+
+      console.log('Supabase healthCheck result:', { error, count, status });
+
+      // Проверяем статус ответа
+      if (status === 200 || status === 206) {
+        return true;
+      }
+
       if (error) {
-        console.error('Supabase healthCheck error:', error);
+        console.error('Supabase healthCheck error:', JSON.stringify(error));
         return false;
       }
+
       return true;
     } catch (e) {
       console.error('Supabase healthCheck exception:', e);
