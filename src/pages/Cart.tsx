@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/context/CartContext';
 import CheckoutForm, { CheckoutData } from '@/components/CheckoutForm';
 import { generateOrderId, saveOrder } from '@/hooks/useOrderTracking';
@@ -18,8 +17,12 @@ import { api } from '@/services/api';
  * - Итоговую сумму
  * - Кнопку оформления заказа
  */
-const Cart: React.FC = () => {
-  const navigate = useNavigate();
+
+interface CartProps {
+  onNavigateHome?: () => void;
+}
+
+const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
   const { cartItems, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCart();
   const [showCheckoutForm, setShowCheckoutForm] = useState(false);
   const [isOrdering, setIsOrdering] = useState(false);
@@ -74,7 +77,9 @@ const Cart: React.FC = () => {
 
       // Возвращаемся на главную страницу
       setTimeout(() => {
-        navigate('/');
+        if (onNavigateHome) {
+          onNavigateHome();
+        }
       }, 1500); // Небольшая задержка, чтобы пользователь увидел сообщение
     } catch (error: any) {
       console.error('❌ Ошибка оформления заказа:', error);

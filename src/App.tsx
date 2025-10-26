@@ -146,6 +146,11 @@ function App() {
     setActiveTab('profile');
   };
 
+  // Обработчик навигации на главную (для Cart)
+  const handleNavigateHome = () => {
+    setActiveTab('home');
+  };
+
   // Рендер активной страницы с анимацией
   const renderPage = () => {
     const pageClassName = "animate-fade-in";
@@ -156,7 +161,7 @@ function App() {
       case 'favorites':
         return <div className={pageClassName}><Favorites userId={user?.user_id} /></div>;
       case 'cart':
-        return <div className={pageClassName}><Cart /></div>;
+        return <div className={pageClassName}><Cart onNavigateHome={handleNavigateHome} /></div>;
       case 'profile':
         return <div className={pageClassName}><Profile user={user} /></div>;
       default:
