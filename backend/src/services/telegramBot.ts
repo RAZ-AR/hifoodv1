@@ -290,6 +290,8 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
    * Отправляет заказ в группу кухни и клиенту
    */
   async sendOrder(orderData: OrderData, customerTelegramId?: number): Promise<void> {
+    console.log(`🔵 sendOrder вызван: OrderID=${orderData.orderId}, Timestamp=${new Date().toISOString()}`);
+
     if (!this.bot) {
       throw new Error('Telegram Bot не инициализирован');
     }
@@ -301,6 +303,7 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
 
     try {
       // 1. Отправляем в группу кухни с кнопками управления
+      console.log(`📨 Отправка в группу кухни: OrderID=${orderData.orderId}`);
       await this.bot.sendMessage(kitchenGroupId, message, {
         parse_mode: 'Markdown',
         reply_markup: {
@@ -313,6 +316,7 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
       // 2. Дублируем клиенту (если есть его Telegram ID)
       if (customerTelegramId) {
         try {
+          console.log(`📨 Отправка клиенту: OrderID=${orderData.orderId}, CustomerID=${customerTelegramId}`);
           await this.bot.sendMessage(customerTelegramId, message, {
             parse_mode: 'Markdown',
           });
@@ -323,6 +327,7 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
         }
       }
 
+      console.log(`🟢 sendOrder завершён: OrderID=${orderData.orderId}`);
     } catch (error) {
       console.error('❌ Ошибка отправки заказа в группу кухни:', error);
       throw error;

@@ -116,7 +116,10 @@ class ApiService {
    * Send order to Telegram (kitchen group + customer)
    */
   async sendOrderToTelegram(orderData: any, customerTelegramId?: number): Promise<{ success: boolean; orderId: string }> {
+    console.log(`🔵 Frontend sendOrderToTelegram вызван: OrderID=${orderData.orderId}, Timestamp=${new Date().toISOString()}`);
+
     try {
+      console.log(`📤 Отправка POST запроса на ${API_BASE_URL}/orders/telegram-webhook`);
       const response = await fetch(`${API_BASE_URL}/orders/telegram-webhook`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -125,8 +128,11 @@ class ApiService {
           customerTelegramId,
         }),
       });
+      console.log(`📥 Получен ответ: status=${response.status}, OrderID=${orderData.orderId}`);
       if (!response.ok) throw new Error('Failed to send order to Telegram');
-      return await response.json();
+      const result = await response.json();
+      console.log(`🟢 Frontend sendOrderToTelegram завершён успешно: OrderID=${orderData.orderId}`);
+      return result;
     } catch (error) {
       console.error('Error sending order to Telegram:', error);
       throw error;

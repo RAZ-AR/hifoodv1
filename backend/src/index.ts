@@ -186,8 +186,12 @@ async function main() {
       try {
         const { orderData, customerTelegramId } = req.body;
 
+        console.log(`🔍 Webhook вызван: OrderID=${orderData.orderId}, Timestamp=${new Date().toISOString()}`);
+
         // Отправляем заказ в Telegram группу и клиенту
+        console.log(`📤 Отправка заказа ${orderData.orderId} в Telegram...`);
         await telegramBot.sendOrder(orderData, customerTelegramId);
+        console.log(`✅ Заказ ${orderData.orderId} успешно отправлен в Telegram`);
 
         // Сохраняем заказ в БД (MockProvider принимает order_id)
         const orderToCreate = {
