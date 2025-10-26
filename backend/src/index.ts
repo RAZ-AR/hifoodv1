@@ -194,6 +194,7 @@ async function main() {
         console.log(`✅ Заказ ${orderData.orderId} успешно отправлен в Telegram`);
 
         // Сохраняем заказ в БД (Supabase schema)
+        // Убираем bonus_points_used и bonus_points_earned - они могут отсутствовать в таблице
         const orderToCreate = {
           order_number: orderData.orderId,
           telegram_id: customerTelegramId || 0,
@@ -217,13 +218,12 @@ async function main() {
             entrance: orderData.code || '',
             comment: orderData.deliveryNote || '',
           },
-          bonus_points_used: 0,
-          bonus_points_earned: 0,
           status: 'confirmed',
           payment_method: orderData.paymentMethod,
           payment_status: orderData.paymentMethod === 'cash' ? 'pending' : 'paid',
           customer_comment: orderData.comment || null,
           // user_id не включаем - оно nullable и будет NULL
+          // bonus_points_used и bonus_points_earned тоже nullable, используют DEFAULT
         } as any;
 
         console.log('💾 Сохранение заказа в БД:', orderToCreate.order_number);
