@@ -13,13 +13,13 @@ class ApiService {
    */
   async getUser(telegramId: number): Promise<User | null> {
     try {
-      const response = await fetch(`${API_BASE_URL}/users/${telegramId}`);
+      const response = await fetch(`${API_BASE_URL}/users/telegram/${telegramId}`);
       if (response.status === 404) return null;
       if (!response.ok) throw new Error('Failed to fetch user');
       return await response.json();
     } catch (error) {
       console.error('Error fetching user:', error);
-      throw error;
+      return null; // Возвращаем null вместо throw для обработки отсутствия пользователя
     }
   }
 
