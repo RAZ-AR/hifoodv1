@@ -50,16 +50,19 @@ class TelegramBotService {
 
   private initializeBot() {
     try {
-      // Создаем экземпляр бота
-      this.bot = new TelegramBot(this.botToken, { polling: true });
+      // В production не используем polling, только отправка сообщений
+      // В development включаем polling для локального тестирования команд
+      const usePolling = process.env.NODE_ENV !== 'production';
 
-      console.log('✅ Telegram Bot инициализирован');
+      this.bot = new TelegramBot(this.botToken, { polling: usePolling });
 
-      // Обработка команд
-      this.setupCommands();
+      console.log(`✅ Telegram Bot инициализирован (polling: ${usePolling})`);
 
-      // Обработка callback-кнопок для смены статуса
-      this.setupCallbackHandlers();
+      // Обработка команд (только если включен polling)
+      if (usePolling) {
+        this.setupCommands();
+        this.setupCallbackHandlers();
+      }
 
     } catch (error) {
       console.error('❌ Ошибка инициализации Telegram Bot:', error);
