@@ -669,9 +669,15 @@ export class SupabaseProvider implements IDataProvider {
 
   async healthCheck(): Promise<boolean> {
     try {
-      const { error } = await this.supabase.from('users').select('user_id').limit(1);
-      return !error;
-    } catch {
+      // Просто проверяем доступность таблицы menu (которая точно есть)
+      const { error } = await this.supabase.from('menu').select('*', { count: 'exact', head: true });
+      if (error) {
+        console.error('Supabase healthCheck error:', error);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.error('Supabase healthCheck exception:', e);
       return false;
     }
   }
@@ -693,10 +699,10 @@ export class SupabaseProvider implements IDataProvider {
       .select('*', { count: 'exact', head: true });
 
     // Общая выручка
-    const { data: orders } = await this.supabase.from('orders').select('total_amount');
+    const { data: orders } = await this.supabase.from('orders').select('total');
 
     const totalRevenue = (orders || []).reduce(
-      (sum: number, order: any) => sum + order.total_amount,
+      (sum: number, order: any) => sum + (parseFloat(order.total) || 0),
       0
     );
 
@@ -705,9 +711,9 @@ export class SupabaseProvider implements IDataProvider {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const { count: activeUsers } = await this.supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true })
-      .gte('last_order_date', thirtyDaysAgo.toISOString());
+      .from('orders')
+      .select('telegram_id', { count: 'exact', head: true })
+      .gte('created_at', thirtyDaysAgo.toISOString());
 
     return {
       totalUsers: totalUsers || 0,
