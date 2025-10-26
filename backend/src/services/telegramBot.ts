@@ -147,6 +147,90 @@ class TelegramBotService {
         { parse_mode: 'Markdown' }
       );
     });
+
+    // Команда /menu - открыть меню
+    this.bot.onText(/\/menu/, (msg: Message) => {
+      const chatId = msg.chat.id;
+      this.bot?.sendMessage(
+        chatId,
+        '🍔 Нажмите кнопку ниже чтобы открыть меню:',
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: '📱 Открыть меню',
+                  web_app: { url: 'https://raz-ar.github.io/hifoodv1/' }
+                }
+              ]
+            ]
+          }
+        }
+      );
+    });
+
+    // Команда /orders - мои заказы
+    this.bot.onText(/\/orders/, (msg: Message) => {
+      const chatId = msg.chat.id;
+      this.bot?.sendMessage(
+        chatId,
+        '📦 Нажмите кнопку ниже чтобы посмотреть заказы:',
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: '📱 Мои заказы',
+                  web_app: { url: 'https://raz-ar.github.io/hifoodv1/' }
+                }
+              ]
+            ]
+          }
+        }
+      );
+    });
+
+    // Команда /profile - мой профиль
+    this.bot.onText(/\/profile/, (msg: Message) => {
+      const chatId = msg.chat.id;
+      this.bot?.sendMessage(
+        chatId,
+        '👤 Нажмите кнопку ниже чтобы открыть профиль:',
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: '📱 Мой профиль',
+                  web_app: { url: 'https://raz-ar.github.io/hifoodv1/' }
+                }
+              ]
+            ]
+          }
+        }
+      );
+    });
+
+    // Команда /card - карта лояльности
+    this.bot.onText(/\/card/, (msg: Message) => {
+      const chatId = msg.chat.id;
+      this.bot?.sendMessage(
+        chatId,
+        '🎁 Нажмите кнопку ниже чтобы посмотреть карту лояльности:',
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: '📱 Моя карта',
+                  web_app: { url: 'https://raz-ar.github.io/hifoodv1/' }
+                }
+              ]
+            ]
+          }
+        }
+      );
+    });
   }
 
   /**
