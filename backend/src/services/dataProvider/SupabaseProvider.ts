@@ -214,23 +214,17 @@ export class SupabaseProvider implements IDataProvider {
   // ЗАКАЗЫ
   // ==========================================
 
-  async createOrder(
-    order: Omit<Order, 'order_id' | 'created_at' | 'updated_at'>
-  ): Promise<Order> {
-    const newOrder = {
-      ...order,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
+  async createOrder(order: any): Promise<Order> {
+    // Supabase автоматически добавит created_at через DEFAULT NOW()
     const { data, error } = await this.supabase
       .from('orders')
-      .insert([newOrder])
+      .insert([order])
       .select()
       .single();
 
     if (error) {
-      throw new Error(`Ошибка создания заказа: ${error.message}`);
+      console.error('Supabase createOrder error:', error);
+      throw new Error(`Ошибка создания заказа: ${error.message} (${JSON.stringify(error.details)})`);
     }
 
     return data as Order;
@@ -240,10 +234,11 @@ export class SupabaseProvider implements IDataProvider {
     const { data, error } = await this.supabase
       .from('orders')
       .select('*')
-      .eq('order_id', orderId)
+      .eq('order_number', orderId)
       .single();
 
     if (error) {
+      console.error('Supabase getOrderById error:', error);
       return null;
     }
 

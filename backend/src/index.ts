@@ -193,45 +193,37 @@ async function main() {
         await telegramBot.sendOrder(orderData, customerTelegramId);
         console.log(`✅ Заказ ${orderData.orderId} успешно отправлен в Telegram`);
 
-        // Сохраняем заказ в БД (MockProvider принимает order_id)
+        // Сохраняем заказ в БД (Supabase schema)
         const orderToCreate = {
-          user_id: customerTelegramId ? String(customerTelegramId) : 'unknown',
-          user_name: orderData.name,
-          user_phone: orderData.phone || '',
-          loyalty_card_number: orderData.loyaltyCardNumber || '',
+          order_number: orderData.orderId,
+          telegram_id: customerTelegramId || 0,
+          customer_name: orderData.name,
+          customer_phone: orderData.phone || '',
+          loyalty_card_number: orderData.loyaltyCardNumber || null,
           items: orderData.items.map((item: any) => ({
-            dish_id: item.id,
+            id: item.id,
             name: item.name,
             price: item.price,
             quantity: item.quantity,
-            subtotal: item.price * item.quantity,
           })),
-          total_amount: orderData.total,
           subtotal: orderData.total,
           delivery_fee: 0,
-          bonus_applied: 0,
+          discount: 0,
+          total: orderData.total,
           delivery_address: {
-            id: '',
-            label: 'Адрес доставки',
             street: orderData.street,
             building: orderData.building,
             apartment: orderData.apartment,
-            entrance: orderData.code,
-            comment: orderData.deliveryNote,
-            is_default: false,
+            entrance: orderData.code || '',
+            comment: orderData.deliveryNote || '',
           },
-          delivery_time: 'now',
-          payment_method: {
-            id: '',
-            type: orderData.paymentMethod,
-            is_default: true,
-          },
-          status: 'confirmed' as any,
-          notes: orderData.comment,
+          bonus_points_used: 0,
+          bonus_points_earned: 0,
+          status: 'confirmed',
+          payment_method: orderData.paymentMethod,
+          payment_status: orderData.paymentMethod === 'cash' ? 'pending' : 'paid',
+          customer_comment: orderData.comment || null,
         } as any;
-
-        // Добавляем order_id для MockProvider
-        orderToCreate.order_id = orderData.orderId;
 
         await db.createOrder(orderToCreate);
 
