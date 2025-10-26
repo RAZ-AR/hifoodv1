@@ -193,14 +193,13 @@ async function main() {
         await telegramBot.sendOrder(orderData, customerTelegramId);
         console.log(`✅ Заказ ${orderData.orderId} успешно отправлен в Telegram`);
 
-        // Сохраняем заказ в БД (Supabase schema)
-        // Убираем bonus_points_used и bonus_points_earned - они могут отсутствовать в таблице
+        // Сохраняем заказ в БД (минимальный набор полей)
+        // Используем только те поля, которые точно есть в таблице
         const orderToCreate = {
           order_number: orderData.orderId,
           telegram_id: customerTelegramId || 0,
           customer_name: orderData.name,
           customer_phone: orderData.phone || '',
-          loyalty_card_number: orderData.loyaltyCardNumber || null,
           items: orderData.items.map((item: any) => ({
             id: item.id,
             name: item.name,
@@ -208,22 +207,15 @@ async function main() {
             quantity: item.quantity,
           })),
           subtotal: orderData.total,
-          delivery_fee: 0,
-          discount: 0,
           total: orderData.total,
           delivery_address: {
             street: orderData.street,
             building: orderData.building,
             apartment: orderData.apartment,
-            entrance: orderData.code || '',
-            comment: orderData.deliveryNote || '',
           },
           status: 'confirmed',
           payment_method: orderData.paymentMethod,
-          payment_status: orderData.paymentMethod === 'cash' ? 'pending' : 'paid',
-          customer_comment: orderData.comment || null,
-          // user_id не включаем - оно nullable и будет NULL
-          // bonus_points_used и bonus_points_earned тоже nullable, используют DEFAULT
+          // Все остальные поля имеют DEFAULT значения в схеме
         } as any;
 
         console.log('💾 Сохранение заказа в БД:', orderToCreate.order_number);
