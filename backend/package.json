@@ -10,6 +10,7 @@
     "test": "jest",
     "migrate": "ts-node ../scripts/migrate-sheets-to-supabase.ts",
     "populate-sheets": "ts-node populate-sheets.ts",
+    "populate-supabase": "ts-node populate-supabase.ts",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\""
   },
