@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getTelegramUser } from '@/utils/telegram';
+import { api } from '@/services/api';
 
 interface CheckoutFormProps {
   onSubmit: (data: CheckoutData) => void;
@@ -47,6 +49,39 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutData, string>>>({});
+
+  // Загружаем данные пользователя при монтировании компонента
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const telegramUser = getTelegramUser();
+        if (!telegramUser?.id) return;
+
+        // Получаем данные пользователя из БД
+        const user = await api.getUser(telegramUser.id);
+
+        if (user) {
+          // Автоматически заполняем поля формы
+          setFormData(prev => ({
+            ...prev,
+            name: user.name || telegramUser.first_name || '',
+            phone: user.phone || '',
+            loyaltyCardNumber: user.loyalty_card_number || '',
+          }));
+        } else {
+          // Если пользователя нет в БД, используем данные из Telegram
+          setFormData(prev => ({
+            ...prev,
+            name: telegramUser.first_name || '',
+          }));
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки данных пользователя:', error);
+      }
+    };
+
+    loadUserData();
+  }, []);
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof CheckoutData, string>> = {};
@@ -350,22 +385,21 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
             </div>
           )}
 
-          {/* Номер карты лояльности */}
-          <div>
-            <label className="block text-sm font-medium tg-theme-text mb-2">
-              Номер карты лояльности
-            </label>
-            <input
-              type="text"
-              value={formData.loyaltyCardNumber || ''}
-              onChange={(e) => handleChange('loyaltyCardNumber', e.target.value)}
-              placeholder="Если у вас есть карта лояльности"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 tg-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-            <p className="text-xs tg-theme-hint mt-2">
-              Если у вас нет карты, оставьте поле пустым
-            </p>
-          </div>
+          {/* Номер карты лояльности (автоматически из профиля) */}
+          {formData.loyaltyCardNumber && (
+            <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xl">🎫</span>
+                <span className="text-sm font-medium tg-theme-text">Карта лояльности</span>
+              </div>
+              <p className="text-lg font-mono font-bold text-green-600 dark:text-green-400">
+                {formData.loyaltyCardNumber}
+              </p>
+              <p className="text-xs tg-theme-hint mt-1">
+                Автоматически определена из вашего профиля
+              </p>
+            </div>
+          )}
 
           {/* Комментарий */}
           <div>
