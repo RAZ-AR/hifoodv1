@@ -8,6 +8,7 @@
  */
 
 import TelegramBot, { Message, CallbackQuery } from 'node-telegram-bot-api';
+import { getDataProviderInstance } from './dataProvider';
 
 interface OrderData {
   orderId: string;
@@ -380,12 +381,28 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
    * Обновляет статус заказа в БД
    */
   private async updateOrderStatus(orderId: string, status: string): Promise<void> {
-    // Здесь должен быть запрос к вашей БД для обновления статуса
-    // Например, через API или напрямую к dataProvider
-    console.log(`Обновление статуса заказа ${orderId} -> ${status}`);
+    console.log(`📝 Обновление статуса заказа ${orderId} -> ${status}`);
 
-    // TODO: Реализовать обновление в БД
-    // await db.updateOrderStatus(orderId, status);
+    try {
+      const db = getDataProviderInstance();
+
+      // Маппинг статусов из кнопок в статусы БД
+      const statusMap: Record<string, string> = {
+        'accepted': 'confirmed',
+        'preparing': 'preparing',
+        'delivering': 'on_way',
+        'delivered': 'delivered',
+      };
+
+      const dbStatus = statusMap[status] || status;
+      console.log(`📝 Статус БД: ${dbStatus}`);
+
+      await db.updateOrderStatus(orderId, dbStatus as any);
+      console.log(`✅ Статус заказа ${orderId} обновлён в БД: ${dbStatus}`);
+    } catch (error) {
+      console.error(`❌ Ошибка обновления статуса заказа ${orderId}:`, error);
+      throw error;
+    }
   }
 
   /**
@@ -395,13 +412,34 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
     orderId: string,
     newStatus: string
   ): Promise<void> {
-    // TODO: Получить Telegram ID клиента из БД по orderId
-    // const order = await db.getOrderById(orderId);
-    // if (order.customerTelegramId) {
-    //   await this.sendStatusUpdate(order.customerTelegramId, orderId, newStatus);
-    // }
+    console.log(`📨 Отправка уведомления клиенту о статусе ${orderId}: ${newStatus}`);
 
-    console.log(`Уведомление клиенту о статусе ${orderId}: ${newStatus}`);
+    try {
+      const db = getDataProviderInstance();
+
+      // Получаем заказ из БД
+      const order = await db.getOrderById(orderId);
+
+      if (!order) {
+        console.warn(`⚠️  Заказ ${orderId} не найден в БД`);
+        return;
+      }
+
+      // Получаем Telegram ID клиента
+      const customerTelegramId = order.telegram_id;
+
+      if (!customerTelegramId) {
+        console.warn(`⚠️  У заказа ${orderId} нет telegram_id клиента`);
+        return;
+      }
+
+      // Отправляем уведомление
+      await this.sendStatusUpdate(customerTelegramId, orderId, newStatus);
+      console.log(`✅ Уведомление о статусе отправлено клиенту ${customerTelegramId}`);
+    } catch (error) {
+      console.error(`❌ Ошибка отправки уведомления клиенту:`, error);
+      // Не прокидываем ошибку дальше, чтобы не сломать основной процесс
+    }
   }
 
   /**
