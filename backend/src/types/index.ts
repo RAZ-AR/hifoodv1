@@ -91,6 +91,7 @@ export interface Order {
   user_id: string;                    // ID пользователя
   user_name: string;                  // Имя пользователя
   user_phone: string;                 // Номер телефона
+  telegram_id?: number;               // Telegram ID пользователя (для уведомлений)
 
   // КАРТА ЛОЯЛЬНОСТИ (автоматически из профиля)
   loyalty_card_number: string;        // Номер карты лояльности
