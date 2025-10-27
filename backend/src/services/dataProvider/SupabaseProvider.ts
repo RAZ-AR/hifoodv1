@@ -275,7 +275,7 @@ export class SupabaseProvider implements IDataProvider {
     const { data: updatedData, error } = await this.supabase
       .from('orders')
       .update(updateData)
-      .eq('order_id', orderId)
+      .eq('order_number', orderId)
       .select()
       .single();
 
