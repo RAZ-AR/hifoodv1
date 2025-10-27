@@ -86,5 +86,28 @@ export const closeTelegramApp = (): void => {
  */
 export const getTelegramUser = () => {
   const tg = getTelegramWebApp();
-  return tg?.initDataUnsafe?.user || null;
+
+  if (!tg) {
+    console.warn('[getTelegramUser] Telegram WebApp not available');
+    return null;
+  }
+
+  // Пробуем получить пользователя из initDataUnsafe
+  const user = tg.initDataUnsafe?.user;
+
+  if (user) {
+    console.log('[getTelegramUser] User found:', user);
+    return user;
+  }
+
+  // Fallback: пытаемся получить из других источников
+  console.warn('[getTelegramUser] User not found in initDataUnsafe');
+  console.log('[getTelegramUser] initDataUnsafe:', tg.initDataUnsafe);
+
+  // В некоторых версиях Telegram данные могут быть в другом месте
+  if (tg.initDataUnsafe && Object.keys(tg.initDataUnsafe).length === 0) {
+    console.warn('[getTelegramUser] initDataUnsafe is empty - может быть открыто не через бота');
+  }
+
+  return null;
 };
