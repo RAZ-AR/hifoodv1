@@ -96,13 +96,33 @@ export const getTelegramUser = () => {
   const user = tg.initDataUnsafe?.user;
 
   if (user) {
-    console.log('[getTelegramUser] User found:', user);
+    console.log('[getTelegramUser] User found in initDataUnsafe:', user);
+
+    // Сохраняем в localStorage для последующих использований
+    try {
+      localStorage.setItem('telegram_user_id', String(user.id));
+      localStorage.setItem('telegram_user', JSON.stringify(user));
+    } catch (e) {
+      console.warn('[getTelegramUser] Failed to save to localStorage:', e);
+    }
+
     return user;
   }
 
-  // Fallback: пытаемся получить из других источников
+  // Fallback: пытаемся получить из localStorage
   console.warn('[getTelegramUser] User not found in initDataUnsafe');
   console.log('[getTelegramUser] initDataUnsafe:', tg.initDataUnsafe);
+
+  try {
+    const savedUser = localStorage.getItem('telegram_user');
+    if (savedUser) {
+      const parsedUser = JSON.parse(savedUser);
+      console.log('[getTelegramUser] User restored from localStorage:', parsedUser);
+      return parsedUser;
+    }
+  } catch (e) {
+    console.warn('[getTelegramUser] Failed to restore from localStorage:', e);
+  }
 
   // В некоторых версиях Telegram данные могут быть в другом месте
   if (tg.initDataUnsafe && Object.keys(tg.initDataUnsafe).length === 0) {

@@ -29,8 +29,21 @@ function App() {
       // Получаем данные пользователя из Telegram
       console.log('🔍 [App.tsx] Telegram WebApp:', tg);
       console.log('🔍 [App.tsx] initDataUnsafe:', tg.initDataUnsafe);
-      const telegramUser = tg.initDataUnsafe.user;
+      let telegramUser = tg.initDataUnsafe.user;
       console.log('🔍 [App.tsx] Telegram User:', telegramUser);
+
+      // Fallback: если user пустой, пробуем восстановить из localStorage
+      if (!telegramUser) {
+        try {
+          const savedUser = localStorage.getItem('telegram_user');
+          if (savedUser) {
+            telegramUser = JSON.parse(savedUser);
+            console.log('🔍 [App.tsx] Telegram User restored from localStorage:', telegramUser);
+          }
+        } catch (e) {
+          console.warn('Failed to restore user from localStorage:', e);
+        }
+      }
 
       if (telegramUser) {
         // TODO: Здесь должен быть API запрос для получения/создания пользователя
