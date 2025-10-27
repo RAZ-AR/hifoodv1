@@ -44,6 +44,9 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
       const telegramUser = getTelegramUser();
       const customerTelegramId = telegramUser?.id;
 
+      console.log('📱 Telegram User:', telegramUser);
+      console.log('📱 Customer Telegram ID:', customerTelegramId);
+
       // Формируем данные для отправки в бота
       const orderData = formatOrderData({
         orderId,
