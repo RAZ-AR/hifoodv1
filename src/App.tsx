@@ -27,7 +27,10 @@ function App() {
       tg.expand();
 
       // Получаем данные пользователя из Telegram
+      console.log('🔍 [App.tsx] Telegram WebApp:', tg);
+      console.log('🔍 [App.tsx] initDataUnsafe:', tg.initDataUnsafe);
       const telegramUser = tg.initDataUnsafe.user;
+      console.log('🔍 [App.tsx] Telegram User:', telegramUser);
 
       if (telegramUser) {
         // TODO: Здесь должен быть API запрос для получения/создания пользователя
