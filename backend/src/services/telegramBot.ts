@@ -55,10 +55,25 @@ class TelegramBotService {
 
   private initializeBot() {
     try {
-      // Включаем polling для обработки команд пользователей
-      this.bot = new TelegramBot(this.botToken, { polling: true });
+      const isProduction = process.env.NODE_ENV === 'production';
 
-      console.log(`✅ Telegram Bot инициализирован с polling`);
+      if (isProduction) {
+        // На production используем webhook (без polling)
+        this.bot = new TelegramBot(this.botToken, { polling: false });
+
+        const webhookUrl = `${process.env.RENDER_EXTERNAL_URL || 'https://hifoodv1.onrender.com'}/api/telegram/webhook`;
+
+        // Устанавливаем webhook
+        this.bot.setWebHook(webhookUrl).then(() => {
+          console.log(`✅ Telegram Bot webhook установлен: ${webhookUrl}`);
+        }).catch((err) => {
+          console.error('❌ Ошибка установки webhook:', err);
+        });
+      } else {
+        // На development используем polling
+        this.bot = new TelegramBot(this.botToken, { polling: true });
+        console.log(`✅ Telegram Bot инициализирован с polling (development)`);
+      }
 
       // Настраиваем команды и обработчики
       this.setupCommands();
@@ -322,6 +337,14 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
       delivered: 'Доставлен',
     };
     return labels[status] || status;
+  }
+
+  /**
+   * Обрабатывает Telegram webhook update
+   */
+  processUpdate(update: any): void {
+    if (!this.bot) return;
+    this.bot.processUpdate(update);
   }
 
   /**

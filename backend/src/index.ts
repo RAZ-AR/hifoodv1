@@ -181,6 +181,18 @@ async function main() {
       }
     });
 
+    // Webhook для Telegram Bot API (callback queries, commands)
+    app.post('/api/telegram/webhook', async (req: Request, res: Response) => {
+      try {
+        // Передаем update боту для обработки
+        telegramBot.processUpdate(req.body);
+        res.sendStatus(200);
+      } catch (error: any) {
+        console.error('Ошибка обработки Telegram webhook:', error);
+        res.sendStatus(500);
+      }
+    });
+
     // Webhook для получения заказов из Telegram Web App
     app.post('/api/orders/telegram-webhook', async (req: Request, res: Response) => {
       try {
