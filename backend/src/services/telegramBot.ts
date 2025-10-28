@@ -390,8 +390,8 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
       const statusMap: Record<string, string> = {
         'accepted': 'confirmed',
         'preparing': 'preparing',
-        'delivering': 'on_way',
-        'delivered': 'delivered',
+        'delivering': 'delivering',
+        'delivered': 'completed',
       };
 
       const dbStatus = statusMap[status] || status;

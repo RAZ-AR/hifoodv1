@@ -139,8 +139,8 @@ export type OrderStatus =
   | 'pending'       // Ожидает подтверждения
   | 'confirmed'     // Подтвержден
   | 'preparing'     // Готовится
-  | 'on_way'        // В пути
-  | 'delivered'     // Доставлен
+  | 'delivering'    // В пути
+  | 'completed'     // Доставлен
   | 'cancelled';    // Отменен
 
 /**
