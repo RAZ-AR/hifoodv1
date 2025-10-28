@@ -180,6 +180,49 @@ class TelegramBotService {
       );
     });
 
+    // Команда /webhookinfo - проверить статус webhook
+    this.bot.onText(/\/webhookinfo/, async (msg: Message) => {
+      const chatId = msg.chat.id;
+
+      try {
+        const info = await this.bot?.getWebHookInfo();
+        this.bot?.sendMessage(
+          chatId,
+          `🔗 *Webhook Info:*\n\n` +
+          `URL: \`${info?.url || 'не установлен'}\`\n` +
+          `Pending updates: ${info?.pending_update_count || 0}\n` +
+          `Last error: ${info?.last_error_message || 'нет'}\n` +
+          `Max connections: ${info?.max_connections || 'N/A'}`,
+          { parse_mode: 'Markdown' }
+        );
+      } catch (error: any) {
+        this.bot?.sendMessage(chatId, `❌ Ошибка: ${error.message}`);
+      }
+    });
+
+    // Команда /setwebhook - установить webhook вручную (только для владельца)
+    this.bot.onText(/\/setwebhook/, async (msg: Message) => {
+      const chatId = msg.chat.id;
+
+      // Проверяем, что это владелец (ваш Telegram ID)
+      if (chatId !== 128136200) {
+        this.bot?.sendMessage(chatId, '❌ У вас нет прав для этой команды');
+        return;
+      }
+
+      try {
+        const webhookUrl = `${process.env.RENDER_EXTERNAL_URL || 'https://hifoodv1.onrender.com'}/api/telegram/webhook`;
+        await this.bot?.setWebHook(webhookUrl);
+        this.bot?.sendMessage(
+          chatId,
+          `✅ Webhook установлен:\n\`${webhookUrl}\``,
+          { parse_mode: 'Markdown' }
+        );
+      } catch (error: any) {
+        this.bot?.sendMessage(chatId, `❌ Ошибка установки webhook: ${error.message}`);
+      }
+    });
+
   }
 
   /**
@@ -480,10 +523,12 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
       preparing: '👨‍🍳 Наши повара готовят ваш заказ',
       delivering: '🛵 Курьер уже в пути к вам!',
       delivered: '🎉 Заказ доставлен! Приятного аппетита!',
+      completed: '🎉 Заказ доставлен! Приятного аппетита!',
     };
 
     const message = `
-🔔 *Обновление заказа ${orderId}*
+🔔 *Обновление заказа*
+📦 *Номер заказа:* ${orderId}
 
 ${statusMessages[status] || 'Статус заказа обновлён'}
     `.trim();
