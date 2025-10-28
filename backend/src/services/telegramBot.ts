@@ -241,9 +241,13 @@ class TelegramBotService {
       const [action, orderId, newStatus] = data.split(':');
 
       if (action === 'status' && orderId && newStatus) {
+        console.log(`🔵 Callback query received: orderId=${orderId}, newStatus=${newStatus}`);
+
         try {
           // Обновляем статус заказа в БД
+          console.log(`📝 Updating order status in DB...`);
           await this.updateOrderStatus(orderId, newStatus);
+          console.log(`✅ Order status updated successfully`);
 
           // Уведомляем оператора
           await this.bot?.answerCallbackQuery(callbackQuery.id, {
@@ -259,12 +263,16 @@ class TelegramBotService {
               message_id: message.message_id,
             }
           );
+          console.log(`✅ Message buttons updated`);
 
           // Отправляем уведомление клиенту
+          console.log(`📨 Sending customer notification...`);
           await this.notifyCustomerAboutStatusChange(orderId, newStatus);
+          console.log(`✅ Customer notification sent`);
 
         } catch (error) {
-          console.error('Ошибка обновления статуса:', error);
+          console.error('❌ Ошибка обновления статуса:', error);
+          console.error('Error stack:', (error as Error).stack);
           await this.bot?.answerCallbackQuery(callbackQuery.id, {
             text: '❌ Ошибка обновления статуса',
           });
