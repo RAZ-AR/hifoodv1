@@ -572,6 +572,17 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
     try {
       const db = getDataProviderInstance();
 
+      // Сначала проверяем, существует ли заказ
+      console.log(`🔍 Проверка существования заказа ${orderId}...`);
+      const existingOrder = await db.getOrderById(orderId);
+
+      if (!existingOrder) {
+        console.error(`❌ Заказ ${orderId} не найден в БД!`);
+        throw new Error(`Заказ ${orderId} не найден в базе данных`);
+      }
+
+      console.log(`✅ Заказ найден, текущий статус: ${existingOrder.status}`);
+
       // Маппинг статусов из кнопок в статусы БД
       const statusMap: Record<string, string> = {
         'accepted': 'confirmed',
@@ -581,12 +592,14 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
       };
 
       const dbStatus = statusMap[status] || status;
-      console.log(`📝 Статус БД: ${dbStatus}`);
+      console.log(`📝 Новый статус БД: ${dbStatus}`);
 
       await db.updateOrderStatus(orderId, dbStatus as any);
       console.log(`✅ Статус заказа ${orderId} обновлён в БД: ${dbStatus}`);
     } catch (error) {
       console.error(`❌ Ошибка обновления статуса заказа ${orderId}:`, error);
+      console.error(`   Error message: ${(error as Error).message}`);
+      console.error(`   Error stack: ${(error as Error).stack}`);
       throw error;
     }
   }
