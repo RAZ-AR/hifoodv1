@@ -43,7 +43,7 @@ export class SupabaseProvider implements IDataProvider {
       phone: data.phone_number,
       loyalty_card_number: data.loyalty_card_number,
       loyalty_card_issued_date: data.created_at,
-      bonus_balance: data.bonus_points || 0,
+      bonus_balance: data.bonus_points || data.bonus_balance || 0,
       total_bonus_earned: 0,
       total_orders: data.total_orders || 0,
       total_spent: parseFloat(data.total_spent) || 0,
@@ -94,16 +94,15 @@ export class SupabaseProvider implements IDataProvider {
     console.log('[SupabaseProvider.createUser] Номер карты:', loyaltyCardNumber);
 
     // Маппим поля TypeScript на схему Supabase БД
+    // ВАЖНО: используем только те поля, которые есть в реальной таблице users
     const dbUser = {
       telegram_id: userData.telegram_id,
-      telegram_username: userData.telegram_username,
+      telegram_username: userData.telegram_username || null,
       first_name: userData.first_name,
-      last_name: userData.last_name,
-      phone_number: userData.phone,
-      bonus_points: userData.bonus_balance || 0,
-      total_orders: userData.total_orders || 0,
-      total_spent: userData.total_spent || 0,
+      last_name: userData.last_name || null,
+      phone_number: userData.phone || null,
       loyalty_card_number: loyaltyCardNumber,
+      // Поля total_orders, total_spent, bonus_points используют DEFAULT значения из БД
     };
 
     console.log('[SupabaseProvider.createUser] Данные для БД:', JSON.stringify(dbUser, null, 2));
