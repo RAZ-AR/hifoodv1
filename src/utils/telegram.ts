@@ -126,27 +126,8 @@ export const getTelegramUser = () => {
 
   // В некоторых версиях Telegram данные могут быть в другом месте
   if (tg.initDataUnsafe && Object.keys(tg.initDataUnsafe).length === 0) {
-    console.warn('[getTelegramUser] initDataUnsafe is empty - может быть открыто не через бота');
-
-    // Hardcoded fallback для владельца (временно, пока не исправим initDataUnsafe)
-    const fallbackUser = {
-      id: 128136200,
-      first_name: 'Armen',
-      username: 'a_razmikovich',
-      language_code: 'ru'
-    };
-
-    console.log('[getTelegramUser] Using hardcoded fallback user:', fallbackUser);
-
-    // Сохраняем fallback в localStorage
-    try {
-      localStorage.setItem('telegram_user_id', String(fallbackUser.id));
-      localStorage.setItem('telegram_user', JSON.stringify(fallbackUser));
-    } catch (e) {
-      console.warn('[getTelegramUser] Failed to save fallback to localStorage:', e);
-    }
-
-    return fallbackUser;
+    console.error('[getTelegramUser] initDataUnsafe is empty - Mini App должен быть открыт через бота!');
+    console.error('[getTelegramUser] Пожалуйста, откройте приложение через кнопку в боте @Hi_food_order_bot');
   }
 
   return null;

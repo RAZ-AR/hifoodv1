@@ -47,6 +47,13 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
       console.log('📱 Telegram User:', telegramUser);
       console.log('📱 Customer Telegram ID:', customerTelegramId);
 
+      if (!customerTelegramId) {
+        throw new Error(
+          'Не удалось получить ваш Telegram ID.\n\n' +
+          'Пожалуйста, откройте приложение через кнопку в боте @Hi_food_order_bot'
+        );
+      }
+
       // Формируем данные для отправки в бота
       const orderData = formatOrderData({
         orderId,
