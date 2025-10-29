@@ -40,7 +40,7 @@ export class SupabaseProvider implements IDataProvider {
       telegram_username: data.telegram_username,
       first_name: data.first_name,
       last_name: data.last_name,
-      phone: data.phone_number,
+      phone: data.phone_number || data.phone || undefined,
       loyalty_card_number: data.loyalty_card_number,
       loyalty_card_issued_date: data.created_at,
       bonus_balance: data.bonus_points || data.bonus_balance || 0,
@@ -95,15 +95,21 @@ export class SupabaseProvider implements IDataProvider {
 
     // Маппим поля TypeScript на схему Supabase БД
     // ВАЖНО: используем только те поля, которые есть в реальной таблице users
-    const dbUser = {
+    const dbUser: any = {
       telegram_id: userData.telegram_id,
-      telegram_username: userData.telegram_username || null,
       first_name: userData.first_name,
-      last_name: userData.last_name || null,
-      phone_number: userData.phone || null,
       loyalty_card_number: loyaltyCardNumber,
-      // Поля total_orders, total_spent, bonus_points используют DEFAULT значения из БД
     };
+
+    // Добавляем опциональные поля только если они заполнены
+    if (userData.telegram_username) {
+      dbUser.telegram_username = userData.telegram_username;
+    }
+    if (userData.last_name) {
+      dbUser.last_name = userData.last_name;
+    }
+    // phone_number может не существовать в БД, пропускаем
+    // Поля total_orders, total_spent, bonus_points используют DEFAULT значения из БД
 
     console.log('[SupabaseProvider.createUser] Данные для БД:', JSON.stringify(dbUser, null, 2));
 
