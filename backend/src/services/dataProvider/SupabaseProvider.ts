@@ -30,6 +30,32 @@ export class SupabaseProvider implements IDataProvider {
   // ПОЛЬЗОВАТЕЛИ
   // ==========================================
 
+  /**
+   * Маппит данные из БД Supabase на тип User
+   */
+  private mapDbUserToUser(data: any): User {
+    return {
+      user_id: data.id,
+      telegram_id: data.telegram_id,
+      telegram_username: data.telegram_username,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      phone: data.phone_number,
+      loyalty_card_number: data.loyalty_card_number,
+      loyalty_card_issued_date: data.created_at,
+      bonus_balance: data.bonus_points || 0,
+      total_bonus_earned: 0,
+      total_orders: data.total_orders || 0,
+      total_spent: parseFloat(data.total_spent) || 0,
+      addresses: [],
+      payment_methods: [],
+      favorite_dishes: [],
+      preferred_language: 'ru',
+      notifications_enabled: true,
+      registered_at: data.created_at,
+    } as User;
+  }
+
   async getUserByTelegramId(telegramId: number): Promise<User | null> {
     const { data, error } = await this.supabase
       .from('users')
@@ -42,7 +68,7 @@ export class SupabaseProvider implements IDataProvider {
       return null;
     }
 
-    return data as User;
+    return this.mapDbUserToUser(data);
   }
 
   async getUserByLoyaltyCard(loyaltyCardNumber: string): Promise<User | null> {
@@ -56,39 +82,29 @@ export class SupabaseProvider implements IDataProvider {
       return null;
     }
 
-    return data as User;
+    return this.mapDbUserToUser(data);
   }
 
-  async createUser(
-    userData: Omit<
-      User,
-      | 'user_id'
-      | 'loyalty_card_number'
-      | 'loyalty_card_issued_date'
-      | 'bonus_balance'
-      | 'total_bonus_earned'
-      | 'total_orders'
-      | 'total_spent'
-      | 'registered_at'
-    >
-  ): Promise<User> {
-    // Генерируем уникальный номер карты лояльности
-    const loyaltyCardNumber = await this.cardGenerator.generateUniqueCard();
+  async createUser(userData: Partial<User>): Promise<User> {
+    // Генерируем номер карты лояльности, если не передан
+    const loyaltyCardNumber = userData.loyalty_card_number || await this.cardGenerator.generateUniqueCard();
 
-    const newUser: Omit<User, 'user_id'> = {
+    // Маппим поля TypeScript на схему Supabase БД
+    const dbUser = {
+      telegram_id: userData.telegram_id,
+      telegram_username: userData.telegram_username,
+      first_name: userData.first_name,
+      last_name: userData.last_name,
+      phone_number: userData.phone,
+      bonus_points: userData.bonus_balance || 0,
+      total_orders: userData.total_orders || 0,
+      total_spent: userData.total_spent || 0,
       loyalty_card_number: loyaltyCardNumber,
-      loyalty_card_issued_date: new Date().toISOString(),
-      bonus_balance: 0,
-      total_bonus_earned: 0,
-      total_orders: 0,
-      total_spent: 0,
-      registered_at: new Date().toISOString(),
-      ...userData,
     };
 
     const { data, error } = await this.supabase
       .from('users')
-      .insert([newUser])
+      .insert([dbUser])
       .select()
       .single();
 
@@ -96,7 +112,7 @@ export class SupabaseProvider implements IDataProvider {
       throw new Error(`Ошибка создания пользователя: ${error.message}`);
     }
 
-    return data as User;
+    return this.mapDbUserToUser(data);
   }
 
   async updateUser(userId: string, data: Partial<User>): Promise<User> {
