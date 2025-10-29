@@ -86,8 +86,12 @@ export class SupabaseProvider implements IDataProvider {
   }
 
   async createUser(userData: Partial<User>): Promise<User> {
+    console.log('[SupabaseProvider.createUser] Начало создания пользователя');
+    console.log('[SupabaseProvider.createUser] Входные данные:', JSON.stringify(userData, null, 2));
+
     // Генерируем номер карты лояльности, если не передан
     const loyaltyCardNumber = userData.loyalty_card_number || await this.cardGenerator.generateUniqueCard();
+    console.log('[SupabaseProvider.createUser] Номер карты:', loyaltyCardNumber);
 
     // Маппим поля TypeScript на схему Supabase БД
     const dbUser = {
@@ -102,6 +106,8 @@ export class SupabaseProvider implements IDataProvider {
       loyalty_card_number: loyaltyCardNumber,
     };
 
+    console.log('[SupabaseProvider.createUser] Данные для БД:', JSON.stringify(dbUser, null, 2));
+
     const { data, error } = await this.supabase
       .from('users')
       .insert([dbUser])
@@ -109,9 +115,14 @@ export class SupabaseProvider implements IDataProvider {
       .single();
 
     if (error) {
+      console.error('[SupabaseProvider.createUser] Ошибка Supabase:', error);
+      console.error('[SupabaseProvider.createUser] Error code:', error.code);
+      console.error('[SupabaseProvider.createUser] Error details:', error.details);
+      console.error('[SupabaseProvider.createUser] Error hint:', error.hint);
       throw new Error(`Ошибка создания пользователя: ${error.message}`);
     }
 
+    console.log('[SupabaseProvider.createUser] Пользователь успешно создан');
     return this.mapDbUserToUser(data);
   }
 

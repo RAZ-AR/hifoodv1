@@ -113,14 +113,20 @@ class TelegramBotService {
           console.log(`👤 Новый пользователь: ${firstName} (ID: ${telegramId})`);
 
           // Генерируем уникальный номер карты лояльности
+          console.log('🔢 Генерация номера карты лояльности...');
           const loyaltyCardNumber = await this.generateUniqueLoyaltyCardNumber();
+          console.log(`✅ Сгенерирован номер карты: ${loyaltyCardNumber}`);
 
-          // Создаем нового пользователя
-          user = await db.createUser({
+          // Проверяем обязательные поля
+          if (!telegramId || !firstName) {
+            throw new Error(`Отсутствуют обязательные поля: telegram_id=${telegramId}, first_name=${firstName}`);
+          }
+
+          const newUserData = {
             telegram_id: telegramId,
-            telegram_username: username,
+            telegram_username: username || undefined,
             first_name: firstName,
-            last_name: msg.from?.last_name,
+            last_name: msg.from?.last_name || undefined,
             loyalty_card_number: loyaltyCardNumber,
             loyalty_card_issued_date: new Date().toISOString(),
             bonus_balance: 0,
@@ -130,10 +136,16 @@ class TelegramBotService {
             addresses: [],
             payment_methods: [],
             favorite_dishes: [],
-            preferred_language: 'ru',
+            preferred_language: 'ru' as const,
             notifications_enabled: true,
             registered_at: new Date().toISOString(),
-          });
+          };
+
+          console.log('💾 Создание пользователя в БД...');
+          console.log('Данные:', JSON.stringify(newUserData, null, 2));
+
+          // Создаем нового пользователя
+          user = await db.createUser(newUserData);
 
           console.log(`✅ Пользователь зарегистрирован: ${firstName}, карта №${loyaltyCardNumber}`);
 
@@ -197,9 +209,17 @@ class TelegramBotService {
         }
       } catch (error: any) {
         console.error('❌ Ошибка при обработке /start:', error);
+        console.error('Error message:', error?.message);
+        console.error('Error stack:', error?.stack);
+        console.error('User data attempt:', {
+          telegram_id: telegramId,
+          first_name: firstName,
+          username,
+        });
+
         this.bot?.sendMessage(
           chatId,
-          '❌ Произошла ошибка при регистрации. Попробуйте еще раз или свяжитесь с поддержкой.'
+          `❌ Произошла ошибка при регистрации.\n\nДетали: ${error?.message || 'Неизвестная ошибка'}\n\nПопробуйте еще раз или свяжитесь с поддержкой.`
         );
       }
     });
