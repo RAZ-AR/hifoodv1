@@ -32,9 +32,9 @@ export interface IDataProvider {
   getUserByLoyaltyCard(loyaltyCardNumber: string): Promise<User | null>;
 
   /**
-   * Создать нового пользователя с автоматической генерацией карты лояльности
+   * Создать нового пользователя (loyalty_card_number, bonus_balance, etc. опциональны)
    */
-  createUser(userData: Omit<User, 'user_id' | 'loyalty_card_number' | 'loyalty_card_issued_date' | 'bonus_balance' | 'total_bonus_earned' | 'total_orders' | 'total_spent' | 'registered_at'>): Promise<User>;
+  createUser(userData: Partial<User>): Promise<User>;
 
   /**
    * Обновить данные пользователя

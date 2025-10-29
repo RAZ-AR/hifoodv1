@@ -78,6 +78,7 @@ class TelegramBotService {
       // Настраиваем команды и обработчики
       this.setupCommands();
       this.setupCallbackHandlers();
+      this.setupContactHandler();
 
     } catch (error) {
       console.error('❌ Ошибка инициализации Telegram Bot:', error);
@@ -91,31 +92,116 @@ class TelegramBotService {
     if (!this.bot) return;
 
     // Команда /start
-    this.bot.onText(/\/start/, (msg: Message) => {
+    this.bot.onText(/\/start/, async (msg: Message) => {
       const chatId = msg.chat.id;
       const firstName = msg.from?.first_name || 'друг';
+      const telegramId = msg.from?.id;
+      const username = msg.from?.username;
 
-      this.bot?.sendMessage(
-        chatId,
-        `👋 Привет, ${firstName}!\n\n` +
-        '🍕 Добро пожаловать в **Hi Food** — доставка вкусной еды!\n\n' +
-        '📱 Нажмите кнопку ниже чтобы открыть меню:',
-        {
-          parse_mode: 'Markdown',
-          reply_markup: {
-            keyboard: [
-              [
-                {
-                  text: '🍔 Открыть меню',
-                  web_app: { url: 'https://raz-ar.github.io/hifoodv1/' }
-                }
-              ]
-            ],
-            resize_keyboard: true,
-            one_time_keyboard: false
-          }
+      if (!telegramId) {
+        this.bot?.sendMessage(chatId, '❌ Не удалось получить ваш Telegram ID');
+        return;
+      }
+
+      try {
+        const db = getDataProviderInstance();
+
+        // Проверяем, существует ли пользователь
+        let user = await db.getUserByTelegramId(telegramId);
+
+        if (!user) {
+          console.log(`👤 Новый пользователь: ${firstName} (ID: ${telegramId})`);
+
+          // Генерируем уникальный номер карты лояльности
+          const loyaltyCardNumber = await this.generateUniqueLoyaltyCardNumber();
+
+          // Создаем нового пользователя
+          user = await db.createUser({
+            telegram_id: telegramId,
+            telegram_username: username,
+            first_name: firstName,
+            last_name: msg.from?.last_name,
+            loyalty_card_number: loyaltyCardNumber,
+            loyalty_card_issued_date: new Date().toISOString(),
+            bonus_balance: 0,
+            total_bonus_earned: 0,
+            total_orders: 0,
+            total_spent: 0,
+            addresses: [],
+            payment_methods: [],
+            favorite_dishes: [],
+            preferred_language: 'ru',
+            notifications_enabled: true,
+            registered_at: new Date().toISOString(),
+          });
+
+          console.log(`✅ Пользователь зарегистрирован: ${firstName}, карта №${loyaltyCardNumber}`);
+
+          // Приветственное сообщение для нового пользователя
+          this.bot?.sendMessage(
+            chatId,
+            `🎉 Добро пожаловать, ${firstName}!\n\n` +
+            `✅ Вы успешно зарегистрированы в **Hi Food**!\n\n` +
+            `💳 Ваша карта лояльности: **${loyaltyCardNumber}**\n\n` +
+            `🎁 Накапливайте бонусы с каждым заказом и получайте скидки!\n\n` +
+            `📱 Нажмите кнопку ниже чтобы открыть меню:`,
+            {
+              parse_mode: 'Markdown',
+              reply_markup: {
+                keyboard: [
+                  [
+                    {
+                      text: '🍔 Открыть меню',
+                      web_app: { url: 'https://raz-ar.github.io/hifoodv1/' }
+                    }
+                  ],
+                  [
+                    {
+                      text: '📞 Поделиться номером телефона',
+                      request_contact: true
+                    }
+                  ]
+                ],
+                resize_keyboard: true,
+                one_time_keyboard: false
+              }
+            }
+          );
+        } else {
+          console.log(`👤 Существующий пользователь: ${firstName} (карта №${user.loyalty_card_number})`);
+
+          // Приветствие для существующего пользователя
+          this.bot?.sendMessage(
+            chatId,
+            `👋 С возвращением, ${firstName}!\n\n` +
+            `💳 Ваша карта лояльности: **${user.loyalty_card_number}**\n` +
+            `🎁 Бонусов на счету: **${user.bonus_balance}**\n` +
+            `📦 Заказов сделано: **${user.total_orders}**\n\n` +
+            `📱 Нажмите кнопку ниже чтобы открыть меню:`,
+            {
+              parse_mode: 'Markdown',
+              reply_markup: {
+                keyboard: [
+                  [
+                    {
+                      text: '🍔 Открыть меню',
+                      web_app: { url: 'https://raz-ar.github.io/hifoodv1/' }
+                    }
+                  ]
+                ],
+                resize_keyboard: true,
+                one_time_keyboard: false
+              }
+            }
+          );
         }
-      );
+      } catch (error: any) {
+        console.error('❌ Ошибка при обработке /start:', error);
+        this.bot?.sendMessage(
+          chatId,
+          '❌ Произошла ошибка при регистрации. Попробуйте еще раз или свяжитесь с поддержкой.'
+        );
+      }
     });
 
     // Команда /help
@@ -548,6 +634,103 @@ ${statusMessages[status] || 'Статус заказа обновлён'}
     } catch (error) {
       console.error('Ошибка отправки уведомления клиенту:', error);
     }
+  }
+
+  /**
+   * Генерирует уникальный 4-значный номер карты лояльности
+   */
+  private async generateUniqueLoyaltyCardNumber(): Promise<string> {
+    const db = getDataProviderInstance();
+    let cardNumber: string;
+    let isUnique = false;
+
+    // Начинаем с 1001 и ищем свободный номер
+    let attempt = 1001;
+    const maxAttempts = 9999; // Максимум 8999 карт (1001-9999)
+
+    while (!isUnique && attempt <= maxAttempts) {
+      cardNumber = attempt.toString();
+
+      try {
+        // Проверяем, существует ли пользователь с таким номером карты
+        const existingUser = await db.getUserByLoyaltyCard(cardNumber!);
+
+        if (!existingUser) {
+          isUnique = true;
+          console.log(`✅ Сгенерирован уникальный номер карты: ${cardNumber}`);
+          return cardNumber!;
+        }
+
+        attempt++;
+      } catch (error) {
+        // Если ошибка при проверке - продолжаем со следующим номером
+        attempt++;
+      }
+    }
+
+    throw new Error('Не удалось сгенерировать уникальный номер карты лояльности');
+  }
+
+  /**
+   * Обработчик контакта (номера телефона)
+   */
+  private setupContactHandler() {
+    if (!this.bot) return;
+
+    this.bot.on('contact', async (msg: Message) => {
+      const chatId = msg.chat.id;
+      const contact = (msg as any).contact;
+
+      if (!contact || !msg.from) {
+        return;
+      }
+
+      const telegramId = msg.from.id;
+      const phoneNumber = contact.phone_number;
+
+      try {
+        const db = getDataProviderInstance();
+
+        // Получаем пользователя
+        const user = await db.getUserByTelegramId(telegramId);
+
+        if (!user) {
+          this.bot?.sendMessage(chatId, '❌ Пользователь не найден. Пожалуйста, нажмите /start');
+          return;
+        }
+
+        // Обновляем номер телефона
+        await db.updateUser(user.user_id, {
+          phone: phoneNumber,
+        });
+
+        console.log(`📞 Номер телефона обновлён для пользователя ${user.first_name}: ${phoneNumber}`);
+
+        this.bot?.sendMessage(
+          chatId,
+          `✅ Спасибо! Ваш номер телефона сохранён.\n\n` +
+          `📱 Теперь вы можете оформлять заказы через меню.`,
+          {
+            parse_mode: 'Markdown',
+            reply_markup: {
+              keyboard: [
+                [
+                  {
+                    text: '🍔 Открыть меню',
+                    web_app: { url: 'https://raz-ar.github.io/hifoodv1/' }
+                  }
+                ]
+              ],
+              resize_keyboard: true,
+              one_time_keyboard: false
+            }
+          }
+        );
+      } catch (error: any) {
+        console.error('❌ Ошибка при обработке контакта:', error);
+        this.bot?.sendMessage(chatId, '❌ Произошла ошибка при сохранении номера телефона.');
+      }
+    });
   }
 }
 
