@@ -294,19 +294,14 @@ export class SupabaseProvider implements IDataProvider {
   async updateOrderStatus(orderId: string, status: Order['status']): Promise<Order> {
     return this.updateOrder(orderId, {
       status,
-      updated_at: new Date().toISOString(),
     });
   }
 
   async updateOrder(orderId: string, data: Partial<Order>): Promise<Order> {
-    const updateData = {
-      ...data,
-      updated_at: new Date().toISOString(),
-    };
-
+    // Обновляем только переданные поля, без updated_at (колонка не существует в БД)
     const { data: updatedData, error } = await this.supabase
       .from('orders')
-      .update(updateData)
+      .update(data)
       .eq('order_number', orderId)
       .select()
       .single();
