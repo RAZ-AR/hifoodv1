@@ -150,6 +150,9 @@ class TelegramBotService {
           console.log(`✅ Пользователь зарегистрирован: ${firstName}, карта №${loyaltyCardNumber}`);
 
           // Приветственное сообщение для нового пользователя
+          // Передаём данные пользователя через URL параметры
+          const appUrl = `https://raz-ar.github.io/hifoodv1/?tgId=${telegramId}&tgUsername=${encodeURIComponent(username || '')}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(msg.from?.last_name || '')}`;
+
           this.bot?.sendMessage(
             chatId,
             `🎉 Добро пожаловать, ${firstName}!\n\n` +
@@ -164,7 +167,7 @@ class TelegramBotService {
                   [
                     {
                       text: '🍔 Открыть меню',
-                      web_app: { url: 'https://raz-ar.github.io/hifoodv1/' }
+                      web_app: { url: appUrl }
                     }
                   ],
                   [
@@ -183,6 +186,9 @@ class TelegramBotService {
           console.log(`👤 Существующий пользователь: ${firstName} (карта №${user.loyalty_card_number})`);
 
           // Приветствие для существующего пользователя
+          // Передаём данные пользователя через URL параметры
+          const appUrl = `https://raz-ar.github.io/hifoodv1/?tgId=${telegramId}&tgUsername=${encodeURIComponent(username || '')}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(msg.from?.last_name || '')}`;
+
           this.bot?.sendMessage(
             chatId,
             `👋 С возвращением, ${firstName}!\n\n` +
@@ -197,7 +203,7 @@ class TelegramBotService {
                   [
                     {
                       text: '🍔 Открыть меню',
-                      web_app: { url: 'https://raz-ar.github.io/hifoodv1/' }
+                      web_app: { url: appUrl }
                     }
                   ]
                 ],

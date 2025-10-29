@@ -89,7 +89,8 @@ export const getTelegramUser = () => {
 
   if (!tg) {
     console.warn('[getTelegramUser] Telegram WebApp not available');
-    return null;
+    // Пытаемся получить из URL параметров (fallback)
+    return getUserFromURLParams();
   }
 
   // Пробуем получить пользователя из initDataUnsafe
@@ -109,8 +110,25 @@ export const getTelegramUser = () => {
     return user;
   }
 
-  // Fallback: пытаемся получить из localStorage
-  console.warn('[getTelegramUser] User not found in initDataUnsafe');
+  // Fallback 1: пытаемся получить из URL параметров
+  console.warn('[getTelegramUser] User not found in initDataUnsafe, trying URL params');
+  const userFromURL = getUserFromURLParams();
+  if (userFromURL) {
+    console.log('[getTelegramUser] User found in URL params:', userFromURL);
+
+    // Сохраняем в localStorage
+    try {
+      localStorage.setItem('telegram_user_id', String(userFromURL.id));
+      localStorage.setItem('telegram_user', JSON.stringify(userFromURL));
+    } catch (e) {
+      console.warn('[getTelegramUser] Failed to save URL params to localStorage:', e);
+    }
+
+    return userFromURL;
+  }
+
+  // Fallback 2: пытаемся получить из localStorage
+  console.warn('[getTelegramUser] User not found in URL params, trying localStorage');
   console.log('[getTelegramUser] initDataUnsafe:', tg.initDataUnsafe);
 
   try {
@@ -132,3 +150,29 @@ export const getTelegramUser = () => {
 
   return null;
 };
+
+/**
+ * Получает данные пользователя из URL параметров
+ * Используется как fallback когда initDataUnsafe не доступен
+ */
+function getUserFromURLParams() {
+  if (typeof window === 'undefined') return null;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const tgId = urlParams.get('tgId');
+  const tgUsername = urlParams.get('tgUsername');
+  const firstName = urlParams.get('firstName');
+  const lastName = urlParams.get('lastName');
+
+  if (!tgId || !firstName) {
+    console.warn('[getUserFromURLParams] Missing required params (tgId or firstName)');
+    return null;
+  }
+
+  return {
+    id: parseInt(tgId, 10),
+    username: tgUsername || undefined,
+    first_name: firstName,
+    last_name: lastName || undefined,
+  };
+}
