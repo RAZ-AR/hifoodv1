@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import CheckoutForm, { CheckoutData } from '@/components/CheckoutForm';
 import { generateOrderId, saveOrder } from '@/hooks/useOrderTracking';
@@ -7,6 +7,7 @@ import { showTelegramAlert, triggerHaptic, getTelegramUser } from '@/utils/teleg
 import { formatItemCount } from '@/utils/formatters';
 import { ORDER_CONFIG } from '@/constants';
 import { api } from '@/services/api';
+import { MenuItem } from '@/types';
 
 /**
  * СТРАНИЦА КОРЗИНЫ
@@ -23,10 +24,37 @@ interface CartProps {
 }
 
 const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
-  const { cartItems, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, getTotalPrice, clearCart, addToCart } = useCart();
   const [showCheckoutForm, setShowCheckoutForm] = useState(false);
   const [isOrdering, setIsOrdering] = useState(false);
   const [cutleryCount, setCutleryCount] = useState<number>(ORDER_CONFIG.DEFAULT_CUTLERY_COUNT);
+  const [recommendedItems, setRecommendedItems] = useState<MenuItem[]>([]);
+
+  // Загружаем рекомендованные блюда при открытии формы оформления
+  useEffect(() => {
+    if (showCheckoutForm) {
+      const fetchRecommendedItems = async () => {
+        try {
+          // Получаем все блюда
+          const allItems = await api.getMenuItems();
+
+          // Фильтруем: только доступные и не в корзине
+          const cartItemIds = cartItems.map(ci => ci.item.id);
+          const available = allItems.filter(
+            item => item.available && !cartItemIds.includes(item.id)
+          );
+
+          // Берем случайные 3 блюда или топ по рейтингу
+          const shuffled = available.sort(() => 0.5 - Math.random());
+          setRecommendedItems(shuffled.slice(0, 3));
+        } catch (error) {
+          console.error('Ошибка загрузки рекомендаций:', error);
+        }
+      };
+
+      fetchRecommendedItems();
+    }
+  }, [showCheckoutForm, cartItems]);
 
   const handleCheckoutClick = () => {
     setShowCheckoutForm(true);
@@ -274,6 +302,8 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
           onSubmit={handleCheckoutSubmit}
           onCancel={() => setShowCheckoutForm(false)}
           totalPrice={getTotalPrice()}
+          menuItems={recommendedItems}
+          onAddToCart={(item, quantity) => addToCart(item, quantity)}
         />
       )}
     </div>

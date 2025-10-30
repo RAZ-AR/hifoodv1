@@ -100,6 +100,7 @@ export interface MenuItem {
   available: boolean;                 // Доступность
   preparation_time: number;           // Время приготовления (минуты)
   allergens?: string[];               // Аллергены
+  related_dishes?: string[];          // ID связанных блюд для рекомендаций
 }
 
 /**

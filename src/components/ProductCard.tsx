@@ -5,6 +5,7 @@ interface ProductCardProps {
   item: MenuItem;
   onAddToCart?: (item: MenuItem, quantity: number) => void;
   onFavoriteToggle?: (item: MenuItem) => void;
+  onImageClick?: (item: MenuItem) => void;
   isFavorite?: boolean;
   currentQuantity?: number;
 }
@@ -90,10 +91,23 @@ const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
+  const handleImageClick = () => {
+    if (onImageClick) {
+      onImageClick(item);
+      // Haptic feedback
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+      }
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden hover-lift">
       {/* Изображение */}
-      <div className="relative h-40 overflow-hidden bg-gray-100">
+      <div
+        className="relative h-40 overflow-hidden bg-gray-100 cursor-pointer"
+        onClick={handleImageClick}
+      >
         <img
           src={item.image_url}
           alt={item.name}

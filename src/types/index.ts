@@ -92,6 +92,7 @@ export interface MenuItem {
   preparation_time: number;           // Время приготовления (минуты)
   allergens?: string[];               // Аллергены
   discount?: number;                  // Процент скидки (0-100)
+  related_dishes?: string[];          // ID связанных блюд для рекомендаций
 }
 
 export interface OrderItem {

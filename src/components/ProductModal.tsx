@@ -215,23 +215,49 @@ const ProductModal: React.FC<ProductModalProps> = ({
           {relatedItems.length > 0 && (
             <div className="mt-8">
               <h3 className="text-lg font-bold tg-theme-text mb-4">Вам может понравиться:</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {relatedItems.slice(0, 4).map((relatedItem) => (
+              <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2">
+                {relatedItems.slice(0, 3).map((relatedItem) => (
                   <div
                     key={relatedItem.id}
-                    onClick={() => handleRelatedItemClick(relatedItem)}
-                    className="cursor-pointer bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                    className="flex-shrink-0 w-[280px] bg-gray-50 dark:bg-gray-700 rounded-xl overflow-hidden snap-center"
                   >
                     <img
                       src={relatedItem.image_url}
                       alt={relatedItem.name}
-                      className="w-full h-32 object-cover"
+                      className="w-full h-36 object-cover"
                     />
                     <div className="p-3">
                       <h4 className="text-sm font-semibold tg-theme-text mb-1 line-clamp-2">
                         {relatedItem.name}
                       </h4>
-                      <p className="text-sm font-bold text-primary-600">{relatedItem.price} RSD</p>
+                      <p className="text-sm font-bold text-primary-600 mb-3">{relatedItem.price} RSD</p>
+
+                      {/* Кнопки действий */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onAddToCart) {
+                              onAddToCart(relatedItem, 1);
+                              if (window.Telegram?.WebApp) {
+                                window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+                              }
+                            }
+                          }}
+                          className="flex-1 py-2 bg-primary-500 text-white rounded-lg text-xs font-semibold hover:bg-primary-600 transition-colors"
+                        >
+                          Купить
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRelatedItemClick(relatedItem);
+                          }}
+                          className="flex-1 py-2 border border-primary-500 text-primary-500 rounded-lg text-xs font-semibold hover:bg-primary-50 transition-colors"
+                        >
+                          Посмотреть
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
