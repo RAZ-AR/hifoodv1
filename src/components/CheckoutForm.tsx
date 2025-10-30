@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getTelegramUser } from '@/utils/telegram';
 import { api } from '@/services/api';
-import { MenuItem } from '@/types';
 
 interface CheckoutFormProps {
   onSubmit: (data: CheckoutData) => void;

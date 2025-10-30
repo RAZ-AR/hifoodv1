@@ -121,43 +121,6 @@ const Home: React.FC = () => {
     setSelectedItem(null);
   };
 
-  // Получить рекомендованные блюда
-  const getRelatedItems = (item: MenuItem): MenuItem[] => {
-    // 1. Если есть ручные связи, используем их
-    if (item.related_dishes && item.related_dishes.length > 0) {
-      const relatedByIds = menuItems.filter(menuItem =>
-        item.related_dishes?.includes(menuItem.id) &&
-        menuItem.available
-      );
-
-      if (relatedByIds.length >= 3) {
-        return relatedByIds.slice(0, 3);
-      }
-
-      // Если ручных связей меньше 3, дополняем автоматическими
-      const remainingCount = 3 - relatedByIds.length;
-      const autoRelated = menuItems
-        .filter(menuItem =>
-          menuItem.id !== item.id &&
-          menuItem.available &&
-          !item.related_dishes?.includes(menuItem.id) &&
-          (menuItem.sub_category === item.sub_category || menuItem.category === item.category)
-        )
-        .slice(0, remainingCount);
-
-      return [...relatedByIds, ...autoRelated];
-    }
-
-    // 2. Автоматические рекомендации: из той же подкатегории или категории
-    return menuItems
-      .filter(menuItem =>
-        menuItem.id !== item.id &&
-        menuItem.available &&
-        (menuItem.sub_category === item.sub_category || menuItem.category === item.category)
-      )
-      .slice(0, 3);
-  };
-
   // Состояние загрузки с скелетонами
   if (loading) {
     return (
@@ -309,8 +272,6 @@ const Home: React.FC = () => {
           currentQuantity={getItemQuantity(selectedItem.id)}
           isFavorite={isFavorite(selectedItem.id)}
           onFavoriteToggle={handleFavoriteToggle}
-          relatedItems={getRelatedItems(selectedItem)}
-          onItemClick={handleItemClick}
         />
       )}
     </div>

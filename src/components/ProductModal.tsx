@@ -8,8 +8,6 @@ interface ProductModalProps {
   currentQuantity: number;
   isFavorite: boolean;
   onFavoriteToggle: (item: MenuItem) => void;
-  relatedItems?: MenuItem[];
-  onItemClick?: (item: MenuItem) => void;
 }
 
 /**
@@ -29,8 +27,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
   currentQuantity,
   isFavorite,
   onFavoriteToggle,
-  relatedItems = [],
-  onItemClick,
 }) => {
   const [quantity, setQuantity] = useState(currentQuantity || 1);
 
@@ -44,12 +40,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const handleQuantityChange = (delta: number) => {
     const newQuantity = Math.max(1, quantity + delta);
     setQuantity(newQuantity);
-  };
-
-  const handleRelatedItemClick = (relatedItem: MenuItem) => {
-    if (onItemClick) {
-      onItemClick(relatedItem);
-    }
   };
 
   return (
