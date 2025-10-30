@@ -63,39 +63,46 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
   ];
 
   return (
-    <nav className="fixed bottom-4 left-4 right-4 z-50">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-accent-black rounded-full shadow-2xl px-6 py-3">
-          <div className="flex justify-around items-center">
-            {tabs.map((tab) => {
-              const isActive = tab.id === activeTab;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => onTabChange(tab.id)}
-                  className={`
-                    flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all
-                    ${isActive ? 'scale-110' : 'scale-100'}
-                  `}
+    <nav className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+      <div className="bg-accent-black/95 backdrop-blur-xl rounded-full shadow-2xl px-4 py-2.5" style={{ width: 'min(340px, calc(100vw - 48px))' }}>
+        <div className="flex justify-around items-center gap-2">
+          {tabs.map((tab) => {
+            const isActive = tab.id === activeTab;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                className={`
+                  flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-500 ease-out
+                  ${isActive ? 'scale-110 bg-white/10' : 'scale-100'}
+                `}
+                style={{
+                  transform: isActive ? 'scale(1.1) translateY(-2px)' : 'scale(1)',
+                  transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                }}
+              >
+                <div className="relative">
+                  {tab.icon(isActive)}
+
+                  {/* Бейдж для корзины */}
+                  {tab.badge !== undefined && tab.badge > 0 && (
+                    <div className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-primary-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1 shadow-lg">
+                      {tab.badge > 99 ? '99+' : tab.badge}
+                    </div>
+                  )}
+                </div>
+
+                <span
+                  className={`text-[10px] font-medium transition-all duration-500 ${isActive ? 'text-primary-500' : 'text-white/90'}`}
+                  style={{
+                    transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                  }}
                 >
-                  <div className="relative">
-                    {tab.icon(isActive)}
-
-                    {/* Бейдж для корзины */}
-                    {tab.badge !== undefined && tab.badge > 0 && (
-                      <div className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-primary-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1">
-                        {tab.badge > 99 ? '99+' : tab.badge}
-                      </div>
-                    )}
-                  </div>
-
-                  <span className={`text-xs font-medium ${isActive ? 'text-primary-500' : 'text-white'}`}>
-                    {tab.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </nav>
