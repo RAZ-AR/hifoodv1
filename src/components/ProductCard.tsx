@@ -26,6 +26,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   item,
   onAddToCart,
   onFavoriteToggle,
+  onImageClick,
   isFavorite = false,
   currentQuantity = 0
 }) => {

@@ -36,15 +36,15 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
       const fetchRecommendedItems = async () => {
         try {
           // Получаем все блюда
-          const allItems = await api.getMenuItems();
+          const allItems = await api.getMenu({ available: true });
 
-          // Фильтруем: только доступные и не в корзине
-          const cartItemIds = cartItems.map(ci => ci.item.id);
+          // Фильтруем: только не в корзине
+          const cartItemIds = cartItems.map((ci: { item: { id: string } }) => ci.item.id);
           const available = allItems.filter(
-            item => item.available && !cartItemIds.includes(item.id)
+            (item: MenuItem) => !cartItemIds.includes(item.id)
           );
 
-          // Берем случайные 3 блюда или топ по рейтингу
+          // Берем случайные 3 блюда
           const shuffled = available.sort(() => 0.5 - Math.random());
           setRecommendedItems(shuffled.slice(0, 3));
         } catch (error) {
