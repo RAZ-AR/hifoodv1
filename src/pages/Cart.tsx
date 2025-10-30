@@ -233,6 +233,49 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
         >
           Очистить корзину
         </button>
+
+        {/* Рекомендации */}
+        {recommendedItems.length > 0 && (
+          <div className="mb-4">
+            <h3 className="text-base font-bold tg-theme-text mb-3 px-4">Добавить к заказу?</h3>
+            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 px-4">
+              {recommendedItems
+                .filter(item => item.available)
+                .slice(0, 5)
+                .map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex-shrink-0 w-[160px] bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden snap-center border border-gray-200 dark:border-gray-600"
+                  >
+                    <img
+                      src={item.image_url}
+                      alt={item.name}
+                      className="w-full h-24 object-cover"
+                    />
+                    <div className="p-3">
+                      <h4 className="text-xs font-semibold tg-theme-text mb-1 line-clamp-2 h-8">
+                        {item.name}
+                      </h4>
+                      <p className="text-sm font-bold text-primary-600 mb-2">{item.price} RSD</p>
+
+                      {/* Кнопка добавить */}
+                      <button
+                        onClick={() => {
+                          addToCart(item, 1);
+                          if (window.Telegram?.WebApp) {
+                            window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+                          }
+                        }}
+                        className="w-full py-1.5 bg-primary-500 text-white rounded-lg text-xs font-semibold hover:bg-primary-600 transition-colors"
+                      >
+                        + Добавить
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Фиксированный футер с итогом */}
@@ -302,8 +345,6 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
           onSubmit={handleCheckoutSubmit}
           onCancel={() => setShowCheckoutForm(false)}
           totalPrice={getTotalPrice()}
-          menuItems={recommendedItems}
-          onAddToCart={(item, quantity) => addToCart(item, quantity)}
         />
       )}
     </div>

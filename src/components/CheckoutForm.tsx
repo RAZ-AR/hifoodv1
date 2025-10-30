@@ -7,8 +7,6 @@ interface CheckoutFormProps {
   onSubmit: (data: CheckoutData) => void;
   onCancel: () => void;
   totalPrice: number;
-  menuItems?: MenuItem[];
-  onAddToCart?: (item: MenuItem, quantity: number) => void;
 }
 
 export interface CheckoutData {
@@ -35,7 +33,7 @@ export interface CheckoutData {
  * - Способ оплаты
  * - Комментарий к заказу
  */
-const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPrice, menuItems = [], onAddToCart }) => {
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPrice }) => {
   const [formData, setFormData] = useState<CheckoutData>({
     name: '',
     street: '',
@@ -439,51 +437,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
               </div>
             </div>
           </div>
-
-          {/* Рекомендации */}
-          {menuItems.length > 0 && onAddToCart && (
-            <div>
-              <h3 className="text-base font-bold tg-theme-text mb-3">Добавить к заказу?</h3>
-              <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2">
-                {menuItems
-                  .filter(item => item.available)
-                  .slice(0, 3)
-                  .map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex-shrink-0 w-[260px] bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden snap-center border border-gray-200 dark:border-gray-600"
-                    >
-                      <img
-                        src={item.image_url}
-                        alt={item.name}
-                        className="w-full h-28 object-cover"
-                      />
-                      <div className="p-3">
-                        <h4 className="text-sm font-semibold tg-theme-text mb-1 line-clamp-1">
-                          {item.name}
-                        </h4>
-                        <p className="text-sm font-bold text-primary-600 mb-2">{item.price} RSD</p>
-
-                        {/* Кнопка добавить */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            onAddToCart(item, 1);
-                            if (window.Telegram?.WebApp) {
-                              window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-                            }
-                          }}
-                          className="w-full py-2 bg-primary-500 text-white rounded-lg text-xs font-semibold hover:bg-primary-600 transition-colors"
-                        >
-                          + Добавить
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
 
           {/* Кнопки */}
           <div className="flex gap-3 pt-4 pb-8">

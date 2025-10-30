@@ -42,11 +42,11 @@ const SubCategoryFilter: React.FC<SubCategoryFilterProps> = ({
   }
 
   return (
-    <div className="sticky top-[126px] z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 py-2.5">
+    <div className="sticky top-[57px] z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
       <div className="max-w-7xl mx-auto">
         <div
           ref={scrollContainerRef}
-          className="flex gap-2 overflow-x-auto px-4 scrollbar-hide scroll-smooth"
+          className="flex gap-2 overflow-x-auto px-4 py-2.5 scrollbar-hide scroll-smooth snap-x snap-mandatory"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -56,7 +56,7 @@ const SubCategoryFilter: React.FC<SubCategoryFilterProps> = ({
           <button
             onClick={() => onSubCategoryChange(null)}
             data-subcategory="all"
-            className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+            className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap snap-start ${
               selectedSubCategory === null
                 ? 'bg-primary-500 text-white shadow-sm'
                 : 'bg-gray-100 dark:bg-gray-800 tg-theme-text hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -71,7 +71,7 @@ const SubCategoryFilter: React.FC<SubCategoryFilterProps> = ({
               key={subCategory}
               onClick={() => onSubCategoryChange(subCategory)}
               data-subcategory={subCategory}
-              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap snap-start ${
                 selectedSubCategory === subCategory
                   ? 'bg-primary-500 text-white shadow-sm'
                   : 'bg-gray-100 dark:bg-gray-800 tg-theme-text hover:bg-gray-200 dark:hover:bg-gray-700'

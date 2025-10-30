@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { User } from '@/types';
 import logo from '@/assets/logo.svg';
 import { useLanguage } from '@/context/LanguageContext';
@@ -21,6 +21,21 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onLogoClick }) => {
   const { language, setLanguage } = useLanguage();
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement>(null);
+
+  // Закрываем dropdown при клике вне его
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
+        setShowLangMenu(false);
+      }
+    };
+
+    if (showLangMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showLangMenu]);
 
   const handleNotificationClick = () => {
     if (window.Telegram?.WebApp) {
@@ -56,7 +71,7 @@ const Header: React.FC<HeaderProps> = ({ onLogoClick }) => {
           {/* Правая часть: Язык + Уведомления */}
           <div className="flex items-center gap-3">
             {/* Выбор языка */}
-            <div className="relative">
+            <div className="relative" ref={langMenuRef}>
               <button
                 onClick={() => setShowLangMenu(!showLangMenu)}
                 className="text-xs font-medium tg-theme-text hover:opacity-70 transition-opacity flex items-center gap-1"
@@ -69,7 +84,7 @@ const Header: React.FC<HeaderProps> = ({ onLogoClick }) => {
 
               {/* Dropdown меню языков */}
               {showLangMenu && (
-                <div className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 min-w-[80px] z-50">
+                <div className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 min-w-[80px] z-50 animate-fade-in">
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
