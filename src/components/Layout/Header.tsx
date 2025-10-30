@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User } from '@/types';
 import logo from '@/assets/logo.svg';
 import { useLanguage } from '@/context/LanguageContext';
-import { NotificationIcon3D, LocationIcon3D } from '@/components/Icons3D';
+import { NotificationIcon3D } from '@/components/Icons3D';
 
 interface HeaderProps {
   user: User | null;
@@ -11,13 +11,12 @@ interface HeaderProps {
 }
 
 /**
- * HEADER С КАРТОЙ ЛОЯЛЬНОСТИ
+ * HEADER
  *
  * Отображает:
  * - Логотип приложения
- * - Приветствие пользователя
- * - Номер карты лояльности (#1234)
- * - Аватар пользователя
+ * - Выбор языка (EN/SR/RU)
+ * - Уведомления
  */
 const Header: React.FC<HeaderProps> = ({ onLogoClick }) => {
   const { language, setLanguage } = useLanguage();
@@ -41,8 +40,8 @@ const Header: React.FC<HeaderProps> = ({ onLogoClick }) => {
   return (
     <header className="sticky top-0 z-50 tg-theme-bg border-b border-gray-200 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Верхняя строка: Лого + Язык + Уведомления */}
-        <div className="flex items-center justify-between mb-3">
+        {/* Лого + Язык + Уведомления */}
+        <div className="flex items-center justify-between">
           {/* Лого */}
           <button
             onClick={onLogoClick}
@@ -104,21 +103,6 @@ const Header: React.FC<HeaderProps> = ({ onLogoClick }) => {
           </div>
         </div>
 
-        {/* Нижняя строка: Адрес доставки */}
-        <button className="flex items-center gap-2 hover:opacity-80 transition-opacity w-full">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center shadow-md">
-            <LocationIcon3D size={22} />
-          </div>
-          <div className="text-left flex-1">
-            <p className="text-xs text-gray-500">Bengaluru</p>
-            <p className="text-sm font-medium tg-theme-text line-clamp-1">
-              BTM Layout, 500628
-            </p>
-          </div>
-          <svg width="20" height="20" viewBox="0 0 24 24" className="fill-gray-400">
-            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-          </svg>
-        </button>
       </div>
     </header>
   );
