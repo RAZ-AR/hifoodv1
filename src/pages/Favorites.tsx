@@ -88,24 +88,24 @@ const Favorites: React.FC<FavoritesProps> = () => {
   // Пустое избранное
   if (favoriteItems.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 pb-20">
+      <div className="min-h-screen bg-cream-300 flex items-center justify-center px-4 pb-20">
         <div className="text-center">
           <span className="text-6xl mb-4 block">❤️</span>
-          <h2 className="text-2xl font-bold tg-theme-text mb-2">Избранное пусто</h2>
-          <p className="tg-theme-hint">Добавьте любимые блюда из меню</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">No Favorites Yet</h2>
+          <p className="text-gray-600">Add your favorite dishes from the menu</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="pb-20">
+    <div className="pb-20 bg-cream-300 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Заголовок */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold tg-theme-text">Избранное</h1>
-          <p className="text-sm tg-theme-hint mt-1">
-            {favoriteItems.length} {favoriteItems.length === 1 ? 'блюдо' : 'блюд'}
+          <h1 className="text-3xl font-bold text-gray-900">Favorites</h1>
+          <p className="text-sm text-gray-600 mt-2">
+            {favoriteItems.length} {favoriteItems.length === 1 ? 'dish' : 'dishes'}
           </p>
         </div>
 

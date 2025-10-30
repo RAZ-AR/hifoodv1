@@ -6,7 +6,6 @@ import ProductModal from '@/components/ProductModal';
 import { generateOrderId, saveOrder } from '@/hooks/useOrderTracking';
 import { formatOrderData } from '@/utils/orderMessage';
 import { showTelegramAlert, triggerHaptic, getTelegramUser } from '@/utils/telegram';
-import { formatItemCount } from '@/utils/formatters';
 import { ORDER_CONFIG } from '@/constants';
 import { api } from '@/services/api';
 import { MenuItem } from '@/types';
@@ -142,37 +141,37 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
   // Пустая корзина
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 pb-20">
+      <div className="min-h-screen bg-cream-300 flex items-center justify-center px-4 pb-20">
         <div className="text-center">
           <span className="text-6xl mb-4 block">🛒</span>
-          <h2 className="text-2xl font-bold tg-theme-text mb-2">Корзина пуста</h2>
-          <p className="tg-theme-hint">Добавьте блюда из меню</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Cart is Empty</h2>
+          <p className="text-gray-600">Add dishes from the menu</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen bg-cream-300 pb-24">
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Заголовок */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold tg-theme-text">Корзина</h1>
-          <p className="text-sm tg-theme-hint mt-1">
-            {formatItemCount(cartItems.length)}
+          <h1 className="text-3xl font-bold text-gray-900">Cart</h1>
+          <p className="text-sm text-gray-600 mt-2">
+            {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
           </p>
         </div>
 
         {/* Список товаров */}
-        <div className="space-y-4 mb-6">
+        <div className="space-y-3 mb-6">
           {cartItems.map(({ item, quantity }) => (
             <div
               key={item.id}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4"
+              className="bg-white rounded-2xl shadow-sm p-4"
             >
               <div className="flex gap-4">
                 {/* Изображение */}
-                <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-accent-green">
                   <img
                     src={item.image_url}
                     alt={item.name}
@@ -182,61 +181,51 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
 
                 {/* Информация */}
                 <div className="flex-grow">
-                  <h3 className="font-semibold tg-theme-text mb-1">{item.name}</h3>
-                  <p className="text-sm tg-theme-hint mb-2">{item.category}</p>
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-bold text-gray-900 text-sm">{item.name}</h3>
+                    <button
+                      onClick={() => removeFromCart(item.id)}
+                      className="flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors"
+                      aria-label="Remove"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
 
                   <div className="flex items-center justify-between">
-                    {/* Цена */}
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-lg font-bold text-primary-600">
-                        {item.price * quantity}
-                      </span>
-                      <span className="text-xs tg-theme-hint">RSD</span>
-                    </div>
-
                     {/* Количество */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 bg-gray-100 rounded-full px-2 py-1">
                       <button
                         onClick={() => updateQuantity(item.id, quantity - 1)}
-                        className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600"
+                        className="w-6 h-6 flex items-center justify-center"
                       >
-                        <span className="text-lg font-bold">−</span>
+                        <span className="text-base font-bold text-gray-700">−</span>
                       </button>
 
-                      <span className="w-8 text-center font-semibold tg-theme-text">
+                      <span className="w-6 text-center font-semibold text-gray-900 text-sm">
                         {quantity}
                       </span>
 
                       <button
                         onClick={() => updateQuantity(item.id, quantity + 1)}
-                        className="w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center hover:bg-primary-600"
+                        className="w-6 h-6 flex items-center justify-center"
                       >
-                        <span className="text-lg font-bold">+</span>
+                        <span className="text-base font-bold text-gray-700">+</span>
                       </button>
+                    </div>
+
+                    {/* Цена */}
+                    <div className="text-lg font-bold text-gray-900">
+                      ${(item.price * quantity).toFixed(2)}
                     </div>
                   </div>
                 </div>
-
-                {/* Кнопка удаления */}
-                <button
-                  onClick={() => removeFromCart(item.id)}
-                  className="flex-shrink-0 w-8 h-8 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full flex items-center justify-center"
-                  aria-label="Удалить"
-                >
-                  <span className="text-xl">🗑️</span>
-                </button>
               </div>
             </div>
           ))}
         </div>
-
-        {/* Очистить корзину */}
-        <button
-          onClick={clearCart}
-          className="w-full mb-4 py-2 text-red-500 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-        >
-          Очистить корзину
-        </button>
 
         {/* Рекомендации */}
         {recommendedItems.length > 0 && (
@@ -284,39 +273,35 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
         )}
 
         {/* Футер с итогом */}
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4">
-        <div className="max-w-7xl mx-auto">
+        <div className="bg-white rounded-2xl p-5 shadow-sm">
           {/* Количество приборов */}
-          <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-100">
             <div className="flex items-center gap-2">
-              <span className="text-2xl">🍴</span>
-              <span className="text-sm font-medium tg-theme-text">Приборы</span>
+              <span className="text-xl">🍴</span>
+              <span className="text-sm font-medium text-gray-900">Cutlery</span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 bg-gray-100 rounded-full px-2 py-1">
               <button
                 onClick={() => setCutleryCount(Math.max(0, cutleryCount - 1))}
-                className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-95 transition-all"
+                className="w-6 h-6 flex items-center justify-center"
               >
-                <span className="text-lg font-bold text-gray-600 dark:text-gray-300">−</span>
+                <span className="text-base font-bold text-gray-700">−</span>
               </button>
-              <span className="w-8 text-center font-bold tg-theme-text">{cutleryCount}</span>
+              <span className="w-6 text-center font-bold text-gray-900 text-sm">{cutleryCount}</span>
               <button
                 onClick={() => setCutleryCount(cutleryCount + 1)}
-                className="w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center hover:bg-primary-600 active:scale-95 transition-all"
+                className="w-6 h-6 flex items-center justify-center"
               >
-                <span className="text-lg font-bold">+</span>
+                <span className="text-base font-bold text-gray-700">+</span>
               </button>
             </div>
           </div>
 
           {/* Итоговая сумма */}
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-lg font-semibold tg-theme-text">Итого:</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-primary-600">
-                {getTotalPrice().toFixed(0)}
-              </span>
-              <span className="text-sm tg-theme-hint">RSD</span>
+          <div className="flex justify-between items-center mb-5">
+            <span className="text-lg font-semibold text-gray-900">Total:</span>
+            <div className="text-3xl font-bold text-gray-900">
+              ${getTotalPrice().toFixed(2)}
             </div>
           </div>
 
@@ -325,23 +310,22 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
             onClick={handleCheckoutClick}
             disabled={isOrdering}
             className={`
-              w-full py-3 rounded-lg font-semibold text-white transition-all
+              w-full py-4 rounded-2xl font-bold text-white text-lg transition-all
               ${isOrdering
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-primary-500 hover:bg-primary-600 active:bg-primary-700'
+                : 'bg-accent-black hover:bg-opacity-90 active:scale-95'
               }
             `}
           >
             {isOrdering ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="animate-spin">⏳</span>
-                Оформление...
+                Processing...
               </span>
             ) : (
-              'Оформить заказ'
+              'Checkout'
             )}
           </button>
-        </div>
         </div>
       </div>
 
