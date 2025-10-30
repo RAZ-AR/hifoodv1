@@ -199,6 +199,11 @@ async function main() {
         const { orderData, customerTelegramId } = req.body;
 
         console.log(`🔍 Webhook вызван: OrderID=${orderData.orderId}, Timestamp=${new Date().toISOString()}`);
+        console.log('📋 Order Data от клиента:', JSON.stringify({
+          orderId: orderData.orderId,
+          name: orderData.name,
+          loyaltyCardNumber: orderData.loyaltyCardNumber,
+        }, null, 2));
 
         // Отправляем заказ в Telegram группу и клиенту
         console.log(`📤 Отправка заказа ${orderData.orderId} в Telegram...`);
@@ -206,6 +211,7 @@ async function main() {
         console.log(`✅ Заказ ${orderData.orderId} успешно отправлен в Telegram`);
 
         // Сохраняем заказ в БД (полная схема после исправления таблицы)
+        console.log('🎫 Loyalty Card Number от клиента:', orderData.loyaltyCardNumber);
         const orderToCreate = {
           order_number: orderData.orderId,
           telegram_id: customerTelegramId || 0,
@@ -237,6 +243,13 @@ async function main() {
         } as any;
 
         console.log('💾 Сохранение заказа в БД:', orderToCreate.order_number);
+        console.log('💾 Loyalty Card в объекте для БД:', orderToCreate.loyalty_card_number);
+        console.log('💾 Полный объект для БД:', JSON.stringify({
+          order_number: orderToCreate.order_number,
+          loyalty_card_number: orderToCreate.loyalty_card_number,
+          customer_name: orderToCreate.customer_name,
+        }, null, 2));
+
         await db.createOrder(orderToCreate);
         console.log('✅ Заказ успешно сохранён в БД');
 

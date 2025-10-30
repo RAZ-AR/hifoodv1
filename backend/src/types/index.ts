@@ -71,11 +71,30 @@ export interface PaymentMethod {
  */
 export interface MenuItem {
   id: string;                         // Уникальный ID блюда
-  category: string;                   // Категория
-  name: string;                       // Название
-  description: string;                // Описание
+
+  // КАТЕГОРИЗАЦИЯ (3 уровня)
+  category: string;                   // Основная категория (напр. "Основные блюда")
+  sub_category?: string;              // Подкатегория (напр. "Паста")
+  sub_category_en?: string;           // Подкатегория (EN)
+  sub_category_sr?: string;           // Подкатегория (SR)
+
+  // МНОГОЯЗЫЧНОСТЬ
+  name: string;                       // Название (RU) - для обратной совместимости
+  title?: string;                     // Название (RU)
+  title_en?: string;                  // Название (EN)
+  title_sr?: string;                  // Название (SR)
+
+  description: string;                // Описание (RU)
+  description_en?: string;            // Описание (EN)
+  description_sr?: string;            // Описание (SR)
+
+  // ОСНОВНАЯ ИНФОРМАЦИЯ
   price: number;                      // Цена в динарах
   image_url: string;                  // URL изображения
+  weight?: string;                    // Вес (напр. "350г")
+  calories?: number;                  // Калории
+
+  // ДОПОЛНИТЕЛЬНО
   ingredients: string[];              // Ингредиенты
   rating: number;                     // Рейтинг (1-5)
   available: boolean;                 // Доступность

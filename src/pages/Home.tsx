@@ -3,6 +3,8 @@ import { MenuItem } from '@/types';
 import { api } from '@/services/api';
 import ProductCard from '@/components/ProductCard';
 import CategoryFilter from '@/components/CategoryFilter';
+import SubCategoryFilter from '@/components/SubCategoryFilter';
+import ProductModal from '@/components/ProductModal';
 import AdBannerSlider from '@/components/AdBannerSlider';
 import SkeletonCard from '@/components/SkeletonCard';
 import SearchBar from '@/components/SearchBar';
@@ -28,25 +30,41 @@ const Home: React.FC = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Все');
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
 
   // Получить список категорий из меню
   const categories = ['Все', ...Array.from(new Set(menuItems.map(item => item.category)))];
+
+  // Получить список подкатегорий для выбранной категории
+  const subCategories = selectedCategory === 'Все'
+    ? []
+    : Array.from(new Set(
+        menuItems
+          .filter(item => item.category === selectedCategory && item.sub_category)
+          .map(item => item.sub_category!)
+      ));
 
   // Загрузить меню при монтировании компонента
   useEffect(() => {
     loadMenu();
   }, []);
 
-  // Фильтровать меню при изменении категории или поиска
+  // Фильтровать меню при изменении категории, подкатегории или поиска
   useEffect(() => {
     let items = menuItems;
 
     // Фильтр по категории
     if (selectedCategory !== 'Все') {
       items = items.filter(item => item.category === selectedCategory);
+    }
+
+    // Фильтр по подкатегории
+    if (selectedSubCategory) {
+      items = items.filter(item => item.sub_category === selectedSubCategory);
     }
 
     // Фильтр по поиску
@@ -59,7 +77,7 @@ const Home: React.FC = () => {
     }
 
     setFilteredItems(items);
-  }, [selectedCategory, searchQuery, menuItems]);
+  }, [selectedCategory, selectedSubCategory, searchQuery, menuItems]);
 
   const loadMenu = async () => {
     try {
@@ -80,6 +98,11 @@ const Home: React.FC = () => {
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
+    setSelectedSubCategory(null); // Сбросить подкатегорию при смене категории
+  };
+
+  const handleSubCategoryChange = (subCategory: string | null) => {
+    setSelectedSubCategory(subCategory);
   };
 
   const handleAddToCart = (item: MenuItem, quantityChange: number) => {
@@ -88,6 +111,25 @@ const Home: React.FC = () => {
 
   const handleFavoriteToggle = (item: MenuItem) => {
     toggleFavorite(item.id);
+  };
+
+  const handleItemClick = (item: MenuItem) => {
+    setSelectedItem(item);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedItem(null);
+  };
+
+  // Получить рекомендованные блюда (из той же подкатегории или категории)
+  const getRelatedItems = (item: MenuItem): MenuItem[] => {
+    return menuItems
+      .filter(menuItem =>
+        menuItem.id !== item.id &&
+        menuItem.available &&
+        (menuItem.sub_category === item.sub_category || menuItem.category === item.category)
+      )
+      .slice(0, 4);
   };
 
   // Состояние загрузки с скелетонами
@@ -164,6 +206,13 @@ const Home: React.FC = () => {
         onCategoryChange={handleCategoryChange}
       />
 
+      {/* Фильтр по подкатегориям */}
+      <SubCategoryFilter
+        subCategories={subCategories}
+        selectedSubCategory={selectedSubCategory}
+        onSubCategoryChange={handleSubCategoryChange}
+      />
+
       {/* Список блюд */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Поисковая строка */}
@@ -202,25 +251,42 @@ const Home: React.FC = () => {
         {filteredItems.length > 0 ? (
           <div className="grid grid-cols-2 gap-4 animate-stagger">
             {filteredItems.map((item) => (
-              <ProductCard
-                key={item.id}
-                item={item}
-                onAddToCart={handleAddToCart}
-                onFavoriteToggle={handleFavoriteToggle}
-                isFavorite={isFavorite(item.id)}
-                currentQuantity={getItemQuantity(item.id)}
-              />
+              <div key={item.id} onClick={() => handleItemClick(item)}>
+                <ProductCard
+                  item={item}
+                  onAddToCart={handleAddToCart}
+                  onFavoriteToggle={handleFavoriteToggle}
+                  isFavorite={isFavorite(item.id)}
+                  currentQuantity={getItemQuantity(item.id)}
+                />
+              </div>
             ))}
           </div>
         ) : (
           <div className="text-center py-12">
             <span className="text-4xl mb-4 block">🔍</span>
             <p className="tg-theme-hint">
-              Нет блюд в категории "{selectedCategory}"
+              {selectedSubCategory
+                ? `Нет блюд в подкатегории "${selectedSubCategory}"`
+                : `Нет блюд в категории "${selectedCategory}"`}
             </p>
           </div>
         )}
       </div>
+
+      {/* Модальное окно с деталями блюда */}
+      {selectedItem && (
+        <ProductModal
+          item={selectedItem}
+          onClose={handleCloseModal}
+          onAddToCart={handleAddToCart}
+          currentQuantity={getItemQuantity(selectedItem.id)}
+          isFavorite={isFavorite(selectedItem.id)}
+          onFavoriteToggle={handleFavoriteToggle}
+          relatedItems={getRelatedItems(selectedItem)}
+          onItemClick={handleItemClick}
+        />
+      )}
     </div>
   );
 };
