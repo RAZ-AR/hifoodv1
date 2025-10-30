@@ -9,6 +9,7 @@ import AdBannerSlider from '@/components/AdBannerSlider';
 import SkeletonCard from '@/components/SkeletonCard';
 import SearchBar from '@/components/SearchBar';
 import OrderStatusTracker from '@/components/OrderStatusTracker';
+import PromoBanner from '@/components/PromoBanner';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useOrderTracking } from '@/hooks/useOrderTracking';
@@ -212,6 +213,9 @@ const Home: React.FC = () => {
             placeholder="Поиск блюд..."
           />
         </div>
+
+        {/* Промо-баннер */}
+        <PromoBanner />
 
         {/* Трекер статуса заказа */}
         {orderId && orderStatus && (

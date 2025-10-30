@@ -7,54 +7,75 @@ interface CategoryFilterProps {
 }
 
 /**
- * ФИЛЬТР ПО КАТЕГОРИЯМ
+ * ФИЛЬТР ПО КАТЕГОРИЯМ - НОВЫЙ ДИЗАЙН
  *
- * Отображает горизонтальный список категорий меню
- * Позволяет выбрать одну категорию для фильтрации
+ * Круглые кнопки с эмодзи как в референсе
+ * Вертикальная сетка 4 колонки
  */
+
+// Маппинг категорий на эмодзи
+const categoryEmoji: Record<string, string> = {
+  'Все': '🍽️',
+  'Бургеры': '🍔',
+  'Пицца': '🍕',
+  'Салаты': '🥗',
+  'Десерты': '🍰',
+  'Напитки': '🥤',
+  'Супы': '🍲',
+  'Паста': '🍝',
+  'Суши': '🍣',
+  'Роллы': '🍱',
+  'Закуски': '🍟',
+  'Соусы': '🧂',
+};
+
 const CategoryFilter: React.FC<CategoryFilterProps> = ({
   categories,
   selectedCategory,
   onCategoryChange
 }) => {
   return (
-    <div className="sticky top-0 z-40 tg-theme-bg border-b border-gray-200 dark:border-gray-800 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-3">
-        {/* Горизонтальный скролл категорий */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar snap-x snap-mandatory">
+    <div className="bg-cream-300 px-4 pt-4 pb-2">
+      <div className="max-w-7xl mx-auto">
+        {/* Сетка категорий */}
+        <div className="grid grid-cols-4 gap-3 mb-4">
           {categories.map((category) => {
             const isSelected = category === selectedCategory;
+            const emoji = categoryEmoji[category] || '🍽️';
+
             return (
               <button
                 key={category}
                 onClick={() => onCategoryChange(category)}
-                className={`
-                  flex-shrink-0 px-5 py-2.5 rounded-full whitespace-nowrap transition-all text-sm font-medium snap-start
-                  ${isSelected
-                    ? 'bg-primary-500 text-white shadow-md'
-                    : 'bg-gray-100 dark:bg-gray-700 tg-theme-text hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }
-                `}
+                className="flex flex-col items-center gap-2 transition-all"
               >
-                {category}
+                {/* Круглая иконка */}
+                <div
+                  className={`
+                    w-16 h-16 rounded-full flex items-center justify-center text-3xl transition-all
+                    ${isSelected
+                      ? 'bg-primary-500 shadow-lg scale-110'
+                      : 'bg-white shadow-md hover:scale-105'
+                    }
+                  `}
+                >
+                  {emoji}
+                </div>
+
+                {/* Название категории */}
+                <span
+                  className={`
+                    text-xs font-medium text-center line-clamp-1
+                    ${isSelected ? 'text-primary-600 font-semibold' : 'text-gray-700'}
+                  `}
+                >
+                  {category}
+                </span>
               </button>
             );
           })}
         </div>
       </div>
-
-      <style>{`
-        /* Скрыть скроллбар для Chrome, Safari и Opera */
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-
-        /* Скрыть скроллбар для IE, Edge и Firefox */
-        .no-scrollbar {
-          -ms-overflow-style: none;  /* IE и Edge */
-          scrollbar-width: none;  /* Firefox */
-        }
-      `}</style>
     </div>
   );
 };
