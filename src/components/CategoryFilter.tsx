@@ -7,75 +7,59 @@ interface CategoryFilterProps {
 }
 
 /**
- * ФИЛЬТР ПО КАТЕГОРИЯМ - НОВЫЙ ДИЗАЙН
+ * ФИЛЬТР ПО КАТЕГОРИЯМ - СТИЛЬ РЕФЕРЕНСА
  *
- * Круглые кнопки с эмодзи как в референсе
- * Вертикальная сетка 4 колонки
+ * Горизонтальный скролл с закругленными кнопками
+ * Только текст, без иконок
  */
-
-// Маппинг категорий на эмодзи
-const categoryEmoji: Record<string, string> = {
-  'Все': '🍽️',
-  'Бургеры': '🍔',
-  'Пицца': '🍕',
-  'Салаты': '🥗',
-  'Десерты': '🍰',
-  'Напитки': '🥤',
-  'Супы': '🍲',
-  'Паста': '🍝',
-  'Суши': '🍣',
-  'Роллы': '🍱',
-  'Закуски': '🍟',
-  'Соусы': '🧂',
-};
-
 const CategoryFilter: React.FC<CategoryFilterProps> = ({
   categories,
   selectedCategory,
   onCategoryChange
 }) => {
   return (
-    <div className="bg-cream-300 px-4 pt-4 pb-2">
+    <div className="bg-cream-300 px-4 pb-4">
       <div className="max-w-7xl mx-auto">
-        {/* Сетка категорий */}
-        <div className="grid grid-cols-4 gap-3 mb-4">
+        {/* Заголовок */}
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xl font-bold text-gray-900">Category</h2>
+          <button className="text-sm text-gray-600">See All</button>
+        </div>
+
+        {/* Горизонтальный скролл категорий */}
+        <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-2">
           {categories.map((category) => {
             const isSelected = category === selectedCategory;
-            const emoji = categoryEmoji[category] || '🍽️';
 
             return (
               <button
                 key={category}
                 onClick={() => onCategoryChange(category)}
-                className="flex flex-col items-center gap-2 transition-all"
+                className={`
+                  flex-shrink-0 px-6 py-3 rounded-full whitespace-nowrap transition-all text-sm font-medium snap-start
+                  ${isSelected
+                    ? 'bg-primary-500 text-white shadow-md'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }
+                `}
               >
-                {/* Круглая иконка */}
-                <div
-                  className={`
-                    w-16 h-16 rounded-full flex items-center justify-center text-3xl transition-all
-                    ${isSelected
-                      ? 'bg-primary-500 shadow-lg scale-110'
-                      : 'bg-white shadow-md hover:scale-105'
-                    }
-                  `}
-                >
-                  {emoji}
-                </div>
-
-                {/* Название категории */}
-                <span
-                  className={`
-                    text-xs font-medium text-center line-clamp-1
-                    ${isSelected ? 'text-primary-600 font-semibold' : 'text-gray-700'}
-                  `}
-                >
-                  {category}
-                </span>
+                {category}
               </button>
             );
           })}
         </div>
       </div>
+
+      <style>{`
+        /* Скрыть скроллбар */
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 };

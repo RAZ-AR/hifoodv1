@@ -11,14 +11,11 @@ interface ProductModalProps {
 }
 
 /**
- * МОДАЛЬНОЕ ОКНО С ДЕТАЛЯМИ БЛЮДА
+ * PRODUCT MODAL - СТИЛЬ РЕФЕРЕНСА
  *
- * Отображает:
- * - Полное описание
- * - Вес и калории
- * - Аллергены
- * - Возможность добавить в корзину
- * - Рекомендации других блюд
+ * Полноэкранное изображение сверху
+ * Информация о блюде снизу
+ * Большая черная кнопка "Add to Cart"
  */
 const ProductModal: React.FC<ProductModalProps> = ({
   item,
@@ -35,6 +32,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
     if (quantityToAdd > 0) {
       onAddToCart(item, quantityToAdd);
     }
+    onClose();
   };
 
   const handleQuantityChange = (delta: number) => {
@@ -43,164 +41,121 @@ const ProductModal: React.FC<ProductModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50 animate-fade-in">
-      <div className="bg-white dark:bg-gray-800 rounded-t-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slide-in-up">
-        {/* Изображение */}
-        <div className="relative h-64 w-full">
-          <img
-            src={item.image_url}
-            alt={item.name}
-            className="w-full h-full object-cover"
-          />
+    <div className="fixed inset-0 bg-white z-50 flex flex-col animate-fade-in">
+      {/* Верхняя часть: Изображение на весь экран */}
+      <div className="relative h-[45%] bg-gradient-to-b from-accent-green to-transparent">
+        <img
+          src={item.image_url}
+          alt={item.name}
+          className="w-full h-full object-contain"
+        />
 
-          {/* Кнопки закрытия и избранного */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 w-10 h-10 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <span className="text-2xl">×</span>
-          </button>
+        {/* Кнопки закрытия и избранного */}
+        <button
+          onClick={onClose}
+          className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 active:scale-95 transition-all"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
 
-          <button
-            onClick={() => onFavoriteToggle(item)}
-            className="absolute top-4 left-4 w-10 h-10 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <span className="text-2xl">{isFavorite ? '❤️' : '🤍'}</span>
-          </button>
+        <button
+          onClick={() => onFavoriteToggle(item)}
+          className="absolute top-6 right-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 active:scale-95 transition-all"
+        >
+          <span className="text-2xl">{isFavorite ? '❤️' : '🤍'}</span>
+        </button>
+      </div>
 
-          {/* Скидка */}
-          {item.discount && item.discount > 0 && (
-            <div className="absolute top-4 right-16 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-              -{item.discount}%
-            </div>
-          )}
-        </div>
+      {/* Нижняя часть: Информация */}
+      <div className="flex-1 bg-white rounded-t-3xl -mt-6 px-6 pt-6 pb-8 overflow-y-auto">
+        {/* Название */}
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">{item.name}</h2>
 
-        {/* Информация о блюде */}
-        <div className="p-6">
-          {/* Категория */}
-          {item.sub_category && (
-            <span className="inline-block px-3 py-1 bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-full text-xs font-medium mb-3">
-              {item.sub_category}
-            </span>
-          )}
+        {/* Описание */}
+        <p className="text-gray-600 text-base leading-relaxed mb-4">
+          {item.description}
+        </p>
 
-          {/* Название */}
-          <h2 className="text-2xl font-bold tg-theme-text mb-2">{item.name}</h2>
-
-          {/* Вес и калории */}
-          <div className="flex items-center gap-4 mb-4">
-            {item.weight && (
-              <div className="flex items-center gap-1 text-sm tg-theme-hint">
-                <span>⚖️</span>
-                <span>{item.weight}</span>
-              </div>
-            )}
-            {item.calories && (
-              <div className="flex items-center gap-1 text-sm tg-theme-hint">
-                <span>🔥</span>
-                <span>{item.calories} ккал</span>
-              </div>
-            )}
-            {item.preparation_time && (
-              <div className="flex items-center gap-1 text-sm tg-theme-hint">
-                <span>⏱️</span>
-                <span>{item.preparation_time} мин</span>
-              </div>
-            )}
-          </div>
-
-          {/* Рейтинг */}
+        {/* Характеристики */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
           {item.rating && (
-            <div className="flex items-center gap-1 mb-4">
-              <span className="text-yellow-500">⭐</span>
-              <span className="text-sm font-medium tg-theme-text">{item.rating.toFixed(1)}</span>
-            </div>
-          )}
-
-          {/* Описание */}
-          <p className="tg-theme-text text-base leading-relaxed mb-6">{item.description}</p>
-
-          {/* Ингредиенты */}
-          {item.ingredients && item.ingredients.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-sm font-semibold tg-theme-text mb-2">Ингредиенты:</h3>
-              <div className="flex flex-wrap gap-2">
-                {item.ingredients.map((ingredient, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm tg-theme-text"
-                  >
-                    {ingredient}
-                  </span>
-                ))}
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <span className="text-yellow-500">⭐</span>
+                <span className="text-lg font-bold text-gray-900">{item.rating.toFixed(1)}</span>
               </div>
+              <span className="text-xs text-gray-500">Rating</span>
             </div>
           )}
-
-          {/* Аллергены */}
-          {item.allergens && item.allergens.length > 0 && (
-            <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-              <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-400 mb-2">
-                ⚠️ Аллергены:
-              </h3>
-              <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                {item.allergens.join(', ')}
-              </p>
+          {item.calories && (
+            <div className="text-center">
+              <div className="text-lg font-bold text-gray-900 mb-1">{item.calories}</div>
+              <span className="text-xs text-gray-500">Kcal</span>
             </div>
           )}
-
-          {/* Цена и количество */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <div className="text-2xl font-bold text-primary-600">
-                {item.discount && item.discount > 0 ? (
-                  <>
-                    <span className="line-through text-gray-400 text-lg mr-2">{item.price} RSD</span>
-                    <span>{Math.round(item.price * (1 - item.discount / 100))} RSD</span>
-                  </>
-                ) : (
-                  <span>{item.price} RSD</span>
-                )}
-              </div>
+          {item.preparation_time && (
+            <div className="text-center">
+              <div className="text-lg font-bold text-gray-900 mb-1">{item.preparation_time}</div>
+              <span className="text-xs text-gray-500">min</span>
             </div>
+          )}
+          {item.weight && (
+            <div className="text-center">
+              <div className="text-lg font-bold text-gray-900 mb-1">{item.weight}</div>
+              <span className="text-xs text-gray-500">grams</span>
+            </div>
+          )}
+        </div>
 
-            {/* Счетчик количества */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => handleQuantityChange(-1)}
-                disabled={quantity <= 1}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="text-xl font-bold">−</span>
-              </button>
-              <span className="text-xl font-bold tg-theme-text min-w-[2rem] text-center">
-                {quantity}
-              </span>
-              <button
-                onClick={() => handleQuantityChange(1)}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
-              >
-                <span className="text-xl font-bold">+</span>
-              </button>
+        {/* Ингредиенты */}
+        {item.ingredients && item.ingredients.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-3">Ingredients</h3>
+            <div className="text-sm text-gray-600">
+              {item.ingredients.join(', ')}
             </div>
           </div>
+        )}
 
-          {/* Кнопка добавления в корзину */}
-          <button
-            onClick={handleAddToCart}
-            disabled={!item.available || quantity === currentQuantity}
-            className="w-full py-4 bg-primary-500 text-white rounded-xl font-semibold text-lg hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-          >
-            {!item.available
-              ? 'Недоступно'
-              : currentQuantity > 0 && quantity === currentQuantity
-              ? 'Уже в корзине'
-              : currentQuantity > 0
-              ? `Обновить (${quantity} шт)`
-              : `Добавить в корзину — ${item.discount ? Math.round(item.price * (1 - item.discount / 100) * quantity) : item.price * quantity} RSD`}
-          </button>
+        {/* Счетчик количества и цена */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="text-3xl font-bold text-gray-900">
+            ${item.price.toFixed(2)}
+          </div>
+
+          {/* Счетчик */}
+          <div className="flex items-center gap-4 bg-gray-100 rounded-full px-4 py-3">
+            <button
+              onClick={() => handleQuantityChange(-1)}
+              disabled={quantity <= 1}
+              className="w-8 h-8 flex items-center justify-center disabled:opacity-50"
+            >
+              <span className="text-2xl font-bold text-gray-700">−</span>
+            </button>
+            <span className="text-xl font-bold text-gray-900 min-w-[2rem] text-center">
+              {quantity}
+            </span>
+            <button
+              onClick={() => handleQuantityChange(1)}
+              className="w-8 h-8 flex items-center justify-center"
+            >
+              <span className="text-2xl font-bold text-gray-700">+</span>
+            </button>
+          </div>
         </div>
+
+        {/* Кнопка Add to Cart */}
+        <button
+          onClick={handleAddToCart}
+          disabled={!item.available}
+          className="w-full py-5 bg-accent-black text-white rounded-2xl font-bold text-lg hover:bg-opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all active:scale-95"
+        >
+          {!item.available
+            ? 'Not Available'
+            : 'Add to Cart'}
+        </button>
       </div>
     </div>
   );

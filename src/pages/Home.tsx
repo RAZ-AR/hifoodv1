@@ -13,7 +13,6 @@ import PromoBanner from '@/components/PromoBanner';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useOrderTracking } from '@/hooks/useOrderTracking';
-import { formatDishCount } from '@/utils/formatters';
 
 /**
  * ГЛАВНАЯ СТРАНИЦА (МЕНЮ)
@@ -205,12 +204,17 @@ const Home: React.FC = () => {
 
       {/* Список блюд */}
       <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Заголовок */}
+        <h1 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">
+          Get Your Favorite<br />Dishes Delivered Fresh
+        </h1>
+
         {/* Поисковая строка */}
         <div className="mb-6">
           <SearchBar
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Поиск блюд..."
+            placeholder="Search"
           />
         </div>
 
@@ -230,14 +234,11 @@ const Home: React.FC = () => {
         <div className="mb-6">
           <AdBannerSlider />
         </div>
-        {/* Заголовок категории */}
-        <div className="mb-4">
-          <h2 className="text-2xl font-bold tg-theme-text">
-            {selectedCategory}
-          </h2>
-          <p className="text-sm tg-theme-hint mt-1">
-            {formatDishCount(filteredItems.length)}
-          </p>
+
+        {/* Заголовок Popular Food */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-gray-900">Popular Food</h2>
+          <button className="text-sm text-gray-600">See All</button>
         </div>
 
         {/* Сетка карточек */}
