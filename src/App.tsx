@@ -152,14 +152,9 @@ function App() {
     );
   }
 
-  // Обработчик клика на логотип
-  const handleLogoClick = () => {
-    setActiveTab('home');
-  };
-
-  // Обработчик клика на профиль
-  const handleProfileClick = () => {
-    setActiveTab('profile');
+  // Обработчик клика на корзину
+  const handleCartClick = () => {
+    setActiveTab('cart');
   };
 
   // Обработчик навигации на главную (для Cart)
@@ -190,7 +185,7 @@ function App() {
       <FavoritesProvider>
         <CartProvider>
           <div className="min-h-screen tg-theme-bg">
-            <Header user={user} onLogoClick={handleLogoClick} onProfileClick={handleProfileClick} />
+            <Header user={user} onCartClick={handleCartClick} />
 
           <main>
             {renderPage()}
