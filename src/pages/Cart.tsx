@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
+import { useFavorites } from '@/context/FavoritesContext';
 import CheckoutForm, { CheckoutData } from '@/components/CheckoutForm';
+import ProductModal from '@/components/ProductModal';
 import { generateOrderId, saveOrder } from '@/hooks/useOrderTracking';
 import { formatOrderData } from '@/utils/orderMessage';
 import { showTelegramAlert, triggerHaptic, getTelegramUser } from '@/utils/telegram';
@@ -24,11 +26,13 @@ interface CartProps {
 }
 
 const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
-  const { cartItems, updateQuantity, removeFromCart, getTotalPrice, clearCart, addToCart } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, getTotalPrice, clearCart, addToCart, getItemQuantity } = useCart();
+  const { toggleFavorite, isFavorite } = useFavorites();
   const [showCheckoutForm, setShowCheckoutForm] = useState(false);
   const [isOrdering, setIsOrdering] = useState(false);
   const [cutleryCount, setCutleryCount] = useState<number>(ORDER_CONFIG.DEFAULT_CUTLERY_COUNT);
   const [recommendedItems, setRecommendedItems] = useState<MenuItem[]>([]);
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
 
   // Загружаем рекомендованные блюда при открытии формы оформления
   useEffect(() => {
@@ -149,7 +153,7 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
   }
 
   return (
-    <div className="pb-32">
+    <div className="min-h-screen pb-24">
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Заголовок */}
         <div className="mb-6">
@@ -236,16 +240,17 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
 
         {/* Рекомендации */}
         {recommendedItems.length > 0 && (
-          <div className="mb-4">
-            <h3 className="text-base font-bold tg-theme-text mb-3 px-4">Добавить к заказу?</h3>
-            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 px-4">
+          <div className="mb-6">
+            <h3 className="text-base font-bold tg-theme-text mb-3">Добавить к заказу?</h3>
+            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2">
               {recommendedItems
                 .filter(item => item.available)
                 .slice(0, 5)
                 .map((item) => (
                   <div
                     key={item.id}
-                    className="flex-shrink-0 w-[160px] bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden snap-center border border-gray-200 dark:border-gray-600"
+                    onClick={() => setSelectedItem(item)}
+                    className="flex-shrink-0 w-[160px] bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden snap-center border border-gray-200 dark:border-gray-600 cursor-pointer hover:shadow-lg transition-shadow"
                   >
                     <img
                       src={item.image_url}
@@ -260,7 +265,8 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
 
                       {/* Кнопка добавить */}
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           addToCart(item, 1);
                           if (window.Telegram?.WebApp) {
                             window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
@@ -276,10 +282,9 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
             </div>
           </div>
         )}
-      </div>
 
-      {/* Фиксированный футер с итогом */}
-      <div className="fixed bottom-16 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 safe-area-bottom">
+        {/* Футер с итогом */}
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4">
         <div className="max-w-7xl mx-auto">
           {/* Количество приборов */}
           <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
@@ -337,6 +342,7 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
             )}
           </button>
         </div>
+        </div>
       </div>
 
       {/* Форма оформления заказа */}
@@ -345,6 +351,18 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
           onSubmit={handleCheckoutSubmit}
           onCancel={() => setShowCheckoutForm(false)}
           totalPrice={getTotalPrice()}
+        />
+      )}
+
+      {/* Модальное окно товара */}
+      {selectedItem && (
+        <ProductModal
+          item={selectedItem}
+          onClose={() => setSelectedItem(null)}
+          onAddToCart={(item, quantity) => addToCart(item, quantity)}
+          currentQuantity={getItemQuantity(selectedItem.id)}
+          isFavorite={isFavorite(selectedItem.id)}
+          onFavoriteToggle={() => toggleFavorite(selectedItem.id)}
         />
       )}
     </div>
