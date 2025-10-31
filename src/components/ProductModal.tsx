@@ -134,7 +134,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
         {/* Счетчик количества и цена */}
         <div className="flex items-center justify-between mb-6">
           <div className="text-3xl font-bold text-gray-900">
-            ${item.price} RSD
+            {item.price} RSD
           </div>
 
           {/* Счетчик */}

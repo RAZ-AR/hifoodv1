@@ -14,9 +14,7 @@ export interface FilterOptions {
 }
 
 /**
- * FILTER MODAL - Liquid Glass Style
- *
- * Modal for filtering and sorting menu items
+ * FILTER MODAL - Compact Centered Design with Icons
  */
 const FilterModal: React.FC<FilterModalProps> = ({
   isOpen,
@@ -47,22 +45,61 @@ const FilterModal: React.FC<FilterModalProps> = ({
   };
 
   const sortOptions = [
-    { value: 'popular', label: 'Popular' },
-    { value: 'name', label: 'Name (A-Z)' },
-    { value: 'price-asc', label: 'Price: Low to High' },
-    { value: 'price-desc', label: 'Price: High to Low' },
-    { value: 'rating', label: 'Highest Rated' }
+    {
+      value: 'popular',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+      label: 'Popular'
+    },
+    {
+      value: 'name',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M4 7h16M4 12h16M4 17h10" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+      label: 'A-Z'
+    },
+    {
+      value: 'price-asc',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 19V5M5 12l7 7 7-7" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+      label: 'Price ↓'
+    },
+    {
+      value: 'price-desc',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 5v14M5 12l7-7 7 7" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+      label: 'Price ↑'
+    },
+    {
+      value: 'rating',
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+      label: 'Rating'
+    }
   ];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end animate-fade-in">
-      {/* Modal Container with Liquid Glass effect */}
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center px-4 animate-fade-in">
+      {/* Compact Modal Container */}
       <div
-        className="w-full bg-white rounded-t-3xl shadow-2xl animate-slide-up"
+        className="w-full max-w-md bg-white rounded-3xl shadow-2xl animate-fade-in"
         style={{
           backdropFilter: 'blur(24px) saturate(180%)',
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          maxHeight: '80vh'
+          backgroundColor: 'rgba(255, 255, 255, 0.95)'
         }}
       >
         {/* Header */}
@@ -81,47 +118,56 @@ const FilterModal: React.FC<FilterModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="px-6 py-6 overflow-y-auto" style={{ maxHeight: 'calc(80vh - 140px)' }}>
-          {/* Sort By Section */}
+        <div className="px-6 py-6">
+          {/* Sort By Section with Icons */}
           <div className="mb-6">
             <h3 className="text-lg font-bold text-gray-900 mb-3">Sort By</h3>
-            <div className="space-y-2">
-              {sortOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setFilters({ ...filters, sortBy: option.value as any })}
-                  className={`w-full px-4 py-3 rounded-xl text-left transition-all ${
-                    filters.sortBy === option.value
-                      ? 'bg-primary-500 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{option.label}</span>
-                    {filters.sortBy === option.value && (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                        <polyline points="20 6 9 17 4 12" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    )}
-                  </div>
-                </button>
-              ))}
+            <div className="grid grid-cols-3 gap-3">
+              {sortOptions.map((option) => {
+                const isSelected = filters.sortBy === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => setFilters({ ...filters, sortBy: option.value as any })}
+                    className={`relative px-3 py-4 rounded-2xl transition-all ${
+                      isSelected
+                        ? 'bg-[#01fff7] text-gray-900 shadow-lg'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className={isSelected ? 'text-gray-900' : 'text-gray-600'}>
+                        {option.icon}
+                      </div>
+                      <span className="text-xs font-semibold">{option.label}</span>
+
+                      {/* Simple Checkmark */}
+                      {isSelected && (
+                        <div className="absolute top-2 right-2">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                            <polyline points="20 6 9 17 4 12" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Available Only Toggle */}
-          <div className="mb-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-3">Availability</h3>
+          <div className="mb-4">
             <button
               onClick={() => setFilters({ ...filters, showAvailableOnly: !filters.showAvailableOnly })}
-              className="w-full px-4 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors"
+              className="w-full px-4 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 transition-colors"
             >
               <div className="flex items-center justify-between">
-                <span className="font-medium text-gray-900">Show available only</span>
+                <span className="font-medium text-gray-900 text-sm">Show available only</span>
                 <div className={`w-12 h-6 rounded-full transition-colors ${
-                  filters.showAvailableOnly ? 'bg-primary-500' : 'bg-gray-300'
+                  filters.showAvailableOnly ? 'bg-[#01fff7]' : 'bg-gray-300'
                 }`}>
-                  <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform ${
+                  <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform shadow-md ${
                     filters.showAvailableOnly ? 'ml-6' : 'ml-0.5'
                   }`}></div>
                 </div>
@@ -142,7 +188,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
             onClick={handleApply}
             className="flex-1 py-3 bg-accent-black text-white rounded-xl font-semibold hover:bg-opacity-90 transition-all active:scale-95"
           >
-            Apply Filters
+            Apply
           </button>
         </div>
       </div>
