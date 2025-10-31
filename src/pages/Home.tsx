@@ -10,6 +10,7 @@ import SkeletonCard from '@/components/SkeletonCard';
 import SearchBar from '@/components/SearchBar';
 import OrderStatusTracker from '@/components/OrderStatusTracker';
 import PromoBanner from '@/components/PromoBanner';
+import FilterModal, { FilterOptions } from '@/components/FilterModal';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useOrderTracking } from '@/hooks/useOrderTracking';
@@ -35,6 +36,12 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [showFilterModal, setShowFilterModal] = useState<boolean>(false);
+  const [filters, setFilters] = useState<FilterOptions>({
+    sortBy: 'popular',
+    priceRange: null,
+    showAvailableOnly: true
+  });
 
   // Получить список категорий из меню
   const categories = ['Все', ...Array.from(new Set(menuItems.map(item => item.category)))];
@@ -53,7 +60,7 @@ const Home: React.FC = () => {
     loadMenu();
   }, []);
 
-  // Фильтровать меню при изменении категории, подкатегории или поиска
+  // Фильтровать меню при изменении категории, подкатегории, поиска или фильтров
   useEffect(() => {
     let items = menuItems;
 
@@ -76,8 +83,33 @@ const Home: React.FC = () => {
       );
     }
 
+    // Фильтр по доступности
+    if (filters.showAvailableOnly) {
+      items = items.filter(item => item.available);
+    }
+
+    // Сортировка
+    switch (filters.sortBy) {
+      case 'name':
+        items = [...items].sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'price-asc':
+        items = [...items].sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        items = [...items].sort((a, b) => b.price - a.price);
+        break;
+      case 'rating':
+        items = [...items].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'popular':
+      default:
+        // Default order from API
+        break;
+    }
+
     setFilteredItems(items);
-  }, [selectedCategory, selectedSubCategory, searchQuery, menuItems]);
+  }, [selectedCategory, selectedSubCategory, searchQuery, menuItems, filters]);
 
   const loadMenu = async () => {
     try {
@@ -215,6 +247,7 @@ const Home: React.FC = () => {
             value={searchQuery}
             onChange={setSearchQuery}
             placeholder="Search"
+            onFilterClick={() => setShowFilterModal(true)}
           />
         </div>
 
@@ -279,6 +312,14 @@ const Home: React.FC = () => {
           onFavoriteToggle={handleFavoriteToggle}
         />
       )}
+
+      {/* Модальное окно фильтров */}
+      <FilterModal
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        onApply={setFilters}
+        currentFilters={filters}
+      />
     </div>
   );
 };

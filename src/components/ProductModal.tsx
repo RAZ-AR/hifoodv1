@@ -53,7 +53,13 @@ const ProductModal: React.FC<ProductModalProps> = ({
         {/* Кнопки закрытия и избранного */}
         <button
           onClick={onClose}
-          className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 active:scale-95 transition-all"
+          className="absolute top-6 left-6 w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all duration-300"
+          style={{
+            backdropFilter: 'blur(24px) saturate(200%)',
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            boxShadow: '0 4px 16px 0 rgba(31, 38, 135, 0.2)',
+            border: '1px solid rgba(255, 255, 255, 0.3)'
+          }}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
@@ -62,14 +68,20 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
         <button
           onClick={() => onFavoriteToggle(item)}
-          className="absolute top-6 right-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 active:scale-95 transition-all"
+          className="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all duration-300"
+          style={{
+            backdropFilter: 'blur(24px) saturate(200%)',
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            boxShadow: '0 4px 16px 0 rgba(31, 38, 135, 0.2)',
+            border: '1px solid rgba(255, 255, 255, 0.3)'
+          }}
         >
           <span className="text-2xl">{isFavorite ? '❤️' : '🤍'}</span>
         </button>
       </div>
 
       {/* Нижняя часть: Информация */}
-      <div className="flex-1 bg-white rounded-t-3xl -mt-6 px-6 pt-6 pb-8 overflow-y-auto">
+      <div className="flex-1 bg-white rounded-t-3xl -mt-6 px-6 pt-6 pb-32 overflow-y-auto">
         {/* Название */}
         <h2 className="text-3xl font-bold text-gray-900 mb-4">{item.name}</h2>
 
@@ -122,7 +134,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
         {/* Счетчик количества и цена */}
         <div className="flex items-center justify-between mb-6">
           <div className="text-3xl font-bold text-gray-900">
-            ${item.price.toFixed(2)}
+            ${item.price} RSD
           </div>
 
           {/* Счетчик */}

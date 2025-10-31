@@ -127,7 +127,7 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
 
           <div className="bg-white rounded-2xl shadow-sm p-5 text-center">
             <div className="text-3xl font-bold text-gray-900 mb-1">
-              ${((user.total_spent || 0) / 100).toFixed(0)}
+              ${((user.total_spent || 0) / 100).toFixed(0)} RSD
             </div>
             <div className="text-sm text-gray-600">Total Spent</div>
           </div>
