@@ -104,7 +104,7 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
 
         {/* Карта лояльности */}
         {user.loyalty_card_number && (
-          <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl shadow-lg p-6 mb-4 text-white">
+          <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl shadow-lg p-6 mb-4 text-gray-900">
             <h3 className="text-lg font-bold mb-4">Loyalty Card</h3>
             <div className="text-3xl font-mono font-bold tracking-wider mb-4">
               {user.loyalty_card_number}

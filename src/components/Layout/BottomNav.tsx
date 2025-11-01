@@ -98,7 +98,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
 
                   {/* Бейдж для корзины */}
                   {tab.badge !== undefined && tab.badge > 0 && (
-                    <div className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-primary-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1">
+                    <div className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-primary-500 text-gray-900 text-xs font-bold rounded-full flex items-center justify-center px-1">
                       {tab.badge > 99 ? '99+' : tab.badge}
                     </div>
                   )}
