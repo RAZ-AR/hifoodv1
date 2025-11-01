@@ -104,7 +104,7 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
 
         {/* Карта лояльности */}
         {user.loyalty_card_number && (
-          <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl shadow-lg p-6 mb-4 text-white">
+          <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl shadow-lg p-6 mb-4 text-gray-900">
             <h3 className="text-lg font-bold mb-4">Loyalty Card</h3>
             <div className="text-3xl font-mono font-bold tracking-wider mb-4">
               {user.loyalty_card_number}
@@ -127,7 +127,11 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
 
           <div className="bg-white rounded-2xl shadow-sm p-5 text-center">
             <div className="text-3xl font-bold text-gray-900 mb-1">
+<<<<<<< HEAD
               ((user.total_spent || 0) / 100) + " RSD"
+=======
+              {((user.total_spent || 0) / 100).toFixed(0)} RSD
+>>>>>>> 105768e0ddc2b7913ee308885c09c7941e454294
             </div>
             <div className="text-sm text-gray-600">Total Spent</div>
           </div>

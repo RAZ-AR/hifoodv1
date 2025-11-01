@@ -33,9 +33,9 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
   const [recommendedItems, setRecommendedItems] = useState<MenuItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
 
-  // Загружаем рекомендованные блюда при открытии формы оформления
+  // Загружаем рекомендованные блюда всегда когда есть товары в корзине
   useEffect(() => {
-    if (showCheckoutForm) {
+    if (cartItems.length > 0) {
       const fetchRecommendedItems = async () => {
         try {
           // Получаем все блюда
@@ -47,9 +47,9 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
             (item: MenuItem) => !cartItemIds.includes(item.id)
           );
 
-          // Берем случайные 3 блюда
+          // Берем случайные 5 блюд
           const shuffled = available.sort(() => 0.5 - Math.random());
-          setRecommendedItems(shuffled.slice(0, 3));
+          setRecommendedItems(shuffled.slice(0, 5));
         } catch (error) {
           console.error('Ошибка загрузки рекомендаций:', error);
         }
@@ -57,7 +57,7 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
 
       fetchRecommendedItems();
     }
-  }, [showCheckoutForm, cartItems]);
+  }, [cartItems]);
 
   const handleCheckoutClick = () => {
     setShowCheckoutForm(true);
@@ -218,7 +218,11 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
 
                     {/* Цена */}
                     <div className="text-lg font-bold text-gray-900">
+<<<<<<< HEAD
                       (item.price * quantity) + " RSD"
+=======
+                      {(item.price * quantity).toFixed(0)} RSD
+>>>>>>> 105768e0ddc2b7913ee308885c09c7941e454294
                     </div>
                   </div>
                 </div>
@@ -230,44 +234,121 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
         {/* Рекомендации */}
         {recommendedItems.length > 0 && (
           <div className="mb-6">
-            <h3 className="text-base font-bold tg-theme-text mb-3">Добавить к заказу?</h3>
+            <h3 className="text-base font-bold text-gray-900 mb-3">Добавить к заказу?</h3>
             <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2">
               {recommendedItems
                 .filter(item => item.available)
                 .slice(0, 5)
-                .map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => setSelectedItem(item)}
-                    className="flex-shrink-0 w-[160px] bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden snap-center border border-gray-200 dark:border-gray-600 cursor-pointer hover:shadow-lg transition-shadow"
-                  >
-                    <img
-                      src={item.image_url}
-                      alt={item.name}
-                      className="w-full h-24 object-cover"
-                    />
-                    <div className="p-3">
-                      <h4 className="text-xs font-semibold tg-theme-text mb-1 line-clamp-2 h-8">
-                        {item.name}
-                      </h4>
-                      <p className="text-sm font-bold text-primary-600 mb-2">{item.price} RSD</p>
+                .map((item, index) => {
+                  const cardColors = ['bg-accent-green', 'bg-accent-blue'];
+                  const cardColor = cardColors[index % cardColors.length];
+                  const currentQuantity = getItemQuantity(item.id);
 
-                      {/* Кнопка добавить */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addToCart(item, 1);
-                          if (window.Telegram?.WebApp) {
-                            window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-                          }
-                        }}
-                        className="w-full py-1.5 bg-primary-500 text-white rounded-lg text-xs font-semibold hover:bg-primary-600 transition-colors"
+                  return (
+                    <div
+                      key={item.id}
+                      className={`flex-shrink-0 w-[160px] ${cardColor} rounded-3xl overflow-hidden snap-center cursor-pointer hover:shadow-xl transition-all duration-300`}
+                      style={{
+                        backdropFilter: 'blur(20px) saturate(180%)',
+                        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)'
+                      }}
+                    >
+                      {/* Изображение */}
+                      <div
+                        className="relative h-32 overflow-hidden"
+                        onClick={() => setSelectedItem(item)}
                       >
-                        + Добавить
-                      </button>
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+
+                        {/* Кнопка избранного */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(item.id);
+                            if (window.Telegram?.WebApp) {
+                              window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                            }
+                          }}
+                          className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300"
+                          style={{
+                            backdropFilter: 'blur(24px) saturate(200%)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                            boxShadow: '0 4px 16px 0 rgba(31, 38, 135, 0.2)'
+                          }}
+                          aria-label="Добавить в избранное"
+                        >
+                          <span className="text-lg">{isFavorite(item.id) ? '❤️' : '🤍'}</span>
+                        </button>
+                      </div>
+
+                      {/* Информация о блюде */}
+                      <div className="p-3">
+                        {/* Название */}
+                        <h4 className="text-xs font-bold text-gray-900 mb-1 line-clamp-2 h-8">
+                          {item.name}
+                        </h4>
+
+                        {/* Цена и кнопка */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold text-gray-900">
+                            {item.price} RSD
+                          </span>
+
+                          {/* Кнопка добавления */}
+                          {currentQuantity === 0 ? (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addToCart(item, 1);
+                                if (window.Telegram?.WebApp) {
+                                  window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+                                }
+                              }}
+                              className="w-8 h-8 bg-accent-black rounded-full flex items-center justify-center hover:bg-opacity-90 active:scale-95 transition-all"
+                            >
+                              <span className="text-white text-lg font-bold">+</span>
+                            </button>
+                          ) : (
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  updateQuantity(item.id, currentQuantity - 1);
+                                  if (window.Telegram?.WebApp) {
+                                    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                                  }
+                                }}
+                                className="w-6 h-6 bg-accent-black rounded-full flex items-center justify-center hover:bg-opacity-90 active:scale-95 transition-all"
+                              >
+                                <span className="text-white text-sm font-bold">−</span>
+                              </button>
+                              <span className="text-xs font-bold text-gray-900 min-w-[1rem] text-center">
+                                {currentQuantity}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  addToCart(item, 1);
+                                  if (window.Telegram?.WebApp) {
+                                    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                                  }
+                                }}
+                                className="w-6 h-6 bg-accent-black rounded-full flex items-center justify-center hover:bg-opacity-90 active:scale-95 transition-all"
+                              >
+                                <span className="text-white text-sm font-bold">+</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           </div>
         )}
@@ -301,7 +382,11 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
           <div className="flex justify-between items-center mb-5">
             <span className="text-lg font-semibold text-gray-900">Total:</span>
             <div className="text-3xl font-bold text-gray-900">
+<<<<<<< HEAD
               getTotalPrice() + " RSD"
+=======
+              {getTotalPrice().toFixed(0)} RSD
+>>>>>>> 105768e0ddc2b7913ee308885c09c7941e454294
             </div>
           </div>
 
@@ -310,10 +395,10 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
             onClick={handleCheckoutClick}
             disabled={isOrdering}
             className={`
-              w-full py-4 rounded-2xl font-bold text-white text-lg transition-all
+              w-full py-4 rounded-2xl font-bold text-lg transition-all
               ${isOrdering
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-accent-black hover:bg-opacity-90 active:scale-95'
+                ? 'bg-gray-400 cursor-not-allowed text-white'
+                : 'bg-primary-500 text-gray-900 hover:bg-primary-600 active:scale-95'
               }
             `}
           >

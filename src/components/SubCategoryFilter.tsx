@@ -58,7 +58,7 @@ const SubCategoryFilter: React.FC<SubCategoryFilterProps> = ({
             data-subcategory="all"
             className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap snap-start ${
               selectedSubCategory === null
-                ? 'bg-primary-500 text-white shadow-sm'
+                ? 'bg-primary-500 text-gray-900 shadow-sm'
                 : 'bg-gray-100 dark:bg-gray-800 tg-theme-text hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
@@ -73,7 +73,7 @@ const SubCategoryFilter: React.FC<SubCategoryFilterProps> = ({
               data-subcategory={subCategory}
               className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap snap-start ${
                 selectedSubCategory === subCategory
-                  ? 'bg-primary-500 text-white shadow-sm'
+                  ? 'bg-primary-500 text-gray-900 shadow-sm'
                   : 'bg-gray-100 dark:bg-gray-800 tg-theme-text hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >

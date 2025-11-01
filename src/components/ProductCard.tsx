@@ -97,7 +97,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div className={`${cardColor} rounded-3xl overflow-hidden hover-lift`}>
+    <div
+      className={`${cardColor} rounded-3xl overflow-hidden hover-lift transition-all duration-300`}
+      style={{
+        backdropFilter: 'blur(20px) saturate(180%)',
+        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+        border: '1px solid rgba(255, 255, 255, 0.18)'
+      }}
+    >
       {/* Изображение */}
       <div
         className="relative h-32 overflow-hidden cursor-pointer"
@@ -116,7 +123,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
             e.stopPropagation();
             handleFavoriteToggle();
           }}
-          className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+          className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300"
+          style={{
+            backdropFilter: 'blur(24px) saturate(200%)',
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            boxShadow: '0 4px 16px 0 rgba(31, 38, 135, 0.2)'
+          }}
           aria-label="Добавить в избранное"
         >
           <span className="text-lg">{isFavorite ? '❤️' : '🤍'}</span>

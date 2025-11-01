@@ -38,7 +38,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 className={`
                   flex-shrink-0 px-6 py-3 rounded-full whitespace-nowrap transition-all text-sm font-medium snap-start
                   ${isSelected
-                    ? 'bg-primary-500 text-white shadow-md'
+                    ? 'bg-primary-500 text-gray-900 shadow-md'
                     : 'bg-white text-gray-700 hover:bg-gray-50'
                   }
                 `}
