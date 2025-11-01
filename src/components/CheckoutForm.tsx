@@ -280,7 +280,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
                 onClick={() => handleChange('contactMethod', 'telegram')}
                 className={`py-3 px-4 rounded-lg border-2 font-medium transition-all ${
                   formData.contactMethod === 'telegram'
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-600'
+                    ? 'border-primary-500 bg-primary-500 text-gray-900'
                     : 'border-gray-300 dark:border-gray-600 tg-theme-text hover:border-primary-300'
                 }`}
               >
@@ -291,7 +291,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
                 onClick={() => handleChange('contactMethod', 'phone')}
                 className={`py-3 px-4 rounded-lg border-2 font-medium transition-all ${
                   formData.contactMethod === 'phone'
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-600'
+                    ? 'border-primary-500 bg-primary-500 text-gray-900'
                     : 'border-gray-300 dark:border-gray-600 tg-theme-text hover:border-primary-300'
                 }`}
               >
@@ -339,12 +339,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
                 onClick={() => handleChange('paymentMethod', 'cash')}
                 className={`px-4 py-3 rounded-lg border-2 transition-all ${
                   formData.paymentMethod === 'cash'
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                    ? 'border-primary-500 bg-primary-500'
                     : 'border-gray-300 dark:border-gray-600'
                 }`}
               >
                 <div className="text-2xl mb-1">💵</div>
-                <div className="text-sm font-medium tg-theme-text">Наличные</div>
+                <div className={`text-sm font-medium ${formData.paymentMethod === 'cash' ? 'text-gray-900' : 'tg-theme-text'}`}>Наличные</div>
               </button>
 
               <button
@@ -352,12 +352,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
                 onClick={() => handleChange('paymentMethod', 'card')}
                 className={`px-4 py-3 rounded-lg border-2 transition-all ${
                   formData.paymentMethod === 'card'
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                    ? 'border-primary-500 bg-primary-500'
                     : 'border-gray-300 dark:border-gray-600'
                 }`}
               >
                 <div className="text-2xl mb-1">💳</div>
-                <div className="text-sm font-medium tg-theme-text">Картой</div>
+                <div className={`text-sm font-medium ${formData.paymentMethod === 'card' ? 'text-gray-900' : 'tg-theme-text'}`}>Картой</div>
               </button>
             </div>
           </div>
@@ -427,12 +427,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
             </div>
             <div className="flex justify-between items-center mb-2">
               <span className="tg-theme-hint">Доставка:</span>
-              <span className="font-semibold text-green-600">Бесплатно</span>
+              <span className="font-semibold text-primary-500">Бесплатно</span>
             </div>
             <div className="border-t border-gray-300 dark:border-gray-600 pt-2 mt-2">
               <div className="flex justify-between items-center">
                 <span className="text-lg font-bold tg-theme-text">Итого:</span>
-                <span className="text-2xl font-bold text-primary-600">{totalPrice} RSD</span>
+                <span className="text-2xl font-bold text-primary-500">{totalPrice} RSD</span>
               </div>
             </div>
           </div>
@@ -448,7 +448,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 px-4 rounded-lg bg-primary-500 text-white hover:bg-primary-600 font-semibold"
+              className="flex-1 py-3 px-4 rounded-lg bg-primary-500 text-gray-900 hover:bg-primary-600 font-semibold transition-all active:scale-95"
             >
               Оформить заказ
             </button>
