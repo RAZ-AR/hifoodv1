@@ -235,7 +235,7 @@ async function main() {
             entrance: orderData.code || '',
             comment: orderData.deliveryNote || '',
           },
-          status: 'confirmed',
+          status: 'accepted',
           payment_method: orderData.paymentMethod,
           payment_status: orderData.paymentMethod === 'cash' ? 'pending' : 'paid',
           customer_comment: orderData.comment || null,
@@ -285,6 +285,22 @@ async function main() {
         res.json(orders);
       } catch (error: any) {
         res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Get order status
+    app.get('/api/orders/:orderId/status', async (req: Request, res: Response) => {
+      try {
+        const orderId = req.params.orderId!;
+        const order = await db.getOrderById(orderId);
+
+        if (!order) {
+          return res.status(404).json({ error: 'Order not found' });
+        }
+
+        return res.json({ status: order.status || 'accepted' });
+      } catch (error: any) {
+        return res.status(500).json({ error: error.message });
       }
     });
 

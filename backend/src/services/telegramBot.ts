@@ -583,19 +583,11 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
 
       console.log(`✅ Заказ найден, текущий статус: ${existingOrder.status}`);
 
-      // Маппинг статусов из кнопок в статусы БД
-      const statusMap: Record<string, string> = {
-        'accepted': 'confirmed',
-        'preparing': 'preparing',
-        'delivering': 'delivering',
-        'delivered': 'completed',
-      };
+      // Сохраняем статус как есть (accepted, preparing, delivering, delivered)
+      console.log(`📝 Новый статус БД: ${status}`);
 
-      const dbStatus = statusMap[status] || status;
-      console.log(`📝 Новый статус БД: ${dbStatus}`);
-
-      await db.updateOrderStatus(orderId, dbStatus as any);
-      console.log(`✅ Статус заказа ${orderId} обновлён в БД: ${dbStatus}`);
+      await db.updateOrderStatus(orderId, status as any);
+      console.log(`✅ Статус заказа ${orderId} обновлён в БД: ${status}`);
     } catch (error) {
       console.error(`❌ Ошибка обновления статуса заказа ${orderId}:`, error);
       console.error(`   Error message: ${(error as Error).message}`);
@@ -656,7 +648,6 @@ ${orderData.comment ? `💬 *Комментарий:*\n${orderData.comment}` : '
       preparing: '👨‍🍳 Наши повара готовят ваш заказ',
       delivering: '🛵 Курьер уже в пути к вам!',
       delivered: '🎉 Заказ доставлен! Приятного аппетита!',
-      completed: '🎉 Заказ доставлен! Приятного аппетита!',
     };
 
     const message = `
