@@ -33,9 +33,9 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
   const [recommendedItems, setRecommendedItems] = useState<MenuItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
 
-  // Загружаем рекомендованные блюда при открытии формы оформления
+  // Загружаем рекомендованные блюда всегда когда есть товары в корзине
   useEffect(() => {
-    if (showCheckoutForm) {
+    if (cartItems.length > 0) {
       const fetchRecommendedItems = async () => {
         try {
           // Получаем все блюда
@@ -47,9 +47,9 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
             (item: MenuItem) => !cartItemIds.includes(item.id)
           );
 
-          // Берем случайные 3 блюда
+          // Берем случайные 5 блюд
           const shuffled = available.sort(() => 0.5 - Math.random());
-          setRecommendedItems(shuffled.slice(0, 3));
+          setRecommendedItems(shuffled.slice(0, 5));
         } catch (error) {
           console.error('Ошибка загрузки рекомендаций:', error);
         }
@@ -57,7 +57,7 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
 
       fetchRecommendedItems();
     }
-  }, [showCheckoutForm, cartItems]);
+  }, [cartItems]);
 
   const handleCheckoutClick = () => {
     setShowCheckoutForm(true);
@@ -250,7 +250,7 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
                       <h4 className="text-xs font-semibold tg-theme-text mb-1 line-clamp-2 h-8">
                         {item.name}
                       </h4>
-                      <p className="text-sm font-bold text-primary-600 mb-2">{item.price} RSD</p>
+                      <p className="text-sm font-bold text-primary-500 mb-2">{item.price} RSD</p>
 
                       {/* Кнопка добавить */}
                       <button
@@ -261,7 +261,7 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
                             window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
                           }
                         }}
-                        className="w-full py-1.5 bg-primary-500 text-white rounded-lg text-xs font-semibold hover:bg-primary-600 transition-colors"
+                        className="w-full py-1.5 bg-primary-500 text-gray-900 rounded-lg text-xs font-semibold hover:bg-primary-600 transition-all active:scale-95"
                       >
                         + Добавить
                       </button>
