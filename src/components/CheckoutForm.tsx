@@ -427,12 +427,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
             </div>
             <div className="flex justify-between items-center mb-2">
               <span className="tg-theme-hint">Доставка:</span>
-              <span className="font-semibold text-primary-500">Бесплатно</span>
+              <span className="font-semibold text-gray-900">Бесплатно</span>
             </div>
             <div className="border-t border-gray-300 dark:border-gray-600 pt-2 mt-2">
               <div className="flex justify-between items-center">
                 <span className="text-lg font-bold tg-theme-text">Итого:</span>
-                <span className="text-2xl font-bold text-primary-500">{totalPrice} RSD</span>
+                <span className="text-2xl font-bold text-gray-900">{totalPrice} RSD</span>
               </div>
             </div>
           </div>
