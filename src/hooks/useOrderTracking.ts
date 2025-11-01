@@ -26,46 +26,61 @@ export const useOrderTracking = (): UseOrderTrackingReturn => {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [orderStatus, setOrderStatus] = useState<OrderStatus | null>(null);
 
-  useEffect(() => {
-    // Загружаем активный заказ из localStorage
-    const savedOrderId = localStorage.getItem(ORDER_ID_KEY);
-    const savedOrderStatus = localStorage.getItem(ORDER_STATUS_KEY) as OrderStatus | null;
-
-    if (savedOrderId && savedOrderStatus) {
-      setOrderId(savedOrderId);
-      setOrderStatus(savedOrderStatus);
-
-      // Периодически обновляем статус заказа
-      const interval = setInterval(async () => {
-        try {
-          const status = await api.getOrderStatus(savedOrderId);
-          if (status?.status) {
-            const newStatus = status.status as OrderStatus;
-            setOrderStatus(newStatus);
-            localStorage.setItem(ORDER_STATUS_KEY, newStatus);
-
-            // Если заказ доставлен, очищаем через некоторое время
-            if (newStatus === 'delivered') {
-              setTimeout(() => {
-                clearOrder();
-              }, AUTO_CLEAR_DELAY);
-            }
-          }
-        } catch (error) {
-          console.error('Error polling order status:', error);
-        }
-      }, POLL_INTERVAL);
-
-      return () => clearInterval(interval);
-    }
-  }, []);
-
   const clearOrder = () => {
     setOrderId(null);
     setOrderStatus(null);
     localStorage.removeItem(ORDER_ID_KEY);
     localStorage.removeItem(ORDER_STATUS_KEY);
   };
+
+  // Загружаем заказ из localStorage при монтировании
+  useEffect(() => {
+    const savedOrderId = localStorage.getItem(ORDER_ID_KEY);
+    const savedOrderStatus = localStorage.getItem(ORDER_STATUS_KEY) as OrderStatus | null;
+
+    if (savedOrderId && savedOrderStatus) {
+      setOrderId(savedOrderId);
+      setOrderStatus(savedOrderStatus);
+    }
+  }, []);
+
+  // Периодически обновляем статус заказа
+  useEffect(() => {
+    if (!orderId) return;
+
+    const pollStatus = async () => {
+      try {
+        console.log('🔄 Polling order status for:', orderId);
+        const status = await api.getOrderStatus(orderId);
+        console.log('📊 Received status:', status);
+
+        if (status?.status) {
+          const newStatus = status.status as OrderStatus;
+          console.log('✅ Updating status to:', newStatus);
+          setOrderStatus(newStatus);
+          localStorage.setItem(ORDER_STATUS_KEY, newStatus);
+
+          // Если заказ доставлен, очищаем через некоторое время
+          if (newStatus === 'delivered') {
+            console.log('🎉 Order delivered, will clear in 30 seconds');
+            setTimeout(() => {
+              clearOrder();
+            }, AUTO_CLEAR_DELAY);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error polling order status:', error);
+      }
+    };
+
+    // Первый запрос сразу
+    pollStatus();
+
+    // Затем каждые 10 секунд
+    const interval = setInterval(pollStatus, POLL_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [orderId]);
 
   return {
     orderId,

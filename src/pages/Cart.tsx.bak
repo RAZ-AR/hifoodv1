@@ -218,7 +218,11 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
 
                     {/* Цена */}
                     <div className="text-lg font-bold text-gray-900">
+<<<<<<< HEAD
+                      (item.price * quantity) + " RSD"
+=======
                       {(item.price * quantity).toFixed(0)} RSD
+>>>>>>> 105768e0ddc2b7913ee308885c09c7941e454294
                     </div>
                   </div>
                 </div>
@@ -378,7 +382,11 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
           <div className="flex justify-between items-center mb-5">
             <span className="text-lg font-semibold text-gray-900">Total:</span>
             <div className="text-3xl font-bold text-gray-900">
+<<<<<<< HEAD
+              getTotalPrice() + " RSD"
+=======
               {getTotalPrice().toFixed(0)} RSD
+>>>>>>> 105768e0ddc2b7913ee308885c09c7941e454294
             </div>
           </div>
 
