@@ -236,11 +236,6 @@ const Home: React.FC = () => {
 
       {/* Список блюд */}
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Заголовок */}
-        <h1 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">
-          Get Your Favorite<br />Dishes Delivered Fresh
-        </h1>
-
         {/* Поисковая строка */}
         <div className="mb-6">
           <SearchBar
