@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCart } from '@/context/CartContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 export type TabType = 'home' | 'favorites' | 'cart' | 'profile';
 
@@ -16,12 +17,13 @@ interface BottomNavProps {
  */
 const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
   const { getTotalItems } = useCart();
+  const { t } = useLanguage();
   const cartItemsCount = getTotalItems();
 
   const tabs = [
     {
       id: 'home' as TabType,
-      label: 'Home',
+      label: t('nav.menu'),
       icon: (isActive: boolean) => (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className={isActive ? 'stroke-gray-900' : 'stroke-white'} strokeWidth="2">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinecap="round" strokeLinejoin="round"/>
@@ -31,7 +33,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
     },
     {
       id: 'cart' as TabType,
-      label: 'Cart',
+      label: t('nav.cart'),
       badge: cartItemsCount,
       icon: (isActive: boolean) => (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className={isActive ? 'stroke-gray-900' : 'stroke-white'} strokeWidth="2">
@@ -43,7 +45,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
     },
     {
       id: 'favorites' as TabType,
-      label: 'Favorites',
+      label: t('nav.favorites'),
       icon: (isActive: boolean) => (
         <svg width="24" height="24" viewBox="0 0 24 24" fill={isActive ? 'currentColor' : 'none'} className={isActive ? 'stroke-gray-900' : 'stroke-white'} strokeWidth="2">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" strokeLinecap="round" strokeLinejoin="round"/>
@@ -52,7 +54,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
     },
     {
       id: 'profile' as TabType,
-      label: 'Profile',
+      label: t('nav.profile'),
       icon: (isActive: boolean) => (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className={isActive ? 'stroke-gray-900' : 'stroke-white'} strokeWidth="2">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round"/>

@@ -314,6 +314,21 @@ async function main() {
       }
     });
 
+    // Get order status
+    app.get('/api/orders/:orderId/status', async (req: Request, res: Response) => {
+      try {
+        const order = await db.getOrderById(req.params.orderId!);
+
+        if (!order) {
+          return res.status(404).json({ error: 'Order not found' });
+        }
+
+        return res.json({ status: order.status });
+      } catch (error: any) {
+        return res.status(500).json({ error: error.message });
+      }
+    });
+
     // ==========================================
     // ADS
     // ==========================================

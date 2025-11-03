@@ -1,5 +1,7 @@
 import React from 'react';
 import { User } from '@/types';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageSelector from '@/components/LanguageSelector';
 
 interface HeaderProps {
   user: User | null;
@@ -12,13 +14,15 @@ interface HeaderProps {
  * Отображает:
  * - Логотип HiFood слева
  * - Приветствие "Hi + имя" по центру
+ * - Селектор языка справа
  * - Белый фон с тенью
  */
 const Header: React.FC<HeaderProps> = ({ user }) => {
+  const { t } = useLanguage();
 
   const getUserName = () => {
-    if (!user) return 'Guest';
-    return user.first_name || 'Guest';
+    if (!user) return t('header.guest');
+    return user.first_name || t('header.guest');
   };
 
   return (
@@ -44,12 +48,12 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
         {/* Центр: Приветствие */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
           <span className="text-lg font-semibold text-gray-700">
-            Hi, {getUserName()}
+            {t('header.hi')}, {getUserName()}
           </span>
         </div>
 
-        {/* Правая часть: пусто */}
-        <div className="w-10"></div>
+        {/* Правая часть: Селектор языка */}
+        <LanguageSelector variant="header" />
       </div>
     </header>
   );
