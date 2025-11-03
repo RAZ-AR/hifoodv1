@@ -208,13 +208,39 @@ class ApiService {
    * Order Status
    */
   async getOrderStatus(orderId: string): Promise<{ status: string } | null> {
+    const url = `${API_BASE_URL}/orders/${orderId}/status`;
+    console.log('🌐 API getOrderStatus called');
+    console.log('   OrderID:', orderId);
+    console.log('   URL:', url);
+    console.log('   Timestamp:', new Date().toISOString());
+
     try {
-      const response = await fetch(`${API_BASE_URL}/orders/${orderId}/status`);
-      if (response.status === 404) return null;
-      if (!response.ok) throw new Error('Failed to fetch order status');
-      return await response.json();
+      console.log('📡 Sending GET request to:', url);
+      const response = await fetch(url);
+      console.log('📨 Response received:');
+      console.log('   Status:', response.status);
+      console.log('   Status Text:', response.statusText);
+      console.log('   OK:', response.ok);
+
+      if (response.status === 404) {
+        console.warn('⚠️  Order not found (404):', orderId);
+        return null;
+      }
+
+      if (!response.ok) {
+        console.error('❌ Response not OK:', response.status, response.statusText);
+        throw new Error('Failed to fetch order status');
+      }
+
+      const data = await response.json();
+      console.log('✅ Order status fetched successfully:', JSON.stringify(data, null, 2));
+      return data;
     } catch (error) {
-      console.error('Error fetching order status:', error);
+      console.error('❌ Error in getOrderStatus:', error);
+      if (error instanceof Error) {
+        console.error('   Error message:', error.message);
+        console.error('   Error name:', error.name);
+      }
       return null;
     }
   }

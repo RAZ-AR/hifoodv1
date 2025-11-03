@@ -38,48 +38,82 @@ export const useOrderTracking = (): UseOrderTrackingReturn => {
     const savedOrderId = localStorage.getItem(ORDER_ID_KEY);
     const savedOrderStatus = localStorage.getItem(ORDER_STATUS_KEY) as OrderStatus | null;
 
+    console.log('📦 useOrderTracking initialized');
+    console.log('   savedOrderId:', savedOrderId);
+    console.log('   savedOrderStatus:', savedOrderStatus);
+
     if (savedOrderId && savedOrderStatus) {
       setOrderId(savedOrderId);
       setOrderStatus(savedOrderStatus);
+      console.log('✅ Order tracking enabled for:', savedOrderId);
+    } else {
+      console.log('ℹ️  No active order in localStorage');
     }
   }, []);
 
   // Периодически обновляем статус заказа
   useEffect(() => {
-    if (!orderId) return;
+    if (!orderId) {
+      console.log('⏸️  Skipping polling - no orderId');
+      return;
+    }
+
+    console.log('🚀 Starting status polling for order:', orderId);
 
     const pollStatus = async () => {
       try {
         console.log('🔄 Polling order status for:', orderId);
-        const status = await api.getOrderStatus(orderId);
-        console.log('📊 Received status:', status);
+        const response = await api.getOrderStatus(orderId);
+        console.log('📊 Raw API response:', JSON.stringify(response, null, 2));
 
-        if (status?.status) {
-          const newStatus = status.status as OrderStatus;
-          console.log('✅ Updating status to:', newStatus);
-          setOrderStatus(newStatus);
-          localStorage.setItem(ORDER_STATUS_KEY, newStatus);
+        if (response?.status) {
+          const newStatus = response.status as OrderStatus;
+          const currentStatus = localStorage.getItem(ORDER_STATUS_KEY);
+
+          console.log('📋 Status comparison:');
+          console.log('   Current:', currentStatus);
+          console.log('   New:', newStatus);
+
+          if (newStatus !== currentStatus) {
+            console.log('🔔 STATUS CHANGED! Updating from', currentStatus, 'to', newStatus);
+            setOrderStatus(newStatus);
+            localStorage.setItem(ORDER_STATUS_KEY, newStatus);
+          } else {
+            console.log('➡️  Status unchanged:', newStatus);
+          }
 
           // Если заказ доставлен, очищаем через некоторое время
           if (newStatus === 'delivered') {
-            console.log('🎉 Order delivered, will clear in 30 seconds');
+            console.log('🎉 Order delivered! Will auto-clear in', AUTO_CLEAR_DELAY / 1000, 'seconds');
             setTimeout(() => {
+              console.log('🧹 Auto-clearing delivered order');
               clearOrder();
             }, AUTO_CLEAR_DELAY);
           }
+        } else {
+          console.warn('⚠️  API returned empty or invalid status');
         }
       } catch (error) {
         console.error('❌ Error polling order status:', error);
+        if (error instanceof Error) {
+          console.error('   Error message:', error.message);
+          console.error('   Error stack:', error.stack);
+        }
       }
     };
 
     // Первый запрос сразу
+    console.log('⏰ Running initial status check');
     pollStatus();
 
     // Затем каждые 10 секунд
+    console.log('⏰ Setting up polling interval:', POLL_INTERVAL / 1000, 'seconds');
     const interval = setInterval(pollStatus, POLL_INTERVAL);
 
-    return () => clearInterval(interval);
+    return () => {
+      console.log('🛑 Stopping status polling for:', orderId);
+      clearInterval(interval);
+    };
   }, [orderId]);
 
   return {
