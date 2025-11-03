@@ -291,6 +291,20 @@ export class SupabaseProvider implements IDataProvider {
     return data as Order[];
   }
 
+  async getUserOrdersByTelegramId(telegramId: number): Promise<Order[]> {
+    const { data, error } = await this.supabase
+      .from('orders')
+      .select('*')
+      .eq('telegram_id', telegramId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Ошибка получения заказов по Telegram ID: ${error.message}`);
+    }
+
+    return data as Order[];
+  }
+
   async updateOrderStatus(orderId: string, status: Order['status']): Promise<Order> {
     return this.updateOrder(orderId, {
       status,

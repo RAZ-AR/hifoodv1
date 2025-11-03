@@ -379,6 +379,14 @@ export class GoogleSheetsProvider implements IDataProvider {
       .map((row) => this.rowToOrder(row));
   }
 
+  async getUserOrdersByTelegramId(telegramId: number): Promise<Order[]> {
+    const rows = await this.readSheet('order!A2:Q');
+    // Предполагаем что telegram_id находится в другой колонке, нужно проверить схему
+    return rows
+      .filter((row) => parseInt(row[2]) === telegramId) // Adjust column index as needed
+      .map((row) => this.rowToOrder(row));
+  }
+
   async updateOrderStatus(orderId: string, status: Order['status']): Promise<Order> {
     return this.updateOrder(orderId, { status, updated_at: new Date().toISOString() });
   }

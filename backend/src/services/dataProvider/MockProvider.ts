@@ -177,6 +177,10 @@ export class MockProvider implements IDataProvider {
     return [];
   }
 
+  async getUserOrdersByTelegramId(_telegramId: number): Promise<Order[]> {
+    return [];
+  }
+
   async createOrder(orderData: Partial<Order>): Promise<Order> {
     const order: Order = {
       ...orderData,

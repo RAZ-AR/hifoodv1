@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
+import { api } from '@/services/api';
+import { getTelegramUser } from '@/utils/telegram';
+import type { Order } from '@/types';
 
 interface ProfileProps {
   user: User | null;
@@ -17,6 +20,50 @@ interface ProfileProps {
  */
 const Profile: React.FC<ProfileProps> = ({ user }) => {
   const { t } = useLanguage();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+  // Загружаем историю заказов при монтировании
+  useEffect(() => {
+    const loadOrders = async () => {
+      const telegramUser = getTelegramUser();
+      const telegramId = telegramUser?.id;
+
+      if (!telegramId) return;
+
+      setLoadingOrders(true);
+      try {
+        const userOrders = await api.getUserOrdersByTelegramId(telegramId);
+        setOrders(userOrders);
+      } catch (error) {
+        console.error('Error loading orders:', error);
+      } finally {
+        setLoadingOrders(false);
+      }
+    };
+
+    loadOrders();
+  }, []);
+
+  const getStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
+      accepted: t('orderStatus.confirmed'),
+      preparing: t('orderStatus.preparing'),
+      delivering: t('orderStatus.delivering'),
+      delivered: t('orderStatus.delivered'),
+    };
+    return statusMap[status] || status;
+  };
+
+  const getStatusColor = (status: string) => {
+    const colorMap: Record<string, string> = {
+      accepted: 'bg-pink-100 text-pink-700',
+      preparing: 'bg-blue-100 text-blue-700',
+      delivering: 'bg-cyan-100 text-cyan-700',
+      delivered: 'bg-green-100 text-green-700',
+    };
+    return colorMap[status] || 'bg-gray-100 text-gray-700';
+  };
 
   if (!user) {
     return (
@@ -124,17 +171,60 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="bg-white rounded-2xl shadow-sm p-5 text-center">
             <div className="text-3xl font-bold text-gray-900 mb-1">
-              {user.total_orders || 0}
+              {orders.length}
             </div>
             <div className="text-sm text-gray-600">{t('profile.totalOrders')}</div>
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm p-5 text-center">
             <div className="text-3xl font-bold text-gray-900 mb-1">
-              {((user.total_spent || 0) / 100).toFixed(0)} RSD
+              {orders.reduce((sum, order: any) => sum + (order.total || 0), 0).toFixed(0)} RSD
             </div>
             <div className="text-sm text-gray-600">{t('profile.totalSpent')}</div>
           </div>
+        </div>
+
+        {/* История заказов */}
+        <div className="bg-white rounded-2xl shadow-sm p-4 mb-4">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">{t('profile.orderHistory')}</h3>
+
+          {loadingOrders ? (
+            <div className="text-center py-8">
+              <div className="inline-block w-8 h-8 border-4 border-gray-200 border-t-primary-500 rounded-full animate-spin"></div>
+            </div>
+          ) : orders.length === 0 ? (
+            <div className="text-center py-8">
+              <span className="text-4xl mb-2 block">📦</span>
+              <p className="text-gray-500 text-sm">{t('profile.noOrders')}</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {orders.map((order: any) => (
+                <div
+                  key={order.id || order.order_id}
+                  className="border border-gray-100 rounded-xl p-4 hover:border-gray-200 transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold text-gray-900">{order.order_number}</span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                      {getStatusLabel(order.status)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">
+                      {new Date(order.created_at).toLocaleDateString('ru-RU', {
+                        day: 'numeric',
+                        month: 'long',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                    <span className="font-medium text-gray-900">{(order.total || 0).toFixed(0)} RSD</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Настройки */}

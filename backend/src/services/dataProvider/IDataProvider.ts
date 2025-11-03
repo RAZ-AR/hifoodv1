@@ -100,6 +100,11 @@ export interface IDataProvider {
   getUserOrders(userId: string): Promise<Order[]>;
 
   /**
+   * Получить заказы пользователя по Telegram ID
+   */
+  getUserOrdersByTelegramId(telegramId: number): Promise<Order[]>;
+
+  /**
    * Обновить статус заказа
    */
   updateOrderStatus(orderId: string, status: Order['status']): Promise<Order>;

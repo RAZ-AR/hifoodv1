@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/services/api';
+import { getTelegramUser } from '@/utils/telegram';
 
 export type OrderStatus = 'accepted' | 'preparing' | 'delivering' | 'delivered';
 
@@ -9,8 +10,6 @@ interface UseOrderTrackingReturn {
   clearOrder: () => void;
 }
 
-const ORDER_ID_KEY = 'currentOrderId';
-const ORDER_STATUS_KEY = 'currentOrderStatus';
 const POLL_INTERVAL = 10000; // 10 seconds
 const AUTO_CLEAR_DELAY = 30000; // 30 seconds
 
@@ -18,9 +17,10 @@ const AUTO_CLEAR_DELAY = 30000; // 30 seconds
  * Кастомный хук для отслеживания статуса заказа
  *
  * Функционал:
- * - Загрузка активного заказа из localStorage
+ * - Загрузка активного заказа из БД по telegram_id
  * - Автоматическое обновление статуса каждые 10 секунд
  * - Автоматическое удаление через 30 секунд после доставки
+ * - Показывает только активные заказы (не delivered)
  */
 export const useOrderTracking = (): UseOrderTrackingReturn => {
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -29,57 +29,45 @@ export const useOrderTracking = (): UseOrderTrackingReturn => {
   const clearOrder = () => {
     setOrderId(null);
     setOrderStatus(null);
-    localStorage.removeItem(ORDER_ID_KEY);
-    localStorage.removeItem(ORDER_STATUS_KEY);
   };
 
-  // Загружаем заказ из localStorage при монтировании
+  // Загружаем активный заказ из БД при монтировании и периодически обновляем
   useEffect(() => {
-    const savedOrderId = localStorage.getItem(ORDER_ID_KEY);
-    const savedOrderStatus = localStorage.getItem(ORDER_STATUS_KEY) as OrderStatus | null;
+    const telegramUser = getTelegramUser();
+    const telegramId = telegramUser?.id;
 
-    console.log('📦 useOrderTracking initialized');
-    console.log('   savedOrderId:', savedOrderId);
-    console.log('   savedOrderStatus:', savedOrderStatus);
-
-    if (savedOrderId && savedOrderStatus) {
-      setOrderId(savedOrderId);
-      setOrderStatus(savedOrderStatus);
-      console.log('✅ Order tracking enabled for:', savedOrderId);
-    } else {
-      console.log('ℹ️  No active order in localStorage');
-    }
-  }, []);
-
-  // Периодически обновляем статус заказа
-  useEffect(() => {
-    if (!orderId) {
-      console.log('⏸️  Skipping polling - no orderId');
+    if (!telegramId) {
+      console.log('⏸️  No telegram ID, skipping order tracking');
       return;
     }
 
-    console.log('🚀 Starting status polling for order:', orderId);
+    console.log('📦 useOrderTracking initialized for telegram ID:', telegramId);
 
-    const pollStatus = async () => {
+    const fetchActiveOrder = async () => {
       try {
-        console.log('🔄 Polling order status for:', orderId);
-        const response = await api.getOrderStatus(orderId);
-        console.log('📊 Raw API response:', JSON.stringify(response, null, 2));
+        console.log('🔄 Fetching active orders for telegram ID:', telegramId);
+        const orders = await api.getUserOrdersByTelegramId(telegramId);
+        console.log('📊 Orders from API:', orders.length);
 
-        if (response?.status) {
-          const newStatus = response.status as OrderStatus;
-          const currentStatus = localStorage.getItem(ORDER_STATUS_KEY);
+        // Фильтруем только активные заказы (не delivered)
+        const activeOrders = orders.filter((order: any) => order.status !== 'delivered');
+        console.log('✅ Active orders:', activeOrders.length);
 
-          console.log('📋 Status comparison:');
-          console.log('   Current:', currentStatus);
-          console.log('   New:', newStatus);
+        if (activeOrders.length > 0) {
+          // Берем самый последний активный заказ
+          const latestOrder = activeOrders[0] as any;
+          const newOrderId = latestOrder.order_number;
+          const newStatus = latestOrder.status as OrderStatus;
 
-          if (newStatus !== currentStatus) {
-            console.log('🔔 STATUS CHANGED! Updating from', currentStatus, 'to', newStatus);
+          console.log('📋 Latest active order:', newOrderId, 'Status:', newStatus);
+
+          // Обновляем состояние только если изменилось
+          if (newOrderId !== orderId || newStatus !== orderStatus) {
+            console.log('🔔 ORDER UPDATE! Setting:', newOrderId, newStatus);
+            setOrderId(newOrderId);
             setOrderStatus(newStatus);
-            localStorage.setItem(ORDER_STATUS_KEY, newStatus);
           } else {
-            console.log('➡️  Status unchanged:', newStatus);
+            console.log('➡️  Order unchanged:', newOrderId, newStatus);
           }
 
           // Если заказ доставлен, очищаем через некоторое время
@@ -91,44 +79,40 @@ export const useOrderTracking = (): UseOrderTrackingReturn => {
             }, AUTO_CLEAR_DELAY);
           }
         } else {
-          console.warn('⚠️  API returned empty or invalid status');
+          console.log('ℹ️  No active orders found');
+          // Очищаем если нет активных заказов
+          if (orderId) {
+            console.log('🧹 Clearing order state');
+            clearOrder();
+          }
         }
       } catch (error) {
-        console.error('❌ Error polling order status:', error);
+        console.error('❌ Error fetching active order:', error);
         if (error instanceof Error) {
           console.error('   Error message:', error.message);
-          console.error('   Error stack:', error.stack);
         }
       }
     };
 
     // Первый запрос сразу
-    console.log('⏰ Running initial status check');
-    pollStatus();
+    console.log('⏰ Running initial order check');
+    fetchActiveOrder();
 
     // Затем каждые 10 секунд
     console.log('⏰ Setting up polling interval:', POLL_INTERVAL / 1000, 'seconds');
-    const interval = setInterval(pollStatus, POLL_INTERVAL);
+    const interval = setInterval(fetchActiveOrder, POLL_INTERVAL);
 
     return () => {
-      console.log('🛑 Stopping status polling for:', orderId);
+      console.log('🛑 Stopping order polling');
       clearInterval(interval);
     };
-  }, [orderId]);
+  }, [orderId, orderStatus]); // Добавляем зависимости чтобы обновлялись корректно
 
   return {
     orderId,
     orderStatus,
     clearOrder,
   };
-};
-
-/**
- * Сохраняет новый заказ в localStorage
- */
-export const saveOrder = (orderId: string, status: OrderStatus = 'accepted') => {
-  localStorage.setItem(ORDER_ID_KEY, orderId);
-  localStorage.setItem(ORDER_STATUS_KEY, status);
 };
 
 /**

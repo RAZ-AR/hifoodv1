@@ -3,7 +3,7 @@ import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import CheckoutForm, { CheckoutData } from '@/components/CheckoutForm';
 import ProductModal from '@/components/ProductModal';
-import { generateOrderId, saveOrder } from '@/hooks/useOrderTracking';
+import { generateOrderId } from '@/hooks/useOrderTracking';
 import { formatOrderData } from '@/utils/orderMessage';
 import { showTelegramAlert, triggerHaptic, getTelegramUser } from '@/utils/telegram';
 import { ORDER_CONFIG } from '@/constants';
@@ -99,8 +99,8 @@ const Cart: React.FC<CartProps> = ({ onNavigateHome }) => {
 
       console.log('✅ Заказ успешно отправлен:', result);
 
-      // Сохраняем orderId в localStorage
-      saveOrder(orderId, 'accepted');
+      // Заказ будет автоматически отображаться в виджете через useOrderTracking
+      // который загружает активные заказы из БД по telegram_id
 
       // Показываем красивое сообщение об успехе
       showTelegramAlert(

@@ -278,10 +278,24 @@ async function main() {
       }
     });
 
-    // Get user orders
+    // Get user orders by user_id
     app.get('/api/orders/user/:userId', async (req: Request, res: Response) => {
       try {
         const orders = await db.getUserOrders(req.params.userId!);
+        res.json(orders);
+      } catch (error: any) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Get user orders by telegram_id
+    app.get('/api/orders/telegram/:telegramId', async (req: Request, res: Response) => {
+      try {
+        const telegramId = parseInt(req.params.telegramId!);
+        if (isNaN(telegramId)) {
+          return res.status(400).json({ error: 'Invalid telegram ID' });
+        }
+        const orders = await db.getUserOrdersByTelegramId(telegramId);
         res.json(orders);
       } catch (error: any) {
         res.status(500).json({ error: error.message });

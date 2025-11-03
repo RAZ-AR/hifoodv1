@@ -97,6 +97,17 @@ class ApiService {
     }
   }
 
+  async getUserOrdersByTelegramId(telegramId: number): Promise<Order[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/telegram/${telegramId}`);
+      if (!response.ok) throw new Error('Failed to fetch orders by telegram ID');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching orders by telegram ID:', error);
+      throw error;
+    }
+  }
+
   async createOrder(orderData: Partial<Order>): Promise<Order> {
     try {
       const response = await fetch(`${API_BASE_URL}/orders`, {
