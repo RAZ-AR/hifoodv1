@@ -66,8 +66,17 @@ export const OrderTrackingProvider: React.FC<OrderTrackingProviderProps> = ({ ch
     const fetchActiveOrder = async () => {
       try {
         console.log('🔄 Fetching active orders for telegram ID:', telegramId);
-        const orders = await api.getUserOrdersByTelegramId(telegramId);
-        console.log('📊 Orders from API:', orders.length);
+
+        let orders: any[] = [];
+        try {
+          orders = await api.getUserOrdersByTelegramId(telegramId);
+          console.log('📊 Orders from API:', orders.length);
+        } catch (apiError) {
+          console.warn('⚠️ API error, will retry:', apiError);
+          // Продолжаем работу, даже если API вернул ошибку
+          // На следующем цикле попробуем снова
+          return;
+        }
 
         // Фильтруем только активные заказы (не delivered)
         const activeOrders = orders.filter((order: any) => order.status !== 'delivered');

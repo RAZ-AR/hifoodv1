@@ -217,25 +217,26 @@ const AppContent: React.FC<AppContentProps> = ({ user, activeTab, handleCartClic
   const { orderId, orderStatus, clearOrder } = useOrderTracking();
 
   // Для тестирования виджета - включите эту строку
-  const ENABLE_TEST_WIDGET = true;
+  const ENABLE_TEST_WIDGET = false; // Тестовый виджет в углу
+  const SHOW_DEMO_ORDER = true; // Показать демо заказ вверху
 
   return (
     <div className="min-h-screen bg-cream-300">
       {/* Виджет трекинга заказа - виден на всех страницах */}
-      {orderId && orderStatus && (
+      {(orderId && orderStatus) || SHOW_DEMO_ORDER ? (
         <OrderStatusTracker
-          orderId={orderId}
-          status={orderStatus}
+          orderId={orderId || '#91683625'}
+          status={orderStatus || 'accepted'}
           onClose={clearOrder}
         />
-      )}
+      ) : null}
 
       {/* Тестовый виджет - удалите после проверки */}
       {ENABLE_TEST_WIDGET && <OrderStatusTrackerTest />}
 
       <Header user={user} onCartClick={handleCartClick} />
 
-      <main className={orderId && orderStatus ? 'pt-16' : ''}>
+      <main className={(orderId && orderStatus) || SHOW_DEMO_ORDER ? 'pt-16' : ''}>
         {renderPage()}
       </main>
 
