@@ -6,7 +6,6 @@ import Favorites from './pages/Favorites';
 import Cart from './pages/Cart';
 import Profile from './pages/Profile';
 import OrderStatusTracker from './components/OrderStatusTracker';
-import OrderStatusTrackerTest from './components/OrderStatusTrackerTest';
 import { CartProvider } from './context/CartContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -216,9 +215,8 @@ interface AppContentProps {
 const AppContent: React.FC<AppContentProps> = ({ user, activeTab, handleCartClick, renderPage, setActiveTab }) => {
   const { orderId, orderStatus, clearOrder } = useOrderTracking();
 
-  // Для тестирования виджета - включите эту строку
-  const ENABLE_TEST_WIDGET = false; // Тестовый виджет в углу
-  const SHOW_DEMO_ORDER = true; // Показать демо заказ вверху
+  // Для отладки: установите true чтобы показать демо заказ
+  const SHOW_DEMO_ORDER = false;
 
   return (
     <div className="min-h-screen bg-cream-300">
@@ -230,9 +228,6 @@ const AppContent: React.FC<AppContentProps> = ({ user, activeTab, handleCartClic
           onClose={clearOrder}
         />
       ) : null}
-
-      {/* Тестовый виджет - удалите после проверки */}
-      {ENABLE_TEST_WIDGET && <OrderStatusTrackerTest />}
 
       <Header user={user} onCartClick={handleCartClick} />
 
