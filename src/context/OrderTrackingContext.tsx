@@ -1,55 +1,60 @@
-import { useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { api } from '@/services/api';
 import { getTelegramUser } from '@/utils/telegram';
 
 export type OrderStatus = 'accepted' | 'preparing' | 'delivering' | 'delivered';
 
-interface UseOrderTrackingReturn {
+interface OrderTrackingContextType {
   orderId: string | null;
   orderStatus: OrderStatus | null;
   clearOrder: () => void;
 }
 
+const OrderTrackingContext = createContext<OrderTrackingContextType | undefined>(undefined);
+
 const POLL_INTERVAL = 10000; // 10 seconds
-const AUTO_CLEAR_DELAY = 30000; // 30 seconds
+const AUTO_CLEAR_DELAY = 30000; // 30 seconds after delivered
+
+interface OrderTrackingProviderProps {
+  children: ReactNode;
+}
 
 /**
- * Кастомный хук для отслеживания статуса заказа
+ * OrderTrackingProvider - Глобальный провайдер для отслеживания статуса заказа
  *
  * Функционал:
- * - Загрузка активного заказа из БД по telegram_id
- * - Автоматическое обновление статуса каждые 10 секунд
- * - Автоматическое удаление через 30 секунд после доставки
+ * - Загружает активный заказ из БД по telegram_id
+ * - Автоматически обновляет статус каждые 10 секунд
+ * - Автоматически скрывает виджет через 30 секунд после доставки
  * - Показывает только активные заказы (не delivered)
  */
-export const useOrderTracking = (): UseOrderTrackingReturn => {
+export const OrderTrackingProvider: React.FC<OrderTrackingProviderProps> = ({ children }) => {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [orderStatus, setOrderStatus] = useState<OrderStatus | null>(null);
 
   const clearOrder = () => {
+    console.log('🧹 Clearing order state');
     setOrderId(null);
     setOrderStatus(null);
   };
 
-  // Загружаем активный заказ из БД при монтировании и периодически обновляем
   useEffect(() => {
-    // ВАЖНО: Очищаем старые данные из localStorage
+    // Очищаем старые данные из localStorage
     localStorage.removeItem('currentOrderId');
     localStorage.removeItem('currentOrderStatus');
 
     const telegramUser = getTelegramUser();
     const telegramId = telegramUser?.id;
 
-    console.log('📦 useOrderTracking initialized');
-    console.log('   Telegram User:', telegramUser);
+    console.log('📦 OrderTrackingProvider initialized');
     console.log('   Telegram ID:', telegramId);
 
     if (!telegramId) {
       console.log('⏸️  No telegram ID, skipping order tracking');
-      console.log('   Window.Telegram:', (window as any).Telegram);
-      console.log('   Window.Telegram.WebApp:', (window as any).Telegram?.WebApp);
       return;
     }
+
+    let autoHideTimeout: NodeJS.Timeout | null = null;
 
     const fetchActiveOrder = async () => {
       try {
@@ -74,17 +79,23 @@ export const useOrderTracking = (): UseOrderTrackingReturn => {
             console.log('🔔 ORDER UPDATE! Setting:', newOrderId, newStatus);
             setOrderId(newOrderId);
             setOrderStatus(newStatus);
+
+            // Если заказ доставлен, очищаем через некоторое время
+            if (newStatus === 'delivered') {
+              console.log('🎉 Order delivered! Will auto-clear in', AUTO_CLEAR_DELAY / 1000, 'seconds');
+
+              // Очищаем предыдущий таймер если есть
+              if (autoHideTimeout) {
+                clearTimeout(autoHideTimeout);
+              }
+
+              autoHideTimeout = setTimeout(() => {
+                console.log('🧹 Auto-clearing delivered order');
+                clearOrder();
+              }, AUTO_CLEAR_DELAY);
+            }
           } else {
             console.log('➡️  Order unchanged:', newOrderId, newStatus);
-          }
-
-          // Если заказ доставлен, очищаем через некоторое время
-          if (newStatus === 'delivered') {
-            console.log('🎉 Order delivered! Will auto-clear in', AUTO_CLEAR_DELAY / 1000, 'seconds');
-            setTimeout(() => {
-              console.log('🧹 Auto-clearing delivered order');
-              clearOrder();
-            }, AUTO_CLEAR_DELAY);
           }
         } else {
           console.log('ℹ️  No active orders found');
@@ -113,19 +124,32 @@ export const useOrderTracking = (): UseOrderTrackingReturn => {
     return () => {
       console.log('🛑 Stopping order polling');
       clearInterval(interval);
+      if (autoHideTimeout) {
+        clearTimeout(autoHideTimeout);
+      }
     };
-  }, [orderId, orderStatus]); // Добавляем зависимости чтобы обновлялись корректно
+  }, []); // Убираем orderId и orderStatus из зависимостей для устранения бесконечного цикла
 
-  return {
+  const value: OrderTrackingContextType = {
     orderId,
     orderStatus,
     clearOrder,
   };
+
+  return (
+    <OrderTrackingContext.Provider value={value}>
+      {children}
+    </OrderTrackingContext.Provider>
+  );
 };
 
 /**
- * Генерирует уникальный ID заказа
+ * useOrderTracking - Хук для доступа к контексту трекинга заказа
  */
-export const generateOrderId = (): string => {
-  return `#${Date.now().toString().slice(-8)}`;
+export const useOrderTracking = (): OrderTrackingContextType => {
+  const context = useContext(OrderTrackingContext);
+  if (context === undefined) {
+    throw new Error('useOrderTracking must be used within OrderTrackingProvider');
+  }
+  return context;
 };

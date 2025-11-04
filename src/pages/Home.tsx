@@ -8,12 +8,10 @@ import ProductModal from '@/components/ProductModal';
 import AdBannerSlider from '@/components/AdBannerSlider';
 import SkeletonCard from '@/components/SkeletonCard';
 import SearchBar from '@/components/SearchBar';
-import OrderStatusTracker from '@/components/OrderStatusTracker';
 import PromoBanner from '@/components/PromoBanner';
 import FilterModal, { FilterOptions } from '@/components/FilterModal';
 import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
-import { useOrderTracking } from '@/hooks/useOrderTracking';
 
 /**
  * ГЛАВНАЯ СТРАНИЦА (МЕНЮ)
@@ -26,7 +24,6 @@ import { useOrderTracking } from '@/hooks/useOrderTracking';
 const Home: React.FC = () => {
   const { addToCart, getItemQuantity } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
-  const { orderId, orderStatus, clearOrder } = useOrderTracking();
 
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
@@ -248,15 +245,6 @@ const Home: React.FC = () => {
 
         {/* Промо-баннер */}
         <PromoBanner />
-
-        {/* Трекер статуса заказа */}
-        {orderId && orderStatus && (
-          <OrderStatusTracker
-            orderId={orderId}
-            status={orderStatus}
-            onClose={clearOrder}
-          />
-        )}
 
         {/* Слайдер с баннерами */}
         <div className="mb-6">

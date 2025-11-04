@@ -5,9 +5,11 @@ import Home from './pages/Home';
 import Favorites from './pages/Favorites';
 import Cart from './pages/Cart';
 import Profile from './pages/Profile';
+import OrderStatusTracker from './components/OrderStatusTracker';
 import { CartProvider } from './context/CartContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { OrderTrackingProvider, useOrderTracking } from './context/OrderTrackingContext';
 import { User } from './types';
 
 function App() {
@@ -184,19 +186,55 @@ function App() {
     <LanguageProvider>
       <FavoritesProvider>
         <CartProvider>
-          <div className="min-h-screen bg-cream-300">
-            <Header user={user} onCartClick={handleCartClick} />
-
-          <main>
-            {renderPage()}
-          </main>
-
-          <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-        </div>
-      </CartProvider>
-    </FavoritesProvider>
+          <OrderTrackingProvider>
+            <AppContent
+              user={user}
+              activeTab={activeTab}
+              handleCartClick={handleCartClick}
+              renderPage={renderPage}
+              setActiveTab={setActiveTab}
+            />
+          </OrderTrackingProvider>
+        </CartProvider>
+      </FavoritesProvider>
     </LanguageProvider>
   );
 }
+
+/**
+ * AppContent - внутренний компонент для использования useOrderTracking
+ */
+interface AppContentProps {
+  user: User | null;
+  activeTab: TabType;
+  handleCartClick: () => void;
+  renderPage: () => JSX.Element;
+  setActiveTab: (tab: TabType) => void;
+}
+
+const AppContent: React.FC<AppContentProps> = ({ user, activeTab, handleCartClick, renderPage, setActiveTab }) => {
+  const { orderId, orderStatus, clearOrder } = useOrderTracking();
+
+  return (
+    <div className="min-h-screen bg-cream-300">
+      {/* Виджет трекинга заказа - виден на всех страницах */}
+      {orderId && orderStatus && (
+        <OrderStatusTracker
+          orderId={orderId}
+          status={orderStatus}
+          onClose={clearOrder}
+        />
+      )}
+
+      <Header user={user} onCartClick={handleCartClick} />
+
+      <main className={orderId && orderStatus ? 'pt-16' : ''}>
+        {renderPage()}
+      </main>
+
+      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+    </div>
+  );
+};
 
 export default App;

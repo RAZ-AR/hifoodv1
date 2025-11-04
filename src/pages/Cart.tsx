@@ -3,7 +3,7 @@ import { useCart } from '@/context/CartContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import CheckoutForm, { CheckoutData } from '@/components/CheckoutForm';
 import ProductModal from '@/components/ProductModal';
-import { generateOrderId } from '@/hooks/useOrderTracking';
+import { generateOrderId } from '@/utils/order';
 import { formatOrderData } from '@/utils/orderMessage';
 import { showTelegramAlert, triggerHaptic, getTelegramUser } from '@/utils/telegram';
 import { ORDER_CONFIG } from '@/constants';

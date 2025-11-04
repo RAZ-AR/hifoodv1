@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export type OrderStatus = 'accepted' | 'preparing' | 'delivering' | 'delivered';
 
@@ -8,96 +9,80 @@ interface OrderStatusTrackerProps {
   onClose: () => void;
 }
 
+/**
+ * OrderStatusTracker - Компактный виджет трекинга заказа
+ *
+ * Стиль: Референс - одна строка с иконкой и текстом
+ * Синхронизирован с кнопками Telegram бота
+ */
 const OrderStatusTracker: React.FC<OrderStatusTrackerProps> = ({ orderId, status, onClose }) => {
-  const statuses = [
-    {
-      id: 'accepted' as OrderStatus,
-      label: 'Заказ принят',
-      icon: '✅',
-    },
-    {
-      id: 'preparing' as OrderStatus,
-      label: 'Готовим ваш заказ',
-      icon: '👨‍🍳',
-    },
-    {
-      id: 'delivering' as OrderStatus,
-      label: 'Курьер едет к вам',
-      icon: '🛵',
-    },
-    {
-      id: 'delivered' as OrderStatus,
-      label: 'Заказ доставлен',
-      icon: '🎉',
-    },
-  ];
+  const { t } = useLanguage();
 
-  const currentIndex = statuses.findIndex(s => s.id === status);
-  const currentStatus = statuses[currentIndex];
+  // Синхронизировано с кнопками Telegram бота
+  const statusConfig: Record<OrderStatus, { icon: string; label: string; bgColor: string; textColor: string }> = {
+    'accepted': {
+      icon: '✅',
+      label: t('orderStatus.confirmed') || 'Принят',
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-700',
+    },
+    'preparing': {
+      icon: '👨‍🍳',
+      label: t('orderStatus.preparing') || 'Готовится',
+      bgColor: 'bg-orange-50',
+      textColor: 'text-orange-700',
+    },
+    'delivering': {
+      icon: '🛵',
+      label: t('orderStatus.delivering') || 'В пути',
+      bgColor: 'bg-blue-50',
+      textColor: 'text-blue-700',
+    },
+    'delivered': {
+      icon: '🎉',
+      label: t('orderStatus.delivered') || 'Доставлен',
+      bgColor: 'bg-purple-50',
+      textColor: 'text-purple-700',
+    },
+  };
+
+  const currentStatus = statusConfig[status];
 
   return (
     <div
-      className="bg-white rounded-2xl p-5 mb-4 relative"
+      className={`
+        fixed top-0 left-0 right-0 z-50
+        ${currentStatus.bgColor} border-b border-gray-200
+        px-4 py-3
+        animate-slide-down
+        shadow-sm
+      `}
       style={{
-        backdropFilter: 'blur(24px) saturate(180%)',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
-        border: '1px solid rgba(255, 255, 255, 0.18)'
+        backdropFilter: 'blur(10px)',
       }}
     >
-      {/* Заголовок */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-base font-bold text-gray-900">Ваш заказ</h3>
-          <p className="text-xs text-gray-500">№{orderId}</p>
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        {/* Левая часть: Иконка + Статус + Номер заказа */}
+        <div className="flex items-center gap-3">
+          <span className="text-2xl animate-bounce-gentle">{currentStatus.icon}</span>
+          <div className="flex flex-col">
+            <span className={`text-sm font-bold ${currentStatus.textColor}`}>
+              {currentStatus.label}
+            </span>
+            <span className="text-xs text-gray-500">
+              #{orderId}
+            </span>
+          </div>
         </div>
+
+        {/* Правая часть: Кнопка закрытия */}
         <button
           onClick={onClose}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+          className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
           aria-label="Закрыть"
         >
-          <span className="text-xl text-gray-500">×</span>
+          <span className="text-lg text-gray-600">×</span>
         </button>
-      </div>
-
-      {/* Иконки статусов в ряд */}
-      <div className="flex items-center justify-center gap-2 mb-4">
-        {statuses.map((s, index) => {
-          const isActive = index === currentIndex;
-          const isCompleted = index < currentIndex;
-
-          return (
-            <React.Fragment key={s.id}>
-              {/* Иконка */}
-              <div
-                className={`
-                  w-12 h-12 rounded-full flex items-center justify-center text-xl transition-all duration-300
-                  ${isActive ? 'bg-primary-500 scale-110 shadow-lg' : ''}
-                  ${isCompleted ? 'bg-gray-200' : ''}
-                  ${!isActive && !isCompleted ? 'bg-gray-100' : ''}
-                `}
-              >
-                <span className={!isActive && !isCompleted ? 'opacity-30' : ''}>{s.icon}</span>
-              </div>
-
-              {/* Линия между иконками (кроме последней) */}
-              {index < statuses.length - 1 && (
-                <div
-                  className={`h-0.5 w-8 transition-all duration-300 ${
-                    isCompleted ? 'bg-primary-500' : 'bg-gray-200'
-                  }`}
-                />
-              )}
-            </React.Fragment>
-          );
-        })}
-      </div>
-
-      {/* Текущий статус - одной строкой */}
-      <div className="text-center">
-        <p className="text-sm font-medium text-gray-900">
-          {currentStatus?.label}
-        </p>
       </div>
     </div>
   );
