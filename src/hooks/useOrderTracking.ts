@@ -33,15 +33,23 @@ export const useOrderTracking = (): UseOrderTrackingReturn => {
 
   // Загружаем активный заказ из БД при монтировании и периодически обновляем
   useEffect(() => {
+    // ВАЖНО: Очищаем старые данные из localStorage
+    localStorage.removeItem('currentOrderId');
+    localStorage.removeItem('currentOrderStatus');
+
     const telegramUser = getTelegramUser();
     const telegramId = telegramUser?.id;
 
+    console.log('📦 useOrderTracking initialized');
+    console.log('   Telegram User:', telegramUser);
+    console.log('   Telegram ID:', telegramId);
+
     if (!telegramId) {
       console.log('⏸️  No telegram ID, skipping order tracking');
+      console.log('   Window.Telegram:', (window as any).Telegram);
+      console.log('   Window.Telegram.WebApp:', (window as any).Telegram?.WebApp);
       return;
     }
-
-    console.log('📦 useOrderTracking initialized for telegram ID:', telegramId);
 
     const fetchActiveOrder = async () => {
       try {
