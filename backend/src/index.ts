@@ -296,9 +296,9 @@ async function main() {
           return res.status(400).json({ error: 'Invalid telegram ID' });
         }
         const orders = await db.getUserOrdersByTelegramId(telegramId);
-        res.json(orders);
+        return res.json(orders);
       } catch (error: any) {
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
       }
     });
 
