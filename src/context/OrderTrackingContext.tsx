@@ -47,10 +47,17 @@ export const OrderTrackingProvider: React.FC<OrderTrackingProviderProps> = ({ ch
     const telegramId = telegramUser?.id;
 
     console.log('📦 OrderTrackingProvider initialized');
+    console.log('   Telegram User:', JSON.stringify(telegramUser, null, 2));
     console.log('   Telegram ID:', telegramId);
+    console.log('   Window.Telegram.WebApp:', (window as any).Telegram?.WebApp);
 
     if (!telegramId) {
       console.log('⏸️  No telegram ID, skipping order tracking');
+      console.log('   Available globals:', {
+        hasTelegram: !!(window as any).Telegram,
+        hasWebApp: !!(window as any).Telegram?.WebApp,
+        hasInitData: !!(window as any).Telegram?.WebApp?.initDataUnsafe,
+      });
       return;
     }
 
