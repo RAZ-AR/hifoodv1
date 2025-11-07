@@ -14,6 +14,8 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 import { getDataProviderInstance } from './services/dataProvider';
 import { telegramBot } from './services/telegramBot';
+import { GeocodingService } from './services/geocoding';
+import { createClient } from '@supabase/supabase-js';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -51,6 +53,19 @@ async function main() {
     }
 
     console.log('✅ Подключение успешно!\n');
+
+    // Инициализируем сервис геокодирования
+    let geocodingService: GeocodingService | null = null;
+    if (process.env.GOOGLE_MAPS_API_KEY && process.env.SUPABASE_URL && process.env.SUPABASE_KEY) {
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_KEY
+      );
+      geocodingService = new GeocodingService(process.env.GOOGLE_MAPS_API_KEY, supabase);
+      console.log('🗺️  Сервис геокодирования инициализирован\n');
+    } else {
+      console.warn('⚠️  Google Maps API или Supabase не настроены. Геокодирование недоступно.\n');
+    }
 
     // Получаем статистику
     console.log('📊 Статистика:');
@@ -438,6 +453,125 @@ async function main() {
         const stats = await db.getStats();
         res.json(stats);
       } catch (error: any) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // ==========================================
+    // GEOCODING & DELIVERY ZONES
+    // ==========================================
+
+    // Address autocomplete
+    app.get('/api/geocoding/autocomplete', async (req: Request, res: Response) => {
+      try {
+        if (!geocodingService) {
+          return res.status(503).json({
+            error: 'Сервис геокодирования недоступен. Настройте Google Maps API.',
+          });
+        }
+
+        const { input, sessionToken } = req.query;
+
+        if (!input || typeof input !== 'string') {
+          return res.status(400).json({ error: 'Параметр input обязателен' });
+        }
+
+        const results = await geocodingService.autocompleteAddress(
+          input,
+          sessionToken as string | undefined
+        );
+
+        res.json(results);
+      } catch (error: any) {
+        console.error('Autocomplete error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Get place details by place_id
+    app.get('/api/geocoding/place/:placeId', async (req: Request, res: Response) => {
+      try {
+        if (!geocodingService) {
+          return res.status(503).json({
+            error: 'Сервис геокодирования недоступен',
+          });
+        }
+
+        const { placeId } = req.params;
+
+        if (!placeId) {
+          return res.status(400).json({ error: 'placeId обязателен' });
+        }
+
+        const details = await geocodingService.getPlaceDetails(placeId);
+        res.json(details);
+      } catch (error: any) {
+        console.error('Place details error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Check delivery zone
+    app.post('/api/delivery-zones/check', async (req: Request, res: Response) => {
+      try {
+        if (!geocodingService) {
+          return res.status(503).json({
+            error: 'Сервис геокодирования недоступен',
+          });
+        }
+
+        const { latitude, longitude } = req.body;
+
+        if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+          return res.status(400).json({
+            error: 'Параметры latitude и longitude обязательны и должны быть числами',
+          });
+        }
+
+        const result = await geocodingService.checkDeliveryZone(latitude, longitude);
+        res.json(result);
+      } catch (error: any) {
+        console.error('Zone check error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Get all delivery zones
+    app.get('/api/delivery-zones', async (_req: Request, res: Response) => {
+      try {
+        if (!geocodingService) {
+          return res.status(503).json({
+            error: 'Сервис геокодирования недоступен',
+          });
+        }
+
+        const zones = await geocodingService.getDeliveryZones();
+        res.json(zones);
+      } catch (error: any) {
+        console.error('Get zones error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Geocode address (convert address string to coordinates)
+    app.post('/api/geocoding/geocode', async (req: Request, res: Response) => {
+      try {
+        if (!geocodingService) {
+          return res.status(503).json({
+            error: 'Сервис геокодирования недоступен',
+          });
+        }
+
+        const { address } = req.body;
+
+        if (!address || typeof address !== 'string') {
+          return res.status(400).json({ error: 'Параметр address обязателен' });
+        }
+
+        const result = await geocodingService.geocodeAddress(address);
+        res.json(result);
+      } catch (error: any) {
+        console.error('Geocode error:', error);
         res.status(500).json({ error: error.message });
       }
     });

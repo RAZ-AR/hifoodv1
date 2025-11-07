@@ -53,6 +53,51 @@ export interface Address {
   latitude?: number;                  // Широта (для геолокации)
   longitude?: number;                 // Долгота (для геолокации)
   is_default: boolean;                // Адрес по умолчанию
+  formatted_address?: string;         // Форматированный адрес из Google Maps
+  place_id?: string;                  // Google Place ID
+}
+
+/**
+ * Зона доставки
+ */
+export interface DeliveryZone {
+  id: string;                         // Уникальный ID зоны
+  name: string;                       // Название зоны (напр. "Центр города")
+  description?: string;               // Описание зоны
+  boundary: GeoJSON.Polygon;          // Границы зоны (полигон)
+  delivery_fee: number;               // Стоимость доставки в зоне (DIN)
+  free_delivery_threshold?: number;   // Порог бесплатной доставки (DIN)
+  min_order_amount?: number;          // Минимальная сумма заказа (DIN)
+  estimated_delivery_time?: number;   // Примерное время доставки (минуты)
+  is_active: boolean;                 // Активна ли зона
+  priority: number;                   // Приоритет (для пересекающихся зон)
+  color: string;                      // Цвет для карты (hex)
+  created_at: string;                 // Дата создания
+  updated_at: string;                 // Дата обновления
+}
+
+/**
+ * Результат проверки адреса в зоне доставки
+ */
+export interface ZoneCheckResult {
+  in_zone: boolean;                   // Адрес в зоне доставки
+  zone?: DeliveryZone;                // Информация о зоне (если найдена)
+  delivery_fee: number;               // Стоимость доставки
+  free_delivery_threshold?: number;   // Порог бесплатной доставки
+  min_order_amount?: number;          // Минимальная сумма заказа
+  estimated_delivery_time?: number;   // Примерное время доставки
+  message?: string;                   // Сообщение пользователю
+}
+
+/**
+ * Результат автокомплита адреса
+ */
+export interface AddressAutocompleteResult {
+  place_id: string;                   // Google Place ID
+  formatted_address: string;          // Форматированный адрес
+  description: string;                // Описание (краткое)
+  main_text: string;                  // Основной текст (название места)
+  secondary_text: string;             // Вторичный текст (адрес)
 }
 
 /**

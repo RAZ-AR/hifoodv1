@@ -50,6 +50,42 @@ export interface Address {
   latitude?: number;
   longitude?: number;
   is_default: boolean;
+  formatted_address?: string;
+  place_id?: string;
+}
+
+export interface DeliveryZone {
+  id: string;
+  name: string;
+  description?: string;
+  boundary: any; // GeoJSON Polygon
+  delivery_fee: number;
+  free_delivery_threshold?: number;
+  min_order_amount?: number;
+  estimated_delivery_time?: number;
+  is_active: boolean;
+  priority: number;
+  color: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ZoneCheckResult {
+  in_zone: boolean;
+  zone?: DeliveryZone;
+  delivery_fee: number;
+  free_delivery_threshold?: number;
+  min_order_amount?: number;
+  estimated_delivery_time?: number;
+  message?: string;
+}
+
+export interface AddressAutocompleteResult {
+  place_id: string;
+  formatted_address: string;
+  description: string;
+  main_text: string;
+  secondary_text: string;
 }
 
 export interface PaymentMethod {

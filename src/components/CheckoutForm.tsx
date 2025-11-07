@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getTelegramUser } from '@/utils/telegram';
 import { api } from '@/services/api';
+import { AddressAutocomplete } from './AddressAutocomplete';
+import type { ZoneCheckResult } from '@/types';
 
 interface CheckoutFormProps {
   onSubmit: (data: CheckoutData) => void;
@@ -21,6 +23,13 @@ export interface CheckoutData {
   changeFrom?: number; // Сумма, с которой нужна сдача (только для наличных)
   comment?: string;
   loyaltyCardNumber?: string; // Номер карты лояльности (необязательно)
+  // Геолокация и зона доставки
+  formatted_address?: string;
+  latitude?: number;
+  longitude?: number;
+  place_id?: string;
+  delivery_fee?: number;
+  in_delivery_zone?: boolean;
 }
 
 /**
@@ -49,6 +58,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutData, string>>>({});
+  const [zoneCheckResult, setZoneCheckResult] = useState<ZoneCheckResult | null>(null);
 
   // Загружаем данные пользователя при монтировании компонента
   useEffect(() => {
@@ -95,7 +105,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
     }
 
     if (!formData.street.trim()) {
-      newErrors.street = 'Укажите улицу';
+      newErrors.street = 'Укажите адрес доставки';
+    }
+
+    // Проверка зоны доставки
+    if (formData.in_delivery_zone === false) {
+      newErrors.street = 'Этот адрес находится вне зоны доставки. Пожалуйста, выберите другой адрес.';
     }
 
     if (!formData.building.trim()) {
@@ -175,21 +190,33 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, totalPr
             )}
           </div>
 
-          {/* Улица */}
+          {/* Адрес доставки с автокомплитом */}
           <div>
             <label className="block text-sm font-medium tg-theme-text mb-2">
-              Улица <span className="text-red-500">*</span>
+              Адрес доставки <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
+            <AddressAutocomplete
               value={formData.street}
-              onChange={(e) => handleChange('street', e.target.value)}
-              placeholder="Название улицы"
-              className={`w-full px-4 py-3 rounded-lg border ${
-                errors.street
-                  ? 'border-red-500'
-                  : 'border-gray-300 dark:border-gray-600'
-              } bg-white dark:bg-gray-700 tg-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500`}
+              onChange={(value) => handleChange('street', value)}
+              onPlaceSelected={(details) => {
+                setFormData(prev => ({
+                  ...prev,
+                  street: details.formatted_address,
+                  formatted_address: details.formatted_address,
+                  latitude: details.latitude,
+                  longitude: details.longitude,
+                  place_id: details.place_id,
+                  delivery_fee: details.zoneCheck.delivery_fee,
+                  in_delivery_zone: details.zoneCheck.in_zone,
+                }));
+                setZoneCheckResult(details.zoneCheck);
+                // Очищаем ошибку, если она была
+                if (errors.street) {
+                  setErrors(prev => ({ ...prev, street: undefined }));
+                }
+              }}
+              required
+              className={errors.street ? 'border-red-500' : ''}
             />
             {errors.street && (
               <p className="text-red-500 text-sm mt-1">{errors.street}</p>

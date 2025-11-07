@@ -5,7 +5,7 @@
  */
 
 import { API_BASE_URL } from '@/config/api';
-import type { User, MenuItem, Order, AdBanner } from '@/types';
+import type { User, MenuItem, Order, AdBanner, AddressAutocompleteResult, ZoneCheckResult, DeliveryZone } from '@/types';
 
 class ApiService {
   /**
@@ -266,6 +266,84 @@ class ApiService {
       return await response.json();
     } catch (error) {
       console.error('Health check failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Geocoding & Delivery Zones
+   */
+  async autocompleteAddress(input: string, sessionToken?: string): Promise<AddressAutocompleteResult[]> {
+    try {
+      const params = new URLSearchParams({ input });
+      if (sessionToken) params.append('sessionToken', sessionToken);
+
+      const response = await fetch(`${API_BASE_URL}/geocoding/autocomplete?${params}`);
+      if (!response.ok) throw new Error('Failed to autocomplete address');
+      return await response.json();
+    } catch (error) {
+      console.error('Error autocompleting address:', error);
+      return [];
+    }
+  }
+
+  async getPlaceDetails(placeId: string): Promise<{
+    latitude: number;
+    longitude: number;
+    formatted_address: string;
+    address_components: any[];
+  }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/geocoding/place/${placeId}`);
+      if (!response.ok) throw new Error('Failed to get place details');
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting place details:', error);
+      throw error;
+    }
+  }
+
+  async checkDeliveryZone(latitude: number, longitude: number): Promise<ZoneCheckResult> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/delivery-zones/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ latitude, longitude }),
+      });
+      if (!response.ok) throw new Error('Failed to check delivery zone');
+      return await response.json();
+    } catch (error) {
+      console.error('Error checking delivery zone:', error);
+      throw error;
+    }
+  }
+
+  async getDeliveryZones(): Promise<DeliveryZone[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/delivery-zones`);
+      if (!response.ok) throw new Error('Failed to get delivery zones');
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting delivery zones:', error);
+      return [];
+    }
+  }
+
+  async geocodeAddress(address: string): Promise<{
+    latitude: number;
+    longitude: number;
+    formatted_address: string;
+  }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/geocoding/geocode`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address }),
+      });
+      if (!response.ok) throw new Error('Failed to geocode address');
+      return await response.json();
+    } catch (error) {
+      console.error('Error geocoding address:', error);
       throw error;
     }
   }

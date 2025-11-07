@@ -74,6 +74,14 @@ const translations: Record<Language, Record<string, string>> = {
     'checkout.cancel': 'Cancel',
     'checkout.total': 'Total',
 
+    // Address Autocomplete
+    'address.enter': 'Start typing your address...',
+    'address.errorCheckingZone': 'Error checking delivery zone',
+    'address.deliveryFee': 'Delivery fee',
+    'address.freeDeliveryFrom': 'Free delivery from',
+    'address.estimatedTime': 'Estimated delivery',
+    'address.minutes': 'min',
+
     // Favorites
     'favorites.title': 'Favorites',
     'favorites.empty': 'No favorites yet',
@@ -181,6 +189,14 @@ const translations: Record<Language, Record<string, string>> = {
     'checkout.cancel': 'Otkaži',
     'checkout.total': 'Ukupno',
 
+    // Address Autocomplete
+    'address.enter': 'Počnite da kucate adresu...',
+    'address.errorCheckingZone': 'Greška pri proveri zone dostave',
+    'address.deliveryFee': 'Cena dostave',
+    'address.freeDeliveryFrom': 'Besplatna dostava od',
+    'address.estimatedTime': 'Procenjeno vreme dostave',
+    'address.minutes': 'min',
+
     // Favorites
     'favorites.title': 'Omiljeno',
     'favorites.empty': 'Nema omiljenih',
@@ -287,6 +303,14 @@ const translations: Record<Language, Record<string, string>> = {
     'checkout.placeOrder': 'Оформить заказ',
     'checkout.cancel': 'Отмена',
     'checkout.total': 'Итого',
+
+    // Address Autocomplete
+    'address.enter': 'Начните вводить адрес...',
+    'address.errorCheckingZone': 'Ошибка проверки зоны доставки',
+    'address.deliveryFee': 'Стоимость доставки',
+    'address.freeDeliveryFrom': 'Бесплатная доставка от',
+    'address.estimatedTime': 'Примерное время доставки',
+    'address.minutes': 'мин',
 
     // Favorites
     'favorites.title': 'Избранное',
