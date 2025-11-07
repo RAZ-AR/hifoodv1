@@ -1,0 +1,52 @@
+{
+  "zones": [
+    {
+      "name": "Центр города",
+      "description": "Центральная часть Белграда",
+      "delivery_fee": 200,
+      "free_delivery_threshold": 2000,
+      "min_order_amount": 800,
+      "estimated_delivery_time": 25,
+      "priority": 3,
+      "color": "#4CAF50",
+      "addresses": [
+        "Knez Mihailova, Belgrade, Serbia",
+        "Trg Republike, Belgrade, Serbia",
+        "Kalemegdan, Belgrade, Serbia",
+        "Skadarlija, Belgrade, Serbia",
+        "Terazije, Belgrade, Serbia"
+      ]
+    },
+    {
+      "name": "Нови Београд",
+      "description": "Район Нови Београд",
+      "delivery_fee": 300,
+      "free_delivery_threshold": 2500,
+      "min_order_amount": 1000,
+      "estimated_delivery_time": 35,
+      "priority": 2,
+      "color": "#2196F3",
+      "addresses": [
+        "Blok 45, Novi Beograd, Serbia",
+        "Blok 70, Novi Beograd, Serbia",
+        "Delta City, Novi Beograd, Serbia",
+        "Ušće Shopping Center, Novi Beograd, Serbia"
+      ]
+    },
+    {
+      "name": "Земун",
+      "description": "Район Земун",
+      "delivery_fee": 350,
+      "free_delivery_threshold": 3000,
+      "min_order_amount": 1200,
+      "estimated_delivery_time": 45,
+      "priority": 1,
+      "color": "#FF9800",
+      "addresses": [
+        "Gardoš, Zemun, Serbia",
+        "Zemunski kej, Zemun, Serbia",
+        "Glavna ulica, Zemun, Serbia"
+      ]
+    }
+  ]
+}

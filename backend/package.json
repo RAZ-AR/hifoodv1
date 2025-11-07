@@ -11,6 +11,9 @@
     "migrate": "ts-node ../scripts/migrate-sheets-to-supabase.ts",
     "populate-sheets": "ts-node populate-sheets.ts",
     "populate-supabase": "ts-node populate-supabase.ts",
+    "import-zones-kml": "ts-node scripts/import-zones-from-kml.ts",
+    "import-zones-json": "ts-node scripts/import-zones-from-json.ts",
+    "import-zones": "npm run import-zones-json",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\""
   },
@@ -27,6 +30,7 @@
     "@googlemaps/google-maps-services-js": "^3.4.2",
     "@react-google-maps/api": "^2.20.7",
     "@supabase/supabase-js": "^2.39.0",
+    "@tmcw/togeojson": "^7.1.2",
     "@turf/boolean-point-in-polygon": "^7.2.0",
     "@turf/turf": "^7.2.0",
     "@types/cors": "^2.8.19",
@@ -43,7 +47,8 @@
     "node-telegram-bot-api": "^0.64.0",
     "request": "^2.88.2",
     "typescript": "^5.3.3",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "xmldom": "^0.6.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.13.2",
