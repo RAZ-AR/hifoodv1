@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "jest",
+    "test-maps-api": "ts-node scripts/test-google-maps-api.ts",
     "migrate": "ts-node ../scripts/migrate-sheets-to-supabase.ts",
     "populate-sheets": "ts-node populate-sheets.ts",
     "populate-supabase": "ts-node populate-supabase.ts",
